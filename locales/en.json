@@ -1,0 +1,111 @@
+{
+  "Login": {
+    "Username": "Email",
+    "Password": "Password",
+    "Login":    "Login",
+    "LoginFailed": "Wrong password. Please try again",
+  },
+
+  "Menu": {
+    "Morning":  "Morning",
+    "Evening":  "Evening",
+
+    "Yesterday":  "Yesterday",
+    "Today":      "Today",
+    "Tomorrow":   "Tomorrow"
+  },
+
+  "Dashboard": {
+    "Scan":       "Scan"
+  },
+
+  "Itemization": {
+    "Itemization":  "Itemization",
+    "Print":        "Print",
+    "PrintRunsheet":"Print Runsheet",
+    "Modify":       "Modify",
+    "Save":         "Save",
+    "ForceSave":    "Force Save",
+    "Total":        "Total items",
+  },
+
+  "Keyboard": {
+    "Clear": "Clear"
+  },
+
+  "Tasks": {
+    "Loading":      "Loading next records",
+    "AddComment":   "Add Comment",
+    "Message":      "Message",
+  },
+
+  "Scan": {
+    "Enter":  "Enter Manually",
+    "Scan":   "Enter Scan Mode",
+  },
+
+  "noRecords": "Not found",
+
+  "login": {
+    "fail": "Wrong credentials"
+  },
+  "bag": {
+    "dryCleaning": "Dry cleaning",
+    "washFold": "Wash & Fold",
+    "search": {
+      "fail": "Bag lookup failed"
+    }
+  },
+
+  "task": {
+    "list": {
+      "fail": "The list of tasks could not be read from the server"
+    },
+
+    "customer": {
+      "new": "[New] "
+    },
+
+    "facility":         "Facility",
+    "bags":             "Bags",
+    "bag":              "Bag",
+    "pieces":           "Pieces",
+
+    "cleaningOptions":  "Customer preference",
+    "colorSeparation":  "Color Separation",
+    "shirtFinishing":   "Shirt Finishing",
+    "cleaningDueDate":  "Cleaning Due",
+    "customerNotes":    "Customer notes",
+    "driverNotes":      "Driver notes",
+    "facilityNotes":    "Facility notes",
+    "facilityNoteSaved":"Comment saved",
+    "bagsDepositedByDriver":"Bags deposited by driver",
+  },
+
+  "comment": {
+    "saved": "Comment saved",
+  },
+
+  "itemization": {
+    "saved": "Itemization saved",
+  },
+
+  "settings": {
+    "resetPrinters": "Printers Lookup"
+  },
+
+  "corporate": "Corporate",
+
+  "SHIRT":      "Shirt",
+  "SUIT":       "Suit",
+  "UPPER":      "Upper",
+  "BOTTOM":     "Bottom",
+  "OTHER":      "Other",
+  "WASH_FOLD":  "Wash & Fold",
+
+  "FOLDED":     "FOLDED",
+  "HAND_IRONED":"HAND IRONED",
+  "ON_HANGER":  "ON HANGER",
+
+  "NO_INTERNET":"Can not communicate to the Zipjet servers",
+}

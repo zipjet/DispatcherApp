@@ -1,0 +1,14 @@
+rootProject.name = 'Zipjet Dispatcher'
+include ':scandit-react-native'
+project(':scandit-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/scandit-react-native/android')
+
+include ':react-native-i18n'
+project(':react-native-i18n').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-i18n/android')
+
+include ':react-native-keyevent'
+project(':react-native-keyevent').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-keyevent/android')
+
+include ':react-native-vector-icons'
+project(':react-native-vector-icons').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-vector-icons/android')
+
+include ':app'
