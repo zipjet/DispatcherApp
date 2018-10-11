@@ -224,4 +224,16 @@ export const itemizationItem = {
 export const SUBMIT = {
     width: '100%',
     height: fontSize(45),
+    flexDirection: 'row',
+}
+
+export const LOGO_WRAPPER = {
+    width: '80%',
+    height: '25%',
+}
+
+export const LOGO = {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain'
 }

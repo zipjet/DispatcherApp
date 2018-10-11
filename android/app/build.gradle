@@ -167,6 +167,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-orientation')
     compile project(':scandit-react-native')
     compile fileTree(dir: "libs", include: ["*.jar"])
 

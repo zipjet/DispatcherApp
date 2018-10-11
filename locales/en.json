@@ -16,7 +16,7 @@
   },
 
   "Dashboard": {
-    "Scan":       "Scan"
+    "Scan":       "START SCANNING"
   },
 
   "Itemization": {
@@ -40,8 +40,9 @@
   },
 
   "Scan": {
-    "Enter":  "Enter Manually",
-    "Scan":   "Enter Scan Mode",
+    "Enter":  "MANUAL ENTRY",
+    "Scan":   "CAMERA SCAN",
+    "Finish": "FINISH DISPATCHING",
   },
 
   "noRecords": "Not found",

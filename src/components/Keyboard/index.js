@@ -27,6 +27,15 @@ class Keyboard extends React.Component {
         }
     }
 
+    // remove the listeners
+    componentWillUnmount() {
+        this.willFocusSubscription &&
+            this.willFocusSubscription.remove();
+
+        this.willBlurSubscription &&
+            this.willBlurSubscription.remove();
+    }
+
     // add the listener
     componentDidMount() {
         this.willFocusSubscription = this.props.navigation.addListener(
@@ -81,9 +90,10 @@ class Keyboard extends React.Component {
         }
 
         if (barcode.length === 8) {
-            this.props.showSpinner && this.props.showSpinner();
+            this._onClear();
 
-            this._onSearchByCode(barcode);
+            this.props.showSpinner && this.props.showSpinner();
+            this.props.onCode(barcode);
         };
     }
 
@@ -91,38 +101,6 @@ class Keyboard extends React.Component {
         if (this.state.barcode.length > 0) {
             this.setState({barcode: this.state.barcode.substring(0, this.state.barcode.length - 1)})
         }
-    }
-
-    _onSearchByCode = (barcode) => {
-        this.props
-            .searchBarcodeRequest(barcode)
-            .then(response => {
-                this.props.hideSpinner && this.props.hideSpinner();
-
-                this._onClear();
-
-                if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('reference')) {
-                    if (response && response.hasOwnProperty('errors') && response.errors.length) {
-                        Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
-                    }
-
-                    store.dispatch({type: types.SAVE_TASK, task:response.data});
-                    storage.saveFulfillment(response.data);
-
-                    if (response.data.state === STATE_ITEMIZING) {
-                        this.props.navigation.push("Fulfillment");
-                    } else {
-                        this.props.navigation.push("FulfillmentView");
-                    }
-                } else {
-                    if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
-                        Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
-                    } else {
-                        Alert.alert("", translate("bag.search.fail"));
-                    }
-                }
-            }
-        );
     }
 
     render() {
@@ -185,22 +163,4 @@ class Keyboard extends React.Component {
     }
 }
 
-const mapStateToProps = ({ dashboardData }) => {
-    return { };
-};
-
-const mapDispatchToProps = (dispatch) => {
-    return {
-        searchBarcodeRequest: (barcode) => {
-            return dispatch(actions.searchBarcodeRequest(barcode));
-        },
-        searchReferenceRequest: (reference) => {
-            return dispatch(actions.searchReferenceRequest(reference));
-        },
-        loadTasksRequest: (timespan) => {
-            return dispatch(actions.loadTasksRequest(timespan));
-        }
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Keyboard);
+export default Keyboard;

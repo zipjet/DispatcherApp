@@ -8,16 +8,18 @@ import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/
 import { translate } from '../../locale';
 import * as storage from '../../storage';
 import Button from "./../../components/Button";
+import Menu from "./../../components/Menu";
 import Prompt       from "./../../components/Dialog";
 import moment       from "moment";
 import * as types   from '../../actions/types';
 import store from '../../store';
-import { fontSize } from '../../constants/util';
+import { dimensions, fontSize, getShift } from '../../constants/util';
 import timer from 'react-native-timer';
 import { Select, Option } from "react-native-chooser";
 import { STATE_ITEMIZING, STATE_CLEANING } from "./../../constants/constants";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DashboardCard from "../../components/DashboardCard/index";
+import Swipeout from 'react-native-swipeout';
 
 const ALL       = translate("Menu.Dashboard");
 const NEW       = translate("Menu.Itemizing");
@@ -52,12 +54,8 @@ class Dashboard extends React.Component {
 
             shifts:     [],
             shiftValue: "",
-            shiftLabel: translate("Menu.Today") + " 12:00"
+            shiftLabel: ""
         };
-    }
-
-    onEndReached() {
-        this.loadData(true, false);
     }
 
     loadData(append, reset) {
@@ -125,9 +123,8 @@ class Dashboard extends React.Component {
         }
     }
 
-
     // add the listener
-    componentDidMount() {
+    componentWillMount() {
         this._calculateShifts();
         this._onShiftSelect   = this._onShiftSelect.bind(this);
 
@@ -188,12 +185,14 @@ class Dashboard extends React.Component {
     }
 
     _onShiftSelect(value, label) {
-        this.setState({ spinner: true });
-        this.setState({ shiftValue: value, shiftLabel: label });
+        if (value !== undefined) {
+            this.setState({ spinner: true });
+            this.setState({ shiftValue: value, shiftLabel: label });
 
-        storage.saveShift({value: value, label: label});
+            storage.saveShift({value: value, label: label});
 
-        this._loadTasks(value);
+            this._loadTasks(value);
+        }
     }
 
     _onSearchByReference = (reference) => {
@@ -251,38 +250,28 @@ class Dashboard extends React.Component {
     }
 
     _calculateShifts = () => {
-        let shifts = [15, 23];
-        let shiftsLabel = [translate("Menu.Morning"), translate("Menu.Evening")];
-
-        let currentHour = parseFloat(moment().format("HH"));
-        let options = [];
-
+        let shifts = [12, 23];
         let todayMoment = moment().startOf('day');
-        let yesterdayMoment = moment().startOf('day').subtract(1, 'day');
         let tomorrowMoment = moment().startOf('day').add(1, 'day');
 
-        let lastShiftIndex = shifts.length - 1;
-        let previousMoment = moment(yesterdayMoment).add(shifts[lastShiftIndex], 'hours');
+        let options = [];
 
         for (i = 0; i < shifts.length; i++) {
-            let hour = Math.floor(shifts[i]);
-            let minutes = Math.floor(shifts[i] * 60 - hour * 60);
-            let dateString = translate("Menu.Today") + " " + shiftsLabel[i];
+            let shift = getShift(moment(todayMoment).add(shifts[i], 'hours'));
 
-            options.push({start: previousMoment, end:moment(todayMoment).add(shifts[i], 'hours'), label:dateString});
-            previousMoment = moment(todayMoment).add(shifts[i], 'hours');
+            options.push({start: shift.start, end:shift.end, label:shift.dayLabel + " " + shift.shiftLabel});
         }
 
         for (i = 0; i < shifts.length; i++) {
-            let hour = Math.floor(shifts[i]);
-            let minutes = Math.floor(shifts[i] * 60 - hour * 60);
-            let dateString = translate("Menu.Tomorrow") + " " + shiftsLabel[i];
+            let shift = getShift(moment(tomorrowMoment).add(shifts[i], 'hours'));
 
-            options.push({start: previousMoment, end:moment(tomorrowMoment).add(shifts[i], 'hours'), label:dateString});
-            previousMoment = moment(tomorrowMoment).add(shifts[i], 'hours');
+            options.push({start: shift.start, end:shift.end, label:shift.dayLabel + " " + shift.shiftLabel});
         }
 
-        this.setState({ shifts: options.map((option, index) => <Option key={index} value={option.start.unix() + "-" + option.end.unix()} styleText={{ color: colors.dark }}>{option.label}</Option>) });
+        this.setState({ shifts: options.map(
+                (option, index) => <Option style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.white}]} key={index} value={option.start.unix() + "-" + option.end.unix()} styleText={{ color: colors.dark }}>{option.label}</Option>
+            )
+        });
 
         storage.loadShift()
             .then((shift) => {
@@ -292,9 +281,9 @@ class Dashboard extends React.Component {
                 let shiftTokens = shiftObj.value.split("-");
 
                 for (let i = 0; i < options.length; i++) {
-                    if (options[i].start.unix() == shiftTokens[0]) {
+                    if (options[i].start.unix() === shiftTokens[0]) {
                         this.setState({shiftValue: shiftObj.value, shiftLabel: options[i].label});
-                        storage.saveShift({value: shiftObj.value, label: shiftObj.label});
+                        storage.saveShift({value: shiftObj.value, label: options[i].label});
 
                         this._loadTasks(shiftObj.value);
 
@@ -305,7 +294,6 @@ class Dashboard extends React.Component {
                 throw "Old shift";
             } catch (e) {
                 this.setState({shiftValue: options[0].start.unix() + "-" + options[0].end.unix(), shiftLabel: options[0].label});
-
                 storage.saveShift({value: options[0].start.unix() + "-" + options[0].end.unix(), label: options[0].label});
 
                 this._loadTasks(options[0].start.unix() + "-" + options[0].end.unix());
@@ -337,22 +325,7 @@ class Dashboard extends React.Component {
             <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
             <View style={ HeaderStyle }>
-                <Select
-                    onSelect = {this._onShiftSelect}
-                    defaultText  =""
-                    indicatorIcon = {<Icon name="bars" size={fontSize(16)} color={colors.dark} />}
-                    style = {[{ borderWidth: 0, backgroundColor: colors.backgroundColor, height: fontSize(24), width: fontSize(30) }]}
-
-                    textStyle = {{ lineHeight: fontSize(26), fontSize: 0 }}
-                    backdropStyle= {{ justifyContent: 'flex-start', alignItems: 'flex-end' }}
-                    optionListStyle = {{ backgroundColor : colors.white, width: "70%", height: "100%", justifyContent: 'center', marginRight: "30%", marginTop: fontSize(0) }}
-                    selected= {<Icon name="bars" size={fontSize(16)} color={colors.dark} />}
-                    transparent={ true }>
-                        <Text styleText={{ color: colors.dark, size: fontSize(18) }} style={{ marginTop: fontSize(10), marginLeft: fontSize(10) }}>
-                            Select Shift
-                        </Text>
-                        { this.state.shifts }
-                </Select>
+                <Menu />
             </View>
 
             <View style={[NO_INTERNET_BAR]}>
@@ -361,36 +334,70 @@ class Dashboard extends React.Component {
 
             <View style={[ ContentWithHeaderStyle ]}>
                 <View style={ContentCentered}>
-                    <View></View>
-
                     <View>
                         <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
-                            <Text>{ this.state.shiftLabel }</Text>
+                            {this.state.shiftLabel !== "" &&  <Select
+                                onSelect = {this._onShiftSelect}
+                                defaultText = {this.state.shiftLabel}
+                                indicatorSize=0
+                                style = {[{ borderWidth: 0, backgroundColor: colors.white, height: fontSize(24), justifyContent: 'center' }]}
+                                textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), alignContent: 'center' }}
+                                optionListStyle = {{ backgroundColor : colors.screenBackground, width: "100%", height: "100%", justifyContent: 'center', marginRight: "0%", marginTop: fontSize(0) }}
+                                selected= {<Text style={{ fontSize: fontSize(14)}}>Shift: { this.state.shiftLabel }</Text>}
+                                transparent={ true }>
+
+                                    <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
+                                        <Text styleText={{ color: colors.dark }} style={{ fontSize: fontSize(14), marginTop: fontSize(10), marginLeft: fontSize(10) }}>
+                                            Choose a Shift
+                                        </Text>
+                                    </View>
+
+                                    { this.state.shifts }
+                                </Select>
+                            }
                         </View>
 
                         <View style={ContentRow}>
                             <Text style="">Stock</Text>
-                            <Text style="">Stock</Text>
+                            <Text style="">
+                                {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
+                                /
+                                {getStockOrders(this.state.tasks).length}
+                            </Text>
                         </View>
 
                         <View style={ContentRow}>
                             <Text style="">New</Text>
-                            <Text style="">Stock</Text>
+                            <Text style="">
+                                {getNewOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
+                                /
+                                {getNewOrders(this.state.tasks).length}
+                            </Text>
                         </View>
 
                         <View style={ContentRow}>
                             <Text style="">Incomplete</Text>
-                            <Text style="">Stock</Text>
+                            <Text style="">
+                                {getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)}).length}
+                            </Text>
                         </View>
 
                         <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
                             <Text style="">Total Orders</Text>
-                            <Text style="">Stock</Text>
+                            <Text style="">
+                                {this.state.tasks.length}
+                            </Text>
                         </View>
                     </View>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Dashboard.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish")}]} buttonWidth={dimensions.width / 2}>
+                            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", width: "100%", height: "100%" }}>
+                                <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}    </Text>
+                                <Icon name="ellipsis-v" size={fontSize(16)} color={colors.white} />
+                            </View>
+                        </Swipeout>
                     </View>
                 </View>
 

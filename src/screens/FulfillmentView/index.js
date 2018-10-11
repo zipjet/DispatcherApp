@@ -117,7 +117,6 @@ class FulfillmentView extends React.Component {
 
                 <Select
                     onSelect = {this._onMenuItemClick}
-                    defaultText  =""
                     indicatorIcon = {<Icon name="ellipsis-v" size={fontSize(16)} color={colors.white} />}
                     style = {[{ borderWidth: 0, backgroundColor: colors.teal, height: fontSize(24) }]}
 

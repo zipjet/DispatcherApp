@@ -4,7 +4,7 @@ import * as actions from "../../actions";
 import { Text, TextInput, View, Alert, Image, AsyncStorage, TouchableHighlight } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
-import { colors, SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
+import { colors, LOGO, LOGO_WRAPPER, SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
 import { API_BASE_URL } from "./../../constants/global.js";
 import { styles } from './singin-style';
 import { translate } from '../../locale';
@@ -115,10 +115,10 @@ class SignIn extends React.Component {
               <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
               <View style={styles.form}>
-                    <TouchableHighlight onLongPress={() => {}} style={[styles.logoWrapper]} underlayColor={colors.white}>
+                    <TouchableHighlight onLongPress={() => {}} style={LOGO_WRAPPER} underlayColor={colors.white}>
                       <Image
                           source={require('./../../../assets/img/logo-dark.png')}
-                          style={[styles.logo]}
+                          style={LOGO}
                           on
                           />
                     </TouchableHighlight>

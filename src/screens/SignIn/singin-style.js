@@ -49,15 +49,4 @@ export const styles = StyleSheet.create({
     password: {
         paddingLeft: 10,
     },
-
-    logoWrapper: {
-        width: '60%',
-        height: '25%',
-    },
-
-    logo: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain',
-    },
 });

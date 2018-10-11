@@ -1,15 +1,17 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../actions";
-import { Text, TextInput, View, Alert, Image, AsyncStorage, PermissionsAndroid } from "react-native";
+import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, PermissionsAndroid } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT } from "./../../constants/base-style.js";
-import { fontSize } from '../../constants/util';
+import { dimensions, fontSize } from '../../constants/util';
 import Keyboard     from "./../../components/Keyboard";
 import { styles } from './style';
 import { translate } from '../../locale';
 import { BarcodePicker, ScanditModule, Barcode, ScanSettings } from 'scandit-react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Swipeout from 'react-native-swipeout';
 
 ScanditModule.setAppKey('AV7M8wCiHB4AO8A7TgBiY2kQyTwrDPsA2lsWdnVRncV+cpOnp1zUyT0EfE3qDlG3v3dovDx8xwjncqaKFnpAkLR7WVkmIGEVKjasGYlKvJOhMKmB3k/ceZJXZEvvAxYaqA+IOioHqvgcQxHNratCaOCRQabanfS4w1KKKGRnoXaAvn65W/qbQ7EthALKnznHNCdVbZMjJ8rj9O+awa1YhKtK5kTwz6m/h6Js9axez65usE72XLwyPEHr5TeO9HB3+F9iaM6i1wftTxBbX99Xw9JjK6pSMRbOZzcP8YJzhWPzHo8f9xnLqs3zZ1cPTBfFikgE15hslAUOmA68OAbSh0/ZarTzunUR8gQ65+NeJujbLg/q70yb3ZWr0bPUutH13vAVANv2TGakDSohLXFsyuyU+0++VXZgYOXSbxgW9049u6sIQanxdAnUCvE066UbhEKhtockXUufS6nP2Mg/CORp/nmlYwa7KDpw6BOlbMZf+97pZbWeYINUg06URIZBNWDsGrSXCWKY+A8W5qoSfYHL1VnEGGuduj7CPRVCQsZffYXxgqiobS0fYh+KehMEGMvJLvM061sJiQx4rYIn2AaQvsrUEmWxRluiacr69l7hYq0AN0wsacjVJ9ZbMoMnQIUFCjpI3lyIXSsAiwDcMecOPHwkvC2WzDzQKon+YDYz19wzfD72I4TBreckx2LYB7kEIHquXX32xJYAJEJmLF+0FWXNZathU+5kSCytVl/AhB1ZPMUw/raWz+UiovwoTV291OkvsagGsBa/RrcB7DzvsTF6+eTa7dzU+JcKIPqI0zq1wwXj');
 
@@ -21,7 +23,10 @@ class Scan extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { showScanner: true };
+    this.state = {
+        showScanner: true,
+        barcodeKey: 1
+    };
 
     this.settings = new ScanSettings();
     this.settings.setSymbologyEnabled(Barcode.Symbology.EAN13, true);
@@ -31,32 +36,31 @@ class Scan extends React.Component {
 
   componentDidMount() {
       this.requestCameraPermission();
-
-      this.scanner.startScanning();
   }
 
   requestCameraPermission() {
-    try {
-        const granted = PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.CAMERA,
-            {
-                'title': 'Camera Permission',
-                'message': 'Dispatcher App needs access to your camera'
-            }
-        )
+      if (Platform.OS === 'ios') {
+          this.scanner.startScanning();
+      } else {
+        try {
+            const granted = PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.CAMERA,
+                {
+                    'title': 'Camera Permission',
+                    'message': 'Dispatcher App needs access to your camera'
+                }
+            ).then((granted) => {
+                this.setState({barcodeKey: this.state.barcodeKey++});
+                this.scanner.startScanning();
+            })
 
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            this.setState({ showScanner: false })
-                // .then(() => {
-                //     this.setState({ showScanner: true })
-                //         .then(() => {
-                //             this.scanner.startScanning();
-                //     });
-                // })
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                this.scanner.startScanning();
+            }
+        } catch (err) {
+            console.warn(err)
         }
-    } catch (err) {
-        console.warn(err)
-    }
+      }
   }
 
     // Pause on a detected barcode (camera video is shown, but not parsed for barcodes).
@@ -64,39 +68,41 @@ class Scan extends React.Component {
     onScan = (code) => {
         this.scanner && this.scanner.pauseScanning();
 
-        Alert.alert("Detected Barcode " + code.newlyRecognizedCodes[0].data,
-            code.data,
-            [{ text: 'CONTINUE', onPress: () => {
-                    this.scanner.resumeScanning()
-                }
-            }],
-            { cancelable: false }
-        );
+        this._onSearchByCode(code.newlyRecognizedCodes[0].data);
     };
 
-  _onConfirm() {
-    this.setState({ spinner: true });
-    const { email, password } = this.state;
+    _onSearchByCode = (barcode) => {
+        this.props
+            .searchBarcodeRequest(barcode)
+            .then(response => {
+                    this.setState({spinner: false});
+                    this.scanner && this.scanner.resumeScanning();
 
-    // store the email
-    this._storeData(email);
+                    if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('reference')) {
+                        if (response && response.hasOwnProperty('errors') && response.errors.length) {
+                            Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
+                        }
 
-    this.props
-        .sendLoginRequest(email, password)
-        .then(response => {
-          this.setState({ spinner: false });
+                        store.dispatch({type: types.SAVE_TASK, task:response.data});
+                        storage.saveFulfillment(response.data);
 
-          if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('authToken')) {
-            this.props.navigation.navigate("Dashboard");
-          } else {
-            if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
-              Alert.alert(response.errors.userTitle, response.errors.userMessage);
-            } else {
-            }
-          }
-        }
-    );
-  }
+                        if (response.data.state === STATE_ITEMIZING) {
+                            this.props.navigation.push("Fulfillment");
+                        } else {
+                            this.props.navigation.push("FulfillmentView");
+                        }
+                    } else {
+                        if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
+                            Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
+                        } else {
+                            Alert.alert("", translate("bag.search.fail"));
+                        }
+                    }
+                }
+            );
+    }
+
+
 
   render() {
     return (
@@ -105,6 +111,7 @@ class Scan extends React.Component {
 
           { this.state.showScanner &&
               <BarcodePicker
+                  key={this.state.barcodeKey}
                   ref={(scan) => { this.scanner = scan }}
                   scanSettings={ this.settings }
                   onScan={(session) => { this.onScan(session) }}
@@ -119,17 +126,47 @@ class Scan extends React.Component {
 
                   eventListener="onKeyDown"
                   navigation={this.props.navigation}
+                  onCode={this._onSearchByCode}
                 />
           }
 
           <View style={SUBMIT}>
-              <Button text={this.state.showScanner ? translate("Scan.Enter") : translate("Scan.Scan")} onSubmit={() => {this.setState({showScanner: !this.state.showScanner})}} height={fontSize(45)} fontSize={fontSize(15)}/>
+              <Button text={this.state.showScanner ? translate("Scan.Enter") : translate("Scan.Scan")}
+                      onSubmit={
+                          () => {
+                              this.setState({showScanner: !this.state.showScanner});
+
+                              if (this.state.showScanner) {
+                                this.scanner.resumeScanning();
+                              }
+                          }
+                      }
+                      height={fontSize(45)} fontSize={fontSize(15)}
+              />
+              <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish")}]} buttonWidth={dimensions.width / 2}>
+                  <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", width: "100%", height: "100%" }}>
+                      <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}    </Text>
+                      <Icon name="ellipsis-v" size={fontSize(16)} color={colors.white} />
+                  </View>
+              </Swipeout>
           </View>
       </View>
     );
   }
 }
 
-export default Scan;
+const mapStateToProps = ({ data }) => {
+    return { };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        searchBarcodeRequest: (barcode) => {
+            return dispatch(actions.searchBarcodeRequest(barcode));
+        },
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Scan);
 
 
