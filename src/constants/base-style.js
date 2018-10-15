@@ -62,7 +62,7 @@ export const ContentRow = {
     justifyContent: 'space-between',
     marginLeft: '10%',
     width: '80%',
-    padding: fontSize(10),
+    padding: fontSize(6),
     marginTop: fontSize(10),
 }
 
@@ -150,7 +150,6 @@ export const HEADER = {
     color: colors.white,
     fontSize: fontSize(13),
     lineHeight: fontSize(16),
-    backgroundColor: colors.dark
 }
 
 export const BIG_ICON = {
@@ -228,6 +227,7 @@ export const SUBMIT = {
 }
 
 export const LOGO_WRAPPER = {
+    marginLeft: '10%',
     width: '80%',
     height: '25%',
 }

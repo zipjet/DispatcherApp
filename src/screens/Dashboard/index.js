@@ -6,20 +6,19 @@ import Spinner from "react-native-loading-spinner-overlay";
 import { colors, HeaderStyle, ContentWithHeaderStyle, ContentCentered, ContentRow } from "./../../constants/base-style.js";
 import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
 import { translate } from '../../locale';
-import * as storage from '../../storage';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
 import Prompt       from "./../../components/Dialog";
 import moment       from "moment";
 import * as types   from '../../actions/types';
 import store from '../../store';
-import { dimensions, fontSize, getShift } from '../../constants/util';
+import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, isTaskDispatched } from '../../constants/util';
 import timer from 'react-native-timer';
 import { Select, Option } from "react-native-chooser";
 import { STATE_ITEMIZING, STATE_CLEANING } from "./../../constants/constants";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import DashboardCard from "../../components/DashboardCard/index";
 import Swipeout from 'react-native-swipeout';
+import * as storage from '../../storage';
 
 const ALL       = translate("Menu.Dashboard");
 const NEW       = translate("Menu.Itemizing");
@@ -209,11 +208,7 @@ class Dashboard extends React.Component {
                     store.dispatch({type: types.SAVE_TASK, task:response.data});
                     storage.saveFulfillment(response.data);
 
-                    if (response.data.state === STATE_ITEMIZING) {
-                        this.props.navigation.push("Fulfillment");
-                    } else {
-                        this.props.navigation.push("FulfillmentView");
-                    }
+                    this.props.navigation.push("OrderDetails");
                 } else {
                     if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                         Alert.alert(response.errors.userTitle, response.errors.userMessage);
@@ -247,6 +242,12 @@ class Dashboard extends React.Component {
                     }
                 }
             });
+    }
+
+    _showTasks = (title, tasks) => {
+        storage.saveTasks({title: title, tasks: tasks});
+
+        this.props.navigation.push("OrdersList");
     }
 
     _calculateShifts = () => {
@@ -325,7 +326,10 @@ class Dashboard extends React.Component {
             <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
             <View style={ HeaderStyle }>
-                <Menu />
+                <Menu
+                    navigation={this.props.navigation}
+                    storage={storage}
+                />
             </View>
 
             <View style={[NO_INTERNET_BAR]}>
@@ -339,9 +343,9 @@ class Dashboard extends React.Component {
                             {this.state.shiftLabel !== "" &&  <Select
                                 onSelect = {this._onShiftSelect}
                                 defaultText = {this.state.shiftLabel}
-                                indicatorSize=0
-                                style = {[{ borderWidth: 0, backgroundColor: colors.white, height: fontSize(24), justifyContent: 'center' }]}
-                                textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), alignContent: 'center' }}
+                                indicatorSize={ fontSize(0) }
+                                style = {[{ borderWidth: 0, height: fontSize(24), justifyContent: 'center' }]}
+                                textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), width: '100%', textAlign: 'center' }}
                                 optionListStyle = {{ backgroundColor : colors.screenBackground, width: "100%", height: "100%", justifyContent: 'center', marginRight: "0%", marginTop: fontSize(0) }}
                                 selected= {<Text style={{ fontSize: fontSize(14)}}>Shift: { this.state.shiftLabel }</Text>}
                                 transparent={ true }>
@@ -357,37 +361,45 @@ class Dashboard extends React.Component {
                             }
                         </View>
 
-                        <View style={ContentRow}>
-                            <Text style="">Stock</Text>
-                            <Text style="">
-                                {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
-                                /
-                                {getStockOrders(this.state.tasks).length}
-                            </Text>
-                        </View>
+                        <TouchableHighlight onPress={() => { this._showTasks("Stock Orders", getStockOrders(this.state.tasks)) }} underlayColor={colors.white}>
+                            <View style={ContentRow}>
+                                <Text style="">Stock</Text>
+                                <Text style="">
+                                    {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
+                                    /
+                                    {getStockOrders(this.state.tasks).length}
+                                </Text>
+                            </View>
+                        </TouchableHighlight>
 
-                        <View style={ContentRow}>
-                            <Text style="">New</Text>
-                            <Text style="">
-                                {getNewOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
-                                /
-                                {getNewOrders(this.state.tasks).length}
-                            </Text>
-                        </View>
+                        <TouchableHighlight onPress={() => { this._showTasks("New Orders", getNewOrders(this.state.tasks)) }} underlayColor={colors.white}>
+                            <View style={ContentRow}>
+                                <Text style="">New</Text>
+                                <Text style="">
+                                    {getNewOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
+                                    /
+                                    {getNewOrders(this.state.tasks).length}
+                                </Text>
+                            </View>
+                        </TouchableHighlight>
 
-                        <View style={ContentRow}>
-                            <Text style="">Incomplete</Text>
-                            <Text style="">
-                                {getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)}).length}
-                            </Text>
-                        </View>
+                        <TouchableHighlight onPress={() => { this._showTasks("Incomplete Orders", getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)})) }} underlayColor={colors.white}>
+                            <View style={ContentRow}>
+                                <Text style="">Incomplete</Text>
+                                <Text style="">
+                                    {getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)}).length}
+                                </Text>
+                            </View>
+                        </TouchableHighlight>
 
-                        <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                            <Text style="">Total Orders</Text>
-                            <Text style="">
-                                {this.state.tasks.length}
-                            </Text>
-                        </View>
+                        <TouchableHighlight onPress={() => { this._showTasks("Total Orders", this.state.tasks) }} underlayColor={colors.white}>
+                            <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                <Text style="">Total Orders</Text>
+                                <Text style="">
+                                    {this.state.tasks.length}
+                                </Text>
+                            </View>
+                        </TouchableHighlight>
                     </View>
 
                     <View style={SUBMIT}>

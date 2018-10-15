@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {Platform, StyleSheet, Text, View, Font} from 'react-native';
 import { Provider } from "react-redux";
 import store from "./src/store";
 
@@ -17,27 +17,15 @@ import { colors } from "./src/constants/base-style.js";
 import SignIn    from "./src/screens/SignIn";
 import Dashboard from "./src/screens/Dashboard";
 import Error from "./src/screens/Error";
-import Fulfillment from "./src/screens/Fulfillment";
-import FulfillmentView from "./src/screens/FulfillmentView";
 import Scan from "./src/screens/Scan";
+import OrderDetails from "./src/screens/OrderDetails";
+import OrdersList from "./src/screens/OrdersList";
 
 type Props = {};
 export default class App extends Component<Props> {
   state = {
     isLoadingComplete: false,
-    fontLoaded: false
   };
-
-  async componentDidMount() {
-    // await Font.loadAsync({
-    //   "WorkSans-Light": require("./assets/fonts/WorkSans-Light.ttf"),
-    //   "WorkSans-Bold": require("./assets/fonts/WorkSans-Bold.ttf"),
-    //   "WorkSans-Medium": require("./assets/fonts/WorkSans-Medium.ttf"),
-    //   "WorkSans-SemiBold": require("./assets/fonts/WorkSans-SemiBold.ttf"),
-    //   "WorkSans-Regular": require("./assets/fonts/WorkSans-Regular.ttf")
-    // });
-    this.setState({ fontLoaded: true });
-  }
 
   _handleFinishLoading = () => {
     this.setState({ isLoadingComplete: true });
@@ -62,18 +50,19 @@ const RootStack = createStackNavigator(
     Dashboard: {
         screen: Dashboard
     },
+    Scan: {
+        screen: Scan
+    },
+    OrderDetails: {
+        screen: OrderDetails
+    },
+    OrdersList: {
+        screen: OrdersList
+    },
+
     Error: {
         screen: Error
     },
-    Fulfillment: {
-        screen: Fulfillment
-    },
-    FulfillmentView: {
-        screen: FulfillmentView
-    },
-    Scan: {
-        screen: Scan
-    }
   },
 
   {

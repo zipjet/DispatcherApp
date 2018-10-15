@@ -86,11 +86,7 @@ class Scan extends React.Component {
                         store.dispatch({type: types.SAVE_TASK, task:response.data});
                         storage.saveFulfillment(response.data);
 
-                        if (response.data.state === STATE_ITEMIZING) {
-                            this.props.navigation.push("Fulfillment");
-                        } else {
-                            this.props.navigation.push("FulfillmentView");
-                        }
+                        this.props.navigation.push("OrderDetails");
                     } else {
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);

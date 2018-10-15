@@ -52,7 +52,7 @@ export const getNewOrders = (tasks) => {
     return tasks.filter((task) => {
         return task.meta.skockedAtHub === false
             && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length)
-    )
+    })
 }
 
 export const isTaskDispatched = (task) => {

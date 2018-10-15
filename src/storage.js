@@ -1,4 +1,4 @@
-import { AsyncStorage } from "react-native";
+import { AsyncStorage, Alert } from "react-native";
 
 const LOGIN_EMAIL        = 'Login:email';
 const LOGIN_AUTH_TOKEN   = 'Login:auth_token';
@@ -7,6 +7,8 @@ const LOGIN_DISPATCHER   = 'Login:dispatcher';
 
 const FULFILLMENT        = 'Fulfillment';
 const SHIFT              = 'Shift';
+
+const TASKS              = 'Tasks';
 
 
 
@@ -34,6 +36,10 @@ export const saveShift = async function (shift) {
     saveData(SHIFT, JSON.stringify(shift));
 }
 
+export const saveTasks = async function (tasks) {
+    saveData(TASKS, JSON.stringify(tasks));
+}
+
 
 
 
@@ -59,6 +65,10 @@ export const loadFulfillment = async function () {
 
 export const loadShift = async function () {
     return loadData(SHIFT);
+}
+
+export const loadTasks = async function () {
+    return loadData(TASKS);
 }
 
 

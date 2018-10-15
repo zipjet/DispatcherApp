@@ -1,0 +1,101 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "react-native-chooser@^1.7.0",
+        "scope": null,
+        "escapedName": "react-native-chooser",
+        "name": "react-native-chooser",
+        "rawSpec": "^1.7.0",
+        "spec": ">=1.7.0 <2.0.0",
+        "type": "range"
+      },
+      "/Users/macbook/Documents/work/INTWASH-DISPATCHER"
+    ]
+  ],
+  "_from": "react-native-chooser@>=1.7.0 <2.0.0",
+  "_id": "react-native-chooser@1.7.0",
+  "_inCache": true,
+  "_location": "/react-native-chooser",
+  "_nodeVersion": "9.0.0",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/react-native-chooser-1.7.0.tgz_1511941885574_0.6180264421273023"
+  },
+  "_npmUser": {
+    "name": "js-media",
+    "email": "azhar.mw@gmail.com"
+  },
+  "_npmVersion": "5.5.1",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "react-native-chooser@^1.7.0",
+    "scope": null,
+    "escapedName": "react-native-chooser",
+    "name": "react-native-chooser",
+    "rawSpec": "^1.7.0",
+    "spec": ">=1.7.0 <2.0.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-native-chooser/-/react-native-chooser-1.7.0.tgz",
+  "_shasum": "f0cf5f19cec2677932450711dc81625541607714",
+  "_shrinkwrap": null,
+  "_spec": "react-native-chooser@^1.7.0",
+  "_where": "/Users/macbook/Documents/work/INTWASH-DISPATCHER",
+  "author": {
+    "name": "Azhar"
+  },
+  "bugs": {
+    "url": "https://github.com/gs-akhan/react-native-chooser/issues"
+  },
+  "dependencies": {},
+  "description": "Simple Cross platform SELECT tag for React-Native",
+  "devDependencies": {
+    "prop-types": "^15.5.10",
+    "react": "16.0.0-alpha.12"
+  },
+  "directories": {},
+  "dist": {
+    "integrity": "sha512-mV9VgdnfiZNSGbz0YPClZewNzM+vjTLx45+kzu086OadvB+FDsxQaAOKmW1CXPZzIW1o2tEQv8Psdnl/ICBtgg==",
+    "shasum": "f0cf5f19cec2677932450711dc81625541607714",
+    "tarball": "https://registry.npmjs.org/react-native-chooser/-/react-native-chooser-1.7.0.tgz"
+  },
+  "gitHead": "9019b7299cfe5eab75aa6ef4876b382162421d14",
+  "homepage": "https://github.com/gs-akhan/react-native-chooser#readme",
+  "keywords": [
+    "react-native",
+    "chooser",
+    "select",
+    "picker"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "maintainers": [
+    {
+      "name": "js-media",
+      "email": "azhar.mw@gmail.com"
+    },
+    {
+      "name": "stoffern",
+      "email": "kristoffer.klevenberg@gmail.com"
+    }
+  ],
+  "name": "react-native-chooser",
+  "optionalDependencies": {},
+  "peerDependencies": {
+    "prop-types": "^15.5.10"
+  },
+  "readme": "# React Native Chooser\nSimple DropDown menu for React Native App! Your Select Tag for React Native. Fully Customizable too.\n\n## Introduction\n\nReact Native Chooser is simple, customizable and easy to use dropdown in React Native. It has been tested on both Android and IOS and works like a charm.\n\n\n## Installation\n```\nnpm i react-native-chooser --save\n```\n\n## Usage\n\n```js\nimport React, { Component } from 'react';\nimport {Select, Option} from \"react-native-chooser\";\n\nimport {\n  AppRegistry,\n  StyleSheet,\n  Text,\n  View\n} from 'react-native';\n\nexport default class AwesomeProject extends Component {\n\n  constructor(props) {\n    super(props);\n    this.state = {value : \"Select Me Please\"}\n  }\n  onSelect(value, label) {\n    this.setState({value : value});\n  }\n\n  render() {\n    return (\n      <View style={styles.container}>\n        <Select\n            onSelect = {this.onSelect.bind(this)}\n            defaultText  = {this.state.value}\n            style = {{borderWidth : 1, borderColor : \"green\"}}\n            textStyle = {{}}\n            backdropStyle  = {{backgroundColor : \"#d3d5d6\"}}\n            optionListStyle = {{backgroundColor : \"#F5FCFF\"}}\n          >\n          <Option value = {{name : \"azhar\"}}>Azhar</Option>\n          <Option value = \"johnceena\">Johnceena</Option>\n          <Option value = \"undertaker\">Undertaker</Option>\n          <Option value = \"Daniel\">Daniel</Option>\n          <Option value = \"Roman\">Roman</Option>\n          <Option value = \"Stonecold\">Stonecold</Option>\n          <Option value = \"Rock\">Rock</Option>\n          <Option value = \"Sheild\">Sheild</Option>\n          <Option value = \"Orton\">Orton</Option>\n\n        </Select>\n      </View>\n    );\n  }\n}\n```\n\n### Props\n\n#### Props for Select\n\n| Prop Name       | Data Type | Default Values  | Description                                      |\n|-----------------|-----------|-----------------|--------------------------------------------------|\n| onSelect        | function  | null            | function that executes on selection of an option |\n| defaultText     | string    | Click To Select | Text to show as default text                     |\n| style           | object    | null            | To style the select box.                         |\n| backdropStyle   | object    | null            | To style the overlay                             |\n| textStyle       | object    | null            | To style the text shown in the box               |\n| optionListStyle | object    | null            | To style the selection box                       |\n| transparent     | boolean   | false           | To set the transparent prop on Modal             |\n| animationType   | string    | \"none\"          | To set the animationType prop on Modal           |\n| indicator       | string    | \"none\", \"up\" or \"down\" | \"none\" | To enable an indicator arrow     |\n| indicatorColor  | string    | \"black\"         | The color of the indicator arrow                 |\n| indicatorSize   | number    | 10              | The size of the indicator arrow                  |\n| indicatorStyle  | object    | null            | To style the indicator arrow                     |\n| indicatorIcon   | react element    | null     | Show the indicator icon                          |\n| selected        | string    | null            | Give it same value as you give to Option         |\n| selectedStyle   | object    | null            | Apply styles to the selected Option              |\n\n#### Functions for Select\n\n| Function Name | Description |\n|-----------|-----------|\n| setSelectedText(text) | Set default text in the select option, often used to reset text.|\n\n#### Props for Option\n\n| Prop Name | Data Type | Default Values | Description                           |\n|-----------|-----------|----------------|---------------------------------------|\n| style     | object    | null           | To style each option                  |\n| styleText | object    | null           | To style the text shown in the option |\n\n## Demo\n###  IOS and Android:\n<p align=\"center\">\n    <img src =\"https://raw.githubusercontent.com/gs-akhan/react-native-select/master/dropdown-both.gif\" />\n</p>\n\n## Contributions\nYour contributions and suggestions are heartily♡ welcome. (✿◠‿◠)\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gs-akhan/react-native-chooser.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.7.0"
+}
