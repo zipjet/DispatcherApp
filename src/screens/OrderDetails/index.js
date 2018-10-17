@@ -65,22 +65,38 @@ class OrderDetails extends React.Component {
             })
     }
 
+    getDispatcherItemizationCount = (productReference, task) => {
+        let count = 0;
+
+        for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
+            for (let j = 0; j < task.meta.scannedAtHub[i].dispatcherItemizationItems.length; j++) {
+                if (task.meta.scannedAtHub[i].dispatcherItemizationItems[j].productReference === productReference) {
+                    count += task.meta.scannedAtHub[i].dispatcherItemizationItems[j].quantity;
+                }
+            }
+        }
+
+        return count;
+    }
+
     renderBagsSummary = (bagsSummary) => {
         let index = 1;
 
         return Object.values(this.state.bagsSummary).map((bagsData) => {
             return <View style={BAG} key={bagsData.category}>
                         <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>Bag {index++}</Text>
-
-                        <Text style={{ color: colors.blueGrey, fontSize: fontSize(18) }}>
-                            {bagsData.category === WASH_FOLD ? "WF" : "DC"}
-                            {"  "}
                             {bagsData.codes.map(
-                                (code) => {
-                                    return <Text key={code}>{code}</Text>
+                                (code, categoryIndex) => {
+                                    return  <Text key={code} style={{ color: colors.blueGrey, fontSize: fontSize(18) }}>
+                                                {categoryIndex > 0 && <Text style={divider}/>}
+                                                {categoryIndex > 0 && <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>{"\n"}Bag {index++}{"\n"}</Text>}
+
+                                                {bagsData.category === WASH_FOLD ? "WF" : "DC"}
+                                                {"  "}
+                                                <Text>{code}</Text>
+                                            </Text>
                                 }
                             )}
-                        </Text>
 
                         {bagsData.category !== WASH_FOLD &&
                             <View>
@@ -88,10 +104,24 @@ class OrderDetails extends React.Component {
 
                                 {bagsData.itemization.map(
                                     (itemizationItem) => {
-                                        return  <View key={itemizationItem.reference}>
-                                                    <Text>
+                                        let dispatcherItemizationCount = this.getDispatcherItemizationCount(itemizationItem.productReference, this.state.task);
+
+                                        return  <View key={itemizationItem.reference} style={{ paddingTop: 5, paddingBottom: 5, width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <Text style={{ width: '60%'}}>
                                                         {itemizationItem.quantity} X {itemizationItem.name}
                                                     </Text>
+
+                                                    { dispatcherItemizationCount !== itemizationItem.quantity &&
+                                                        <Text style={{color: colors.errorColor}}>Found {dispatcherItemizationCount}</Text>
+                                                    }
+
+                                                    { dispatcherItemizationCount !== itemizationItem.quantity &&
+                                                        <Icon size={fontSize(14)} name="times-circle" color={colors.errorColor} />
+                                                    }
+
+                                                    { dispatcherItemizationCount === itemizationItem.quantity &&
+                                                        <Icon size={fontSize(14)} name="check-circle" color={colors.teal} />
+                                                    }
                                                 </View>
                                     }
                                 )}

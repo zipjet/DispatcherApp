@@ -111,18 +111,18 @@ export const isReadyToStock = (task, shift) => {
     let shiftTimes = shift.value && shift.value.split('-');
 
     if (shiftTimes.length !== 2) {
-        return false;
+        return true;
     }
 
     if (taskMoment < parseInt(shiftTimes[0])) {
-        return false;
+        return true;
     }
 
     if (taskMoment > parseInt(shiftTimes[1])) {
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 export const isNotCompleted = (task) => {

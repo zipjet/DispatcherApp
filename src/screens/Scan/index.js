@@ -76,6 +76,11 @@ class Scan extends React.Component {
         this._onSearchByCode(code.newlyRecognizedCodes[0].data);
     };
 
+    goToDispatchFinish = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.push("DispatchFinish");
+    };
+
     _onSearchByCode = (barcode) => {
         this.props
             .searchBarcodeRequest(barcode)
@@ -151,7 +156,7 @@ class Scan extends React.Component {
                       }
                       height={fontSize(45)} fontSize={fontSize(15)}
               />
-              <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish")}]} buttonWidth={dimensions.width / 2}>
+              <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish"), onPress: () => { this.goToDispatchFinish() }}]} buttonWidth={dimensions.width / 2}>
                   <View style={{ justifyContent: "space-between", alignItems: "center", flexDirection: "row", width: (dimensions.width / 2), height: "100%" }}>
                       <Text style={{ width: fontSize(8)}}> </Text>
                       <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}</Text>

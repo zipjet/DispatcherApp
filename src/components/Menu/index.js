@@ -21,6 +21,11 @@ class Menu extends React.Component {
         // this.props.navigation.push("OrdersList");
     }
 
+    goToDispatchFinish = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.push("DispatchFinish");
+    }
+
     logout = () => {
         this.setState({modalVisible: false});
 
@@ -68,7 +73,7 @@ class Menu extends React.Component {
                                 <Text>Dispatch List</Text>
                             </TouchableHighlight>
 
-                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToDispatchFinish()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
                                 <Text>Finish Dispatching</Text>
                             </TouchableHighlight>
 

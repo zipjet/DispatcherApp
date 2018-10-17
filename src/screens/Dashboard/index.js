@@ -137,6 +137,7 @@ class Dashboard extends React.Component {
 
                 if (response && response.hasOwnProperty('data')) {
                     this.setState({tasks: response.data});
+                    store.dispatch({type: types.SAVE_TASKS, tasks: response.data});
                 } else {
                     if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                         Alert.alert(response.errors.userTitle, response.errors.userMessage);

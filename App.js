@@ -21,6 +21,7 @@ import Scan from "./src/screens/Scan";
 import OrderDetails from "./src/screens/OrderDetails";
 import OrdersList from "./src/screens/OrdersList";
 import Dispatch from "./src/screens/Dispatch";
+import DispatchFinish from "./src/screens/DispatchFinish";
 import OrderBagItemization from "./src/screens/OrderBagItemization";
 import DropdownAlert from 'react-native-dropdownalert';
 import { DropDownHolder } from './src/components/DropdownHolder';
@@ -61,6 +62,9 @@ const RootStack = createStackNavigator(
     Dispatch: {
         screen: Dispatch
     },
+    DispatchFinish: {
+        screen: DispatchFinish
+    },
     Scan: {
         screen: Scan
     },
@@ -79,7 +83,7 @@ const RootStack = createStackNavigator(
   },
 
   {
-    initialRouteName: "Scan", //"SignIn",
+    initialRouteName: "Dispatch", //"SignIn",
 
     /* The header config from HomeScreen is now here */
     navigationOptions: {
