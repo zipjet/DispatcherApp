@@ -15,15 +15,9 @@ import store from '../../store';
 import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, isTaskDispatched } from '../../constants/util';
 import timer from 'react-native-timer';
 import { Select, Option } from "react-native-chooser";
-import { STATE_ITEMIZING, STATE_CLEANING } from "./../../constants/constants";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
 import * as storage from '../../storage';
-
-const ALL       = translate("Menu.Dashboard");
-const NEW       = translate("Menu.Itemizing");
-const PROGRESS  = translate("Menu.Cleaning");
-const ERROR     = translate("Menu.Error");
 
 class Dashboard extends React.Component {
     static navigationOptions = {
@@ -34,92 +28,16 @@ class Dashboard extends React.Component {
         super(props);
 
         this.dashboardMode = '';
-        this.tasks = [];
         this.isLoading = false;
 
         this.state = {
-            nextPage: 1,
-            numColumns: 3,
-            posts: [],
-            showFooter: false,
-            dashboardMode: '',
-            refreshing: false,
-
-            noInternet: false,
-            spinner: true,
             tasks: [],
-            filteredTasks: [],
             searchByReferencePrompt: false,
 
             shifts:     [],
             shiftValue: "",
             shiftLabel: ""
         };
-    }
-
-    loadData(append, reset) {
-        if (this.isLoading) return;
-
-        let pagesToLoad = this.state.nextPage;
-        let stateTasksPlusOne = 0;
-
-        if (append) {
-            this.setState({ loadingMore: true, nextPage: this.state.nextPage + 1 });
-            pagesToLoad = this.state.nextPage + 1;
-        }
-
-        if (reset) {
-            this.setState({ nextPage: 1 });
-            pagesToLoad = 1;
-        }
-
-        try {
-            this.isLoading = true;
-
-            let stateTasks = this.tasks
-                .filter(
-                    (item) => {
-                        return this.dashboardMode === ALL ||
-                            (this.dashboardMode === NEW      && item.state === STATE_ITEMIZING) ||
-                            (this.dashboardMode === PROGRESS && item.state === STATE_CLEANING) ||
-                            (this.dashboardMode === ERROR    && item.state === STATE_CLEANING && item.meta.missingBags.length > 0)
-                    }
-                )
-                .sort(
-                    (a, b) => {
-                        if (a.serviceClass && a.serviceClass.id && a.serviceClass.id.toLowerCase().indexOf('-express-') > 0) {
-                            return -1;
-                        }
-
-                        if (b.serviceClass && b.serviceClass.id && b.serviceClass.id.toLowerCase().indexOf('-express-') > 0) {
-                            return 1;
-                        }
-
-                        return 0;
-                    }
-                );
-
-            let refreshTasks = stateTasks.filter((item, index) => { return index < pagesToLoad * 15 });
-            stateTasksPlusOne = stateTasks.filter((item, index) => { return index < pagesToLoad * 15 + 1 }).length;
-
-            // should I show the footer?
-            if (refreshTasks.length < stateTasksPlusOne) {
-                this.setState({ showFooter: true });
-            }
-
-            this.setState({ loadingMore: false, posts: refreshTasks });
-
-            // should I show the footer?
-            if (refreshTasks.length >= stateTasksPlusOne) {
-                this.setState({ showFooter: false });
-            }
-        } catch (error) {
-            Alert.alert("er", error.message);
-
-        } finally {
-            this.isLoading = false;
-            this.setState({ loadingMore: false, refreshing: false });
-        }
     }
 
     // add the listener
@@ -172,17 +90,6 @@ class Dashboard extends React.Component {
         this.willBlurSubscription.remove();
     }
 
-    _modeChange = (mode, doNotReloadData) => {
-        let modeTokens = mode.split(" (");
-
-        store.dispatch({type: types.DASHBOARD_MODE, mode:modeTokens[0]});
-        this.dashboardMode = modeTokens[0];
-
-        if (doNotReloadData !== true) {
-            this.loadData(false, true);
-        }
-    }
-
     _onShiftSelect(value, label) {
         if (value !== undefined) {
             this.setState({ spinner: true });
@@ -229,8 +136,7 @@ class Dashboard extends React.Component {
                 this.setState({ spinner: false });
 
                 if (response && response.hasOwnProperty('data')) {
-                    this.tasks = response.data;
-                    this.loadData(false, false);
+                    this.setState({tasks: response.data});
                 } else {
                     if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                         Alert.alert(response.errors.userTitle, response.errors.userMessage);
@@ -341,6 +247,8 @@ class Dashboard extends React.Component {
                     <View>
                         <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
                             {this.state.shiftLabel !== "" &&  <Select
+                                min={false}
+                                visible={null}
                                 onSelect = {this._onShiftSelect}
                                 defaultText = {this.state.shiftLabel}
                                 indicatorSize={ fontSize(0) }

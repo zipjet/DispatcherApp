@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '600',
     },
+
     itemCode: {
         fontWeight: '600',
         fontSize: 12,

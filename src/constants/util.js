@@ -1,4 +1,4 @@
-import {Dimensions} from 'react-native'
+import {Dimensions, Alert} from 'react-native'
 import { translate } from '../locale';
 import moment       from "moment";
 
@@ -45,16 +45,78 @@ export const getShift = (timestamp) => {
 }
 
 export const getStockOrders = (tasks) => {
-    return tasks.filter((task) => { return task.meta.skockedAtHub === true });
+    return tasks.filter((task) => {
+        return  task.meta.stockedAtHub === true &&
+                task.meta.bags.length !== task.meta.scannedAtHub.length;
+    });
 }
 
 export const getNewOrders = (tasks) => {
     return tasks.filter((task) => {
-        return task.meta.skockedAtHub === false
+        return task.meta.stockedAtHub === false
             && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length)
     })
 }
 
 export const isTaskDispatched = (task) => {
     return task.meta.bags.length === task.meta.scannedAtHub.length;
+}
+
+export const getItemizationData = (taskItemization, bagItemization) => {
+    let data = [];
+
+    for (let i = 0; i < taskItemization.length; i++) {
+        data[taskItemization[i].productReference] = {
+            quantity: 0,
+            productName: taskItemization[i].name,
+            productReference: taskItemization[i].productReference
+        }
+    }
+
+    for (let i = 0; i < bagItemization.length; i++) {
+        if (data[bagItemization[i].productReference] !== undefined) {
+            data[bagItemization[i].productReference].quantity = bagItemization[i].quantity;
+        }
+    }
+
+    return data;
+}
+
+export const isReadyToDispatch = (task) => {
+    if (task.meta.dispatched) {
+        return false;
+    }
+
+    if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
+        return false;
+    }
+
+    return true;
+}
+
+export const isReadyToStock = (task, shift) => {
+    let taskMoment = moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm').unix();
+    let shiftTimes = shift.value && shift.value.split('-');
+
+    if (shiftTimes.length !== 2) {
+        return false;
+    }
+
+    if (taskMoment < parseInt(shiftTimes[0])) {
+        return false;
+    }
+
+    if (taskMoment > parseInt(shiftTimes[1])) {
+        return false;
+    }
+
+    return true;
+}
+
+export const isNotCompleted = (task) => {
+    if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
+        return true;
+    }
+
+    return false;
 }

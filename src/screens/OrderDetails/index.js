@@ -3,22 +3,19 @@ import { connect } from "react-redux";
 import * as actions from "../../actions";
 import { Text, TextInput, View, FlatList, Alert, ScrollView, Image, AsyncStorage, TouchableHighlight } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-import { colors, HeaderStyle, ContentWithHeaderStyle, ContentCentered, ContentRow } from "./../../constants/base-style.js";
-import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
+import { colors, HeaderStyle, ContentWithHeaderStyle, ContentCentered, ContentRow, divider } from "./../../constants/base-style.js";
+import { SUBMIT, HEADER, NO_INTERNET_BAR, NO_INTERNET_MESSAGE, BAG, BAG_SHADOW } from "./../../constants/base-style.js";
 import { translate } from '../../locale';
+import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import Prompt       from "./../../components/Dialog";
-import moment       from "moment";
-import * as types   from '../../actions/types';
-import store from '../../store';
-import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, isTaskDispatched } from '../../constants/util';
-import timer from 'react-native-timer';
-import { Select, Option } from "react-native-chooser";
-import { STATE_ITEMIZING, STATE_CLEANING } from "./../../constants/constants";
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Swipeout from 'react-native-swipeout';
+import { fontSize, getShift } from '../../constants/util';
+import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+const WASH_FOLD_ALIAS    = "1";
+const DRY_CLEANING_ALIAS = "2";
 
 class OrderDetails extends React.Component {
     static navigationOptions = {
@@ -30,13 +27,104 @@ class OrderDetails extends React.Component {
 
         this.state = {
             task: null,
+            spinner: false,
+            shift: null,
+            bagsSummary: []
         };
 
-        storage
-            .loadFulfillment()
-            .then((task) => {
-                this.setState({task: task});
-            });
+        Promise
+            .all([storage.loadFulfillment(), storage.loadShift()])
+            .then(values => {
+                let task = JSON.parse(values[0]);
+                let bagsSummary = {};
+
+                this.setState(
+                    {
+                        task: task,
+                        shift: getShift(moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm'))
+                    }
+                );
+
+                let bags = task.meta.bags.sort((bag1, bag2) => { return bag1.type === DRY_CLEANING });
+                for (let i = 0; i < bags.length; i++) {
+                    let bag = bags[i];
+                    let bagTypeKeys = (bag.type === DRY_CLEANING) ? DRY_CLEANING_ALIAS : WASH_FOLD_ALIAS;
+
+                    if (bagsSummary.hasOwnProperty(bagTypeKeys) === false) {
+                        bagsSummary[bagTypeKeys] = {category: bag.type, codes: [], itemization: []};
+                    }
+
+                    bagsSummary[bagTypeKeys].codes.push(bag.code);
+                }
+
+                if (bagsSummary[DRY_CLEANING_ALIAS] !== undefined) {
+                    bagsSummary[DRY_CLEANING_ALIAS].itemization = task.itemization ? task.itemization.items : [];
+                }
+
+                this.setState({bagsSummary: bagsSummary})
+            })
+    }
+
+    renderBagsSummary = (bagsSummary) => {
+        let index = 1;
+
+        return Object.values(this.state.bagsSummary).map((bagsData) => {
+            return <View style={BAG} key={bagsData.category}>
+                        <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>Bag {index++}</Text>
+
+                        <Text style={{ color: colors.blueGrey, fontSize: fontSize(18) }}>
+                            {bagsData.category === WASH_FOLD ? "WF" : "DC"}
+                            {"  "}
+                            {bagsData.codes.map(
+                                (code) => {
+                                    return <Text key={code}>{code}</Text>
+                                }
+                            )}
+                        </Text>
+
+                        {bagsData.category !== WASH_FOLD &&
+                            <View>
+                                <View style={divider}/>
+
+                                {bagsData.itemization.map(
+                                    (itemizationItem) => {
+                                        return  <View key={itemizationItem.reference}>
+                                                    <Text>
+                                                        {itemizationItem.quantity} X {itemizationItem.name}
+                                                    </Text>
+                                                </View>
+                                    }
+                                )}
+                            </View>
+                        }
+                    </View>
+        })
+    }
+
+    getShiftColor = (dayLabel, shiftLabel) => {
+        if (shiftLabel === translate("Menu.Morning")) {
+            return colors.teal;
+        }
+
+        if (shiftLabel === translate("Menu.Evening")) {
+            return colors.blue;
+        }
+
+        return colors.green;
+    }
+
+    dispatch = () => {
+        this.props
+            .dispatchRequest(this.state.task.reference)
+            .then((response) => {
+                let task = response.data;
+
+                if (task.meta.bags.length === task.meta.scannedAtHub.length) {
+                    this.props.navigation.push("OrdersList");
+                }
+
+                this.props.navigation.push("OrdersList");
+            })
     }
 
   render() {
@@ -45,10 +133,27 @@ class OrderDetails extends React.Component {
             <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
             <View style={ HeaderStyle }>
-                <Menu
-                    navigation={this.props.navigation}
-                    storage={storage}
-                />
+                <View style={{width: fontSize(60)}}/>
+
+                <View style={HEADER}>
+                    <Text style={{fontSize: fontSize(13)}}>{this.state.task !== null && this.state.task.reference.substring(0, this.state.task.reference.length - 2)}</Text>
+                </View>
+
+                {this.state.shift &&
+                    <View style={{width: fontSize(60), height: fontSize(25), alignItems: 'center', justifyContent: 'center', backgroundColor: this.getShiftColor(this.state.shift.dayLabel, this.state.shift.shiftLabel)}}>
+                        {this.state.shift.shiftLabel === translate("Menu.Morning") &&
+                            <Icon name="sun-o" size={fontSize(16)} color={colors.white} />
+                        }
+
+                        {this.state.shift.shiftLabel === translate("Menu.Evening") &&
+                            <Icon name="moon-o" size={fontSize(16)} color={colors.white} />
+                        }
+
+                        {this.state.shift.shiftLabel === "" &&
+                            <Icon name="archive" size={fontSize(16)} color={colors.white} />
+                        }
+                    </View>
+                }
             </View>
 
             <View style={[NO_INTERNET_BAR]}>
@@ -58,94 +163,54 @@ class OrderDetails extends React.Component {
             <View style={[ ContentWithHeaderStyle ]}>
                 <View style={ContentCentered}>
                     <View>
-                        <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
-                            {this.state.shiftLabel !== "" &&  <Select
-                                onSelect = {this._onShiftSelect}
-                                defaultText = {this.state.shiftLabel}
-                                indicatorSize={ fontSize(0) }
-                                style = {[{ borderWidth: 0, backgroundColor: colors.white, height: fontSize(24), justifyContent: 'center' }]}
-                                textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), alignContent: 'center' }}
-                                optionListStyle = {{ backgroundColor : colors.screenBackground, width: "100%", height: "100%", justifyContent: 'center', marginRight: "0%", marginTop: fontSize(0) }}
-                                selected= {<Text style={{ fontSize: fontSize(14)}}>Shift: { this.state.shiftLabel }</Text>}
-                                transparent={ true }>
-
-                                    <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
-                                        <Text styleText={{ color: colors.dark }} style={{ fontSize: fontSize(14), marginTop: fontSize(10), marginLeft: fontSize(10) }}>
-                                            Choose a Shift
+                        { this.state.task !== null &&
+                            <View>
+                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                    <Text>
+                                        <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                            Cleaning Due: {"  "}
                                         </Text>
-                                    </View>
+                                        <Text style="">
+                                            {this.state.task.cleaningDueDate}
+                                        </Text>
+                                    </Text>
+                                </View>
 
-                                    { this.state.shifts }
-                                </Select>
-                            }
-                        </View>
+                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                    <Text>
+                                        <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                            Shift: {"  "}
+                                        </Text>
+                                        <Text style="">
+                                            {this.state.shift.dayLabel + " " + this.state.shift.shiftLabel}
+                                        </Text>
+                                    </Text>
+                                </View>
 
-                        <TouchableHighlight onPress={() => { this._showTasks("Stock Orders", getStockOrders(this.state.tasks)) }} underlayColor={colors.white}>
-                            <View style={ContentRow}>
-                                <Text style="">Stock</Text>
-                                <Text style="">
-                                    {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
-                                    /
-                                    {getStockOrders(this.state.tasks).length}
-                                </Text>
+                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                    <Text>
+                                        <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                            Total Bags: {"  "}
+                                        </Text>
+                                        <Text style="">
+                                            {this.state.task.meta.bags.length}
+                                        </Text>
+                                    </Text>
+                                </View>
+
+                                <View>
+                                    {this.renderBagsSummary(this.state.bagsSummary)}
+                                </View>
                             </View>
-                        </TouchableHighlight>
-
-                        <TouchableHighlight onPress={() => { this._showTasks("New Orders", getNewOrders(this.state.tasks)) }} underlayColor={colors.white}>
-                            <View style={ContentRow}>
-                                <Text style="">New</Text>
-                                <Text style="">
-                                    {getNewOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
-                                    /
-                                    {getNewOrders(this.state.tasks).length}
-                                </Text>
-                            </View>
-                        </TouchableHighlight>
-
-                        <TouchableHighlight onPress={() => { this._showTasks("Incomplete Orders", getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)})) }} underlayColor={colors.white}>
-                            <View style={ContentRow}>
-                                <Text style="">Incomplete</Text>
-                                <Text style="">
-                                    {getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)}).length}
-                                </Text>
-                            </View>
-                        </TouchableHighlight>
-
-                        <TouchableHighlight onPress={() => { this._showTasks("Total Orders", this.state.tasks) }} underlayColor={colors.white}>
-                            <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                <Text style="">Total Orders</Text>
-                                <Text style="">
-                                    {this.state.tasks.length}
-                                </Text>
-                            </View>
-                        </TouchableHighlight>
-                    </View>
-
-                    <View style={SUBMIT}>
-                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
-                        <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish")}]} buttonWidth={dimensions.width / 2}>
-                            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", width: "100%", height: "100%" }}>
-                                <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}    </Text>
-                                <Icon name="ellipsis-v" size={fontSize(16)} color={colors.white} />
-                            </View>
-                        </Swipeout>
-                    </View>
+                        }
                 </View>
 
+                <View style={SUBMIT}>
+                    <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.dispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                </View>
             </View>
-
-            <Prompt
-                isDialogVisible={ this.state.searchByReferencePrompt }
-                title={"Enter reference"}
-                message={""}
-                hintInput={"Reference"}
-                submitInput={ (inputText) => { this._onSearchByReference(inputText) } }
-                closeDialog={ () => {
-                    this.setState({ searchByReferencePrompt: false})
-                }}
-                style={{ width: '50%', height: '50%' }}
-            />
         </View>
+    </View>
     );
   }
 }
@@ -156,12 +221,9 @@ const mapStateToProps = ({ dashboardData }) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        searchReferenceRequest: (reference) => {
-            return dispatch(actions.searchReferenceRequest(reference));
+        dispatchRequest: (reference) => {
+            return dispatch(actions.dispatchRequest(reference));
         },
-        loadTasksRequest: (timespan) => {
-            return dispatch(actions.loadTasksRequest(timespan));
-        }
     };
 };
 

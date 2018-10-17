@@ -4,28 +4,16 @@ import * as actions from "../../actions";
 import { Text, TextInput, View, FlatList, Alert, ScrollView, Image, AsyncStorage, TouchableHighlight } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import { colors, HeaderStyle, ContentWithHeaderStyle, ContentCentered, ContentRow } from "./../../constants/base-style.js";
-import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
+import { hr, SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
 import { translate } from '../../locale';
 import * as storage from '../../storage';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import Prompt       from "./../../components/Dialog";
-import moment       from "moment";
-import * as types   from '../../actions/types';
-import store from '../../store';
 import { dimensions, fontSize, getShift } from '../../constants/util';
-import timer from 'react-native-timer';
-import { Select, Option } from "react-native-chooser";
-import { STATE_ITEMIZING, STATE_CLEANING } from "./../../constants/constants";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import DashboardCard from "../../components/DashboardCard/index";
+import OrderCard from "../../components/OrderCard/index";
 import Swipeout from 'react-native-swipeout';
 import {HEADER} from "../../constants/base-style";
-
-const ALL       = translate("Menu.Dashboard");
-const NEW       = translate("Menu.Itemizing");
-const PROGRESS  = translate("Menu.Cleaning");
-const ERROR     = translate("Menu.Error");
 
 class OrdersList extends React.Component {
     static navigationOptions = {
@@ -59,58 +47,7 @@ class OrdersList extends React.Component {
             })
     }
 
-    loadData(append, reset) {
-        if (this.isLoading) return;
-
-        let pagesToLoad = this.state.nextPage;
-
-        if (append) {
-            this.setState({ loadingMore: true, nextPage: this.state.nextPage + 1 });
-            pagesToLoad = this.state.nextPage + 1;
-        }
-
-        if (reset) {
-            this.setState({ nextPage: 1 });
-            pagesToLoad = 1;
-        }
-
-        try {
-            this.isLoading = true;
-            let refreshTasks      = this.state.tasks.filter((item, index) => { return index < pagesToLoad * 15 });
-            let stateTasksPlusOne = this.state.tasks.filter((item, index) => { return index < pagesToLoad * 15 + 1 }).length;
-
-            // should I show the footer?
-            if (refreshTasks.length < stateTasksPlusOne) {
-                this.setState({ showFooter: true });
-            } else {
-                this.setState({ showFooter: false });
-            }
-
-            this.setState({ loadingMore: false, posts: refreshTasks });
-        } catch (error) {
-        } finally {
-            this.isLoading = false;
-            this.setState({ loadingMore: false, refreshing: false });
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    keyExtractor = (item) => item.reference;
 
   render() {
     return (
@@ -124,8 +61,10 @@ class OrdersList extends React.Component {
                 />
 
                 <View style={HEADER}>
-                    <Text>{this.state.tasks.length} {this.state.title}</Text>
+                    <Text style={{fontSize: fontSize(13)}}>{this.state.title && this.state.tasks.length} {this.state.title}</Text>
                 </View>
+
+                <View style={{width: fontSize(30)}}/>
             </View>
 
             <View style={[NO_INTERNET_BAR]}>
@@ -136,9 +75,19 @@ class OrdersList extends React.Component {
                 <View style={ContentCentered}>
 
                     <FlatList
-                        style={{flex: 1, width: '100%'}}
+                        ItemSeparatorComponent={
+                            () => <View style={hr} />
+                        }
+                        style={{flex: 1, width: '80%', marginLeft: '10%'}}
                         data={this.state.tasks}
-                        renderItem={({item}) => <Text>{item.item.reference}</Text>}
+                        keyExtractor={this.keyExtractor}
+                        renderItem={
+                            ({item}) => <OrderCard
+                                            item={item}
+                                            key={item.reference}
+                                            navigation={this.props.navigation}
+                                            />
+                        }
                     />
 
                     <View style={SUBMIT}>
@@ -157,7 +106,9 @@ const mapStateToProps = ({ dashboardData }) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-    return {};
+    return {
+
+    };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrdersList);

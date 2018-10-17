@@ -174,7 +174,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     compile "com.facebook.react:react-native:+"
 
-    compile project(':react-native-keyevent')
     compile project(':react-native-vector-icons')
     compile project(':react-native-i18n')
 

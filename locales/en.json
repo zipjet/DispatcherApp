@@ -19,16 +19,6 @@
     "Scan":       "START SCANNING"
   },
 
-  "Itemization": {
-    "Itemization":  "Itemization",
-    "Print":        "Print",
-    "PrintRunsheet":"Print Runsheet",
-    "Modify":       "Modify",
-    "Save":         "Save",
-    "ForceSave":    "Force Save",
-    "Total":        "Total items",
-  },
-
   "Keyboard": {
     "Clear": "Clear"
   },
@@ -44,6 +34,10 @@
     "Enter":  "MANUAL ENTRY",
     "Scan":   "CAMERA SCAN",
     "Finish": "FINISH DISPATCHING",
+  },
+
+  "Dispatch": {
+    "Dispatch": "DISPATCH"
   },
 
   "noRecords": "Not found",
@@ -88,8 +82,10 @@
     "saved": "Comment saved",
   },
 
-  "itemization": {
-    "saved": "Itemization saved",
+  "Itemization": {
+    "Cancel": "Cancel",
+    "Save":   "Save",
+    "Saved":  "Itemization saved",
   },
 
   "settings": {

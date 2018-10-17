@@ -20,6 +20,10 @@ import Error from "./src/screens/Error";
 import Scan from "./src/screens/Scan";
 import OrderDetails from "./src/screens/OrderDetails";
 import OrdersList from "./src/screens/OrdersList";
+import Dispatch from "./src/screens/Dispatch";
+import OrderBagItemization from "./src/screens/OrderBagItemization";
+import DropdownAlert from 'react-native-dropdownalert';
+import { DropDownHolder } from './src/components/DropdownHolder';
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -34,9 +38,13 @@ export default class App extends Component<Props> {
   render() {
     if (!this.state.isLoadingComplete) {
       return (
-        <Provider store={store}>
-          <RootStack />
-        </Provider>
+          <View style={{height : '100%', width: '100%'}}>
+            <Provider store={store}>
+              <RootStack />
+            </Provider>
+
+            <DropdownAlert ref={ref => DropDownHolder.setDropDown(ref)} closeInterval={6000}/>
+          </View>
       );
     }
   }
@@ -50,6 +58,9 @@ const RootStack = createStackNavigator(
     Dashboard: {
         screen: Dashboard
     },
+    Dispatch: {
+        screen: Dispatch
+    },
     Scan: {
         screen: Scan
     },
@@ -59,14 +70,16 @@ const RootStack = createStackNavigator(
     OrdersList: {
         screen: OrdersList
     },
-
+    OrderBagItemization: {
+        screen: OrderBagItemization
+    },
     Error: {
         screen: Error
     },
   },
 
   {
-    initialRouteName: "Dashboard", //"SignIn",
+    initialRouteName: "Scan", //"SignIn",
 
     /* The header config from HomeScreen is now here */
     navigationOptions: {

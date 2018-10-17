@@ -7,6 +7,7 @@ import Button from "./../../components/Button";
 import { colors, SUBMIT } from "./../../constants/base-style.js";
 import { dimensions, fontSize } from '../../constants/util';
 import Keyboard     from "./../../components/Keyboard";
+import * as storage from '../../storage';
 import { styles } from './style';
 import { translate } from '../../locale';
 import { BarcodePicker, ScanditModule, Barcode, ScanSettings } from 'scandit-react-native';
@@ -83,10 +84,10 @@ class Scan extends React.Component {
                             Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
                         }
 
-                        store.dispatch({type: types.SAVE_TASK, task:response.data});
+                        storage.saveBarcode(barcode);
                         storage.saveFulfillment(response.data);
 
-                        this.props.navigation.push("OrderDetails");
+                        this.props.navigation.push("OrderBagItemization");
                     } else {
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
@@ -105,44 +106,39 @@ class Scan extends React.Component {
       <View style={styles.container}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
-          { this.state.showScanner &&
               <BarcodePicker
                   key={this.state.barcodeKey}
                   ref={(scan) => { this.scanner = scan }}
                   scanSettings={ this.settings }
                   onScan={(session) => { this.onScan(session) }}
-                  style={{ flex: 1 }}
+                  style={[this.state.showScanner ? {flex: 1} : {height: 0}]}
                 />
-          }
 
-          { this.state.showScanner === false &&
-              <Keyboard
-                  showSpinner={() => {this.setState({spinner: true})}}
-                  hideSpinner={() => {this.setState({spinner: false})}}
+              <View style={[this.state.showScanner ? {flex: 0} : {flex: 1}]}>
+                  <Keyboard
+                      showSpinner={() => {this.setState({spinner: true})}}
+                      hideSpinner={() => {this.setState({spinner: false})}}
 
-                  eventListener="onKeyDown"
-                  navigation={this.props.navigation}
-                  onCode={this._onSearchByCode}
-                />
-          }
+                      eventListener="onKeyDown"
+                      navigation={this.props.navigation}
+                      onCode={this._onSearchByCode}
+                    />
+              </View>
 
           <View style={SUBMIT}>
               <Button text={this.state.showScanner ? translate("Scan.Enter") : translate("Scan.Scan")}
                       onSubmit={
                           () => {
                               this.setState({showScanner: !this.state.showScanner});
-
-                              if (this.state.showScanner) {
-                                this.scanner.resumeScanning();
-                              }
                           }
                       }
                       height={fontSize(45)} fontSize={fontSize(15)}
               />
               <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish")}]} buttonWidth={dimensions.width / 2}>
-                  <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", width: "100%", height: "100%" }}>
-                      <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}    </Text>
-                      <Icon name="ellipsis-v" size={fontSize(16)} color={colors.white} />
+                  <View style={{ justifyContent: "space-between", alignItems: "center", flexDirection: "row", width: (dimensions.width / 2), height: "100%" }}>
+                      <Text style={{ width: fontSize(8)}}> </Text>
+                      <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}</Text>
+                      <Icon name="ellipsis-v" size={fontSize(16)} style={{width: fontSize(8)}} color={colors.white} />
                   </View>
               </Swipeout>
           </View>

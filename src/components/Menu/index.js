@@ -17,11 +17,6 @@ class Menu extends React.Component {
 
     goToListing = () => {
         this.setState({modalVisible: false});
-
-        this.props.storage.saveAuthToken("");
-        this.props.storage.saveLoginId("");
-        this.props.storage.saveDispatcher("");
-
         this.props.navigation.push("OrdersList");
     }
 

@@ -42,7 +42,7 @@ export const request = function(options) {
         return Promise.reject(error.response || error.message);
     }
 
-    return Promise.all([storage.loadLoginId(), storage.loadFulfillment(), storage.loadAuthToken(), I18n.currentLocale()])
+    return Promise.all([storage.loadLoginId(), storage.loadFulfillment(), storage.loadAuthToken(), I18n.currentLocale(), storage.loadBarcode()])
         .then(function (values) {
             if (typeof options.headers === 'undefined') options.headers = {};
 
@@ -60,6 +60,10 @@ export const request = function(options) {
 
             if (task && task.reference) {
                 options.url = options.url.replace('{task_id}',    task.reference);
+            }
+
+            if (values[4]) {
+                options.url = options.url.replace('{barcode}',    values[4]);
             }
 
             // auth token injection part

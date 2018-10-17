@@ -8,7 +8,6 @@ import { styles } from './style';
 import { translate } from '../../locale';
 import CustomButton from "./../../components/Button";
 import { fontSize } from '../../constants/util';
-import KeyEvent from 'react-native-keyevent';
 import store from '../../store';
 import * as storage from '../../storage';
 import * as types from '../../actions/types';
@@ -34,49 +33,6 @@ class Keyboard extends React.Component {
 
         this.willBlurSubscription &&
             this.willBlurSubscription.remove();
-    }
-
-    // add the listener
-    componentDidMount() {
-        this.willFocusSubscription = this.props.navigation.addListener(
-            'willFocus',
-            () => {
-                if (this.props.eventListener === ON_KEY_UP) {
-                    KeyEvent.onKeyUpListener((keyEvent) => {
-                        let keyEventCode = keyEvent.keyCode.toString();
-
-                        if (keyEventCode.length < 2) {
-                            this._onKeyboardInput(keyEventCode);
-                        }
-                    });
-                }
-
-                if (this.props.eventListener === ON_KEY_DOWN) {
-                    KeyEvent.onKeyDownListener((keyEvent) => {
-                        let keyEventCode = keyEvent.keyCode.toString();
-
-                        if (keyEventCode.length < 2) {
-                            this._onKeyboardInput(keyEventCode);
-                        }
-                    });
-                }
-            }
-        );
-
-        this.willBlurSubscription = this.props.navigation.addListener(
-            'willBlur',
-            () => {
-                if (this.props.eventListener === ON_KEY_UP) {
-                    // if you are listening to keyUp
-                    KeyEvent.removeKeyUpListener();
-                }
-
-                if (this.props.eventListener === ON_KEY_DOWN) {
-                    // if you are listening to keyDown
-                    KeyEvent.removeKeyDownListener();
-                }
-            }
-        );
     }
 
     _onClear = () => {

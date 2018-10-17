@@ -14,6 +14,8 @@ export const colors = {
   goldenYellow: "#f8d31c",
   slateTwo: "rgba(60, 72, 88, 0.86)",
   greenBlue: "#02cd89",
+  blue: '#1d55b8',
+  green: '#8492a6',
   black: "#000000",
   screenBackground: '#f9fafc',
   dividerColor: '#DFE3EE',
@@ -36,8 +38,9 @@ export const HeaderStyle = {
     height: '8%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 10,
+    justifyContent: 'space-between',
+    paddingLeft: 0,
+    paddingRight: 0,
     backgroundColor: colors.screenBackground,
 }
 
@@ -136,14 +139,24 @@ export const TableCell = {
     backgroundColor: colors.white,
 }
 
-export const hr = {
+export const divider = {
     borderWidth: 0.5,
-    borderColor:colors.dividerColor,
-    marginTop: 8,
-    marginBottom: 8,
+    borderColor: colors.dividerColor,
+    marginTop: 2,
+    marginBottom: 2,
     height: 1,
     width: '100%',
-    backgroundColor: colors.teal,
+    backgroundColor: colors.dividerColor,
+}
+
+export const hr = {
+    borderWidth: 0.5,
+    borderColor:colors.screenBackground,
+    marginTop: 0,
+    marginBottom: 0,
+    height: 1,
+    width: '100%',
+    backgroundColor: colors.screenBackground,
 }
 
 export const HEADER = {
@@ -163,12 +176,12 @@ export const TASK_DATA_HEADER = {
     fontSize: fontSize(8),
     fontWeight: "normal",
     fontStyle: "normal",
-    lineHeight: fontSize(10),
+    lineHeight: fontSize(14),
     letterSpacing: 0.25,
     textAlign: "left",
     justifyContent: 'center',
     alignItems: 'center',
-    color: colors.teal,
+    color: colors.itemizationColor,
 }
 
 export const TASK_DATA = {
@@ -189,9 +202,9 @@ export const GRID = {
 }
 
 export const GRID_ITEM = {
-    justifyContent: 'flex-end',
-    borderRadius: 5,
-    height: fontSize(170),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: fontSize(40),
 }
 
 export const NO_INTERNET_BAR = {
@@ -212,12 +225,12 @@ export const NO_INTERNET_MESSAGE = {
 
 export const itemizationItem = {
     padding: fontSize(3),
-    fontSize: fontSize(7),
+    fontSize: fontSize(10),
     lineHeight: fontSize(10),
     letterSpacing: 0.25,
-    textAlign: "center",
+    textAlign: "left",
     justifyContent: 'center',
-    color: colors.dcItemizationColor
+    color: colors.dark
 }
 
 export const SUBMIT = {
@@ -236,4 +249,31 @@ export const LOGO = {
     width: '100%',
     height: '100%',
     resizeMode: 'contain'
+}
+
+export const BAG = {
+    borderWidth: 1,
+    borderColor: colors.dividerColor,
+    backgroundColor: colors.white,
+    width: '80%',
+    marginLeft: '10%',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: fontSize(10)
+}
+
+export const BAG_SHADOW = {
+    borderWidth: 1,
+    borderColor: colors.dividerColor,
+    backgroundColor: colors.white,
+    width: '80%',
+    marginLeft: '10%',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: fontSize(10),
+
+    shadowColor: colors.dividerColor,
+    shadowOffset: 3,
+    shadowOpacity: 0.5,
+    shadowRadius: 0.5,
 }

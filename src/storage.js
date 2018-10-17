@@ -9,6 +9,7 @@ const FULFILLMENT        = 'Fulfillment';
 const SHIFT              = 'Shift';
 
 const TASKS              = 'Tasks';
+const BARCODE            = 'Barcode';
 
 
 
@@ -26,6 +27,10 @@ export const saveLoginId = async function (id) {
 
 export const saveDispatcher = async function (facility) {
     saveData(LOGIN_DISPATCHER, JSON.stringify(facility));
+}
+
+export const saveBarcode = async function (barcode) {
+    saveData(BARCODE, barcode);
 }
 
 export const saveFulfillment = async function (facility) {
@@ -61,6 +66,10 @@ export const loadDispatcher = async function () {
 
 export const loadFulfillment = async function () {
     return loadData(FULFILLMENT);
+}
+
+export const loadBarcode = async function () {
+    return loadData(BARCODE);
 }
 
 export const loadShift = async function () {
