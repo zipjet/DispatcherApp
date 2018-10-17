@@ -46,17 +46,29 @@ export const getShift = (timestamp) => {
 
 export const getStockOrders = (tasks) => {
     return tasks.filter((task) => {
-        return  task.meta.stockedAtHub === true &&
-                task.meta.bags.length !== task.meta.scannedAtHub.length;
+        return task.meta.dispatched === false
+            && task.meta.stockedAtHub === true
+            && task.meta.bags.length !== task.meta.scannedAtHub.length;
     });
 }
 
 export const getNewOrders = (tasks) => {
     return tasks.filter((task) => {
-        return task.meta.stockedAtHub === false
+        return task.meta.dispatched === false
+            && task.meta.stockedAtHub === false
             && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length)
     })
 }
+
+export const getNotCompleteOrders = (tasks) => {
+    return tasks.filter((task) => {
+        return task.meta.dispatched === false
+            && task.meta.stockedAtHub === false
+            && task.meta.scannedAtHub.length > 0
+            && task.meta.scannedAtHub.length !== task.meta.bags.length
+    })
+}
+
 
 export const isTaskDispatched = (task) => {
     return task.meta.bags.length === task.meta.scannedAtHub.length;

@@ -13,6 +13,7 @@ import { translate } from '../../locale';
 import { BarcodePicker, ScanditModule, Barcode, ScanSettings } from 'scandit-react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
+import Menu from "./../../components/Menu";
 
 ScanditModule.setAppKey('AV7M8wCiHB4AO8A7TgBiY2kQyTwrDPsA2lsWdnVRncV+cpOnp1zUyT0EfE3qDlG3v3dovDx8xwjncqaKFnpAkLR7WVkmIGEVKjasGYlKvJOhMKmB3k/ceZJXZEvvAxYaqA+IOioHqvgcQxHNratCaOCRQabanfS4w1KKKGRnoXaAvn65W/qbQ7EthALKnznHNCdVbZMjJ8rj9O+awa1YhKtK5kTwz6m/h6Js9axez65usE72XLwyPEHr5TeO9HB3+F9iaM6i1wftTxBbX99Xw9JjK6pSMRbOZzcP8YJzhWPzHo8f9xnLqs3zZ1cPTBfFikgE15hslAUOmA68OAbSh0/ZarTzunUR8gQ65+NeJujbLg/q70yb3ZWr0bPUutH13vAVANv2TGakDSohLXFsyuyU+0++VXZgYOXSbxgW9049u6sIQanxdAnUCvE066UbhEKhtockXUufS6nP2Mg/CORp/nmlYwa7KDpw6BOlbMZf+97pZbWeYINUg06URIZBNWDsGrSXCWKY+A8W5qoSfYHL1VnEGGuduj7CPRVCQsZffYXxgqiobS0fYh+KehMEGMvJLvM061sJiQx4rYIn2AaQvsrUEmWxRluiacr69l7hYq0AN0wsacjVJ9ZbMoMnQIUFCjpI3lyIXSsAiwDcMecOPHwkvC2WzDzQKon+YDYz19wzfD72I4TBreckx2LYB7kEIHquXX32xJYAJEJmLF+0FWXNZathU+5kSCytVl/AhB1ZPMUw/raWz+UiovwoTV291OkvsagGsBa/RrcB7DzvsTF6+eTa7dzU+JcKIPqI0zq1wwXj');
 
@@ -42,6 +43,7 @@ class Scan extends React.Component {
   requestCameraPermission() {
       if (Platform.OS === 'ios') {
           this.scanner.startScanning();
+          this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
       } else {
         try {
             const granted = PermissionsAndroid.request(
@@ -53,10 +55,12 @@ class Scan extends React.Component {
             ).then((granted) => {
                 this.setState({barcodeKey: this.state.barcodeKey++});
                 this.scanner.startScanning();
+                this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
             })
 
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 this.scanner.startScanning();
+                this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
             }
         } catch (err) {
             console.warn(err)
@@ -105,14 +109,27 @@ class Scan extends React.Component {
     return (
       <View style={styles.container}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
+              <View style={[this.state.showScanner ? {flex: 1} : {height: 0}]}>
+                  <Menu
+                      navigation={this.props.navigation}
+                      storage={storage}
+                      style={{ position: 'absolute', top: fontSize(50), left: fontSize(50) }}
+                  />
 
-              <BarcodePicker
-                  key={this.state.barcodeKey}
-                  ref={(scan) => { this.scanner = scan }}
-                  scanSettings={ this.settings }
-                  onScan={(session) => { this.onScan(session) }}
-                  style={[this.state.showScanner ? {flex: 1} : {height: 0}]}
-                />
+                  <BarcodePicker
+                      key={this.state.barcodeKey}
+                      ref={(scan) => { this.scanner = scan }}
+                      scanSettings={ this.settings }
+                      onScan={(session) => { this.onScan(session) }}
+                      style={{ position: 'absolute', top: 0, left: 0, height: fontSize(0, dimensions.height), width: fontSize(0, dimensions.width)}}
+                  />
+
+                  <Menu
+                      navigation={this.props.navigation}
+                      storage={storage}
+                      style={{ position: 'absolute', top: fontSize(50), left: fontSize(50) }}
+                  />
+              </View>
 
               <View style={[this.state.showScanner ? {flex: 0} : {flex: 1}]}>
                   <Keyboard

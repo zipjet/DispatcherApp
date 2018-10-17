@@ -5,6 +5,7 @@ import { TASK_DATA, TASK_DATA_HEADER, GRID, GRID_ITEM, NO_INTERNET_BAR, NO_INTER
 import { styles } from './style';
 import { fontSize } from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
+import Icon from 'react-native-vector-icons/FontAwesome';
 import store from '../../store';
 import * as storage from '../../storage';
 import * as types from '../../actions/types';
@@ -46,7 +47,11 @@ class OrderCard extends React.Component {
     render() {
         return <TouchableHighlight onPress={this._onSelect}  underlayColor="white">
                    <View style={[GRID_ITEM, { backgroundColor: colors.white, paddingTop: fontSize(10), paddingBottom: fontSize(10) }]}>
-                       <View style={{ width: '100%', paddingLeft: fontSize(10), paddingRight: fontSize(10), flexDirection: 'row', justifyContent: "space-between" }}>
+                       <View style={{ width: '100%', paddingLeft: fontSize(10), paddingRight: fontSize(10), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
+                           { this.props.item.meta.dispatched &&
+                                <Icon name="check-circle" size={fontSize(16)} color={colors.teal}/>
+                           }
+
                            <View style={[styles.headingLeftItems, {flex: 0.3}]}>
                                 <Text style={{ fontSize: fontSize(8) }}>{this.props.item.reference.substring(0, this.props.item.reference.length - 2)}</Text>
                            </View>

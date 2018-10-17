@@ -12,7 +12,7 @@ import Prompt       from "./../../components/Dialog";
 import moment       from "moment";
 import * as types   from '../../actions/types';
 import store from '../../store';
-import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, isTaskDispatched } from '../../constants/util';
+import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, getNotCompleteOrders, isTaskDispatched } from '../../constants/util';
 import timer from 'react-native-timer';
 import { Select, Option } from "react-native-chooser";
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -295,7 +295,7 @@ class Dashboard extends React.Component {
                             <View style={ContentRow}>
                                 <Text style="">Incomplete</Text>
                                 <Text style="">
-                                    {getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)}).length}
+                                    {getNotCompleteOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)}).length}
                                 </Text>
                             </View>
                         </TouchableHighlight>

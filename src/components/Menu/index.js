@@ -17,7 +17,8 @@ class Menu extends React.Component {
 
     goToListing = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.push("OrdersList");
+        this.props.navigation.push("Dashboard");
+        // this.props.navigation.push("OrdersList");
     }
 
     logout = () => {

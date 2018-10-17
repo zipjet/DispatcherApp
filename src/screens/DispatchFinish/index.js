@@ -65,9 +65,9 @@ class Dispatch extends React.Component {
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
           <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.screenBackground }}>
-              <Text style={{ fontSize: fontSize(14) }}>Rack</Text>
-
-              <Text style={{ fontSize: fontSize(14) }}>{"\n\n"}</Text>
+              <Text style={{ fontSize: fontSize(14) }}>Do you really want to finish?</Text>
+              <Text style={{ fontSize: fontSize(12) }}>{"\n"}</Text>
+              <Text style={{ fontSize: fontSize(12) }}>Overview imcomplete orders</Text>
 
               {this.state.task &&
                 <Text style={{ fontSize: fontSize(18), color: colors.dark }}>
