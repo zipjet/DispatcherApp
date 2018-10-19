@@ -9,7 +9,7 @@ import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import { fontSize, getShift } from '../../constants/util';
+import { fontSize, getShift, hasItemizationIssues, isBagScannedAtHub } from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -85,48 +85,49 @@ class OrderDetails extends React.Component {
         return Object.values(this.state.bagsSummary).map((bagsData) => {
             return <View style={BAG} key={bagsData.category}>
                         <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>Bag {index++}</Text>
-                            {bagsData.codes.map(
+                            { bagsData.codes.map(
                                 (code, categoryIndex) => {
-                                    return  <Text key={code} style={{ color: colors.blueGrey, fontSize: fontSize(18) }}>
+                                    return  <View key={code} style={{ color: colors.blueGrey, justifyContent: 'space-between', flexDirection: 'row' }}>
                                                 {categoryIndex > 0 && <Text style={divider}/>}
                                                 {categoryIndex > 0 && <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>{"\n"}Bag {index++}{"\n"}</Text>}
 
-                                                {bagsData.category === WASH_FOLD ? "WF" : "DC"}
-                                                {"  "}
-                                                <Text>{code}</Text>
-                                            </Text>
+                                                <Text style={{fontSize: fontSize(18)}}>{bagsData.category === WASH_FOLD ? "WF" : "DC"} {code}</Text>
+                                                { isBagScannedAtHub(this.state.task, code) &&
+                                                    <Icon name='check-circle' size={fontSize(20)} color={colors.teal} />
+                                                }
+                                            </View>
                                 }
                             )}
 
-                        {bagsData.category !== WASH_FOLD &&
-                            <View>
-                                <View style={divider}/>
+                            { bagsData.category !== WASH_FOLD &&
+                                <View>
+                                    <View style={divider}/>
 
-                                {bagsData.itemization.map(
-                                    (itemizationItem) => {
-                                        let dispatcherItemizationCount = this.getDispatcherItemizationCount(itemizationItem.productReference, this.state.task);
+                                    { bagsData.itemization.map(
+                                        (itemizationItem) => {
+                                            let dispatcherItemizationCount = this.getDispatcherItemizationCount(itemizationItem.productReference, this.state.task);
 
-                                        return  <View key={itemizationItem.reference} style={{ paddingTop: 5, paddingBottom: 5, width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <Text style={{ width: '60%'}}>
-                                                        {itemizationItem.quantity} X {itemizationItem.name}
-                                                    </Text>
+                                            return  <View key={itemizationItem.reference} style={{ paddingTop: 5, paddingBottom: 5, width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <Text style={{ width: '60%'}}>
+                                                            {itemizationItem.quantity} X {itemizationItem.name}
+                                                        </Text>
 
-                                                    { dispatcherItemizationCount !== itemizationItem.quantity &&
-                                                        <Text style={{color: colors.errorColor}}>Found {dispatcherItemizationCount}</Text>
-                                                    }
+                                                        { dispatcherItemizationCount !== itemizationItem.quantity &&
+                                                            <Text style={{color: colors.errorColor}}>Found {dispatcherItemizationCount}</Text>
+                                                        }
 
-                                                    { dispatcherItemizationCount !== itemizationItem.quantity &&
-                                                        <Icon size={fontSize(14)} name="times-circle" color={colors.errorColor} />
-                                                    }
+                                                        { dispatcherItemizationCount !== itemizationItem.quantity &&
+                                                            <Icon size={fontSize(14)} name="times-circle" color={colors.errorColor} />
+                                                        }
 
-                                                    { dispatcherItemizationCount === itemizationItem.quantity &&
-                                                        <Icon size={fontSize(14)} name="check-circle" color={colors.teal} />
-                                                    }
-                                                </View>
-                                    }
-                                )}
-                            </View>
-                        }
+                                                        { dispatcherItemizationCount === itemizationItem.quantity &&
+                                                            <Icon size={fontSize(14)} name="check-circle" color={colors.teal} />
+                                                        }
+                                                    </View>
+                                        }
+                                    )}
+                                </View>
+                            }
                     </View>
         })
     }
@@ -234,6 +235,12 @@ class OrderDetails extends React.Component {
                             </View>
                         }
                 </View>
+
+                    { this.state.task && hasItemizationIssues(this.state.task) &&
+                        <View style={[SUBMIT, {padding: fontSize(20)}]}>
+                            <Button text="Move to Incomplete Rack" onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.itemizationColor}/>
+                        </View>
+                    }
 
                 <View style={SUBMIT}>
                     <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.dispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>

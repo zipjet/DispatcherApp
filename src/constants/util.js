@@ -46,64 +46,60 @@ export const getShift = (timestamp) => {
 
 export const getStockOrders = (tasks) => {
     return tasks.filter((task) => {
-        return task.meta.dispatched === false
-            && task.meta.stockedAtHub === true
-            && task.meta.bags.length !== task.meta.scannedAtHub.length;
+        return task.meta.stockedAtHub === true
+            && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length);
     });
 }
 
 export const getNewOrders = (tasks) => {
     return tasks.filter((task) => {
-        return task.meta.dispatched === false
-            && task.meta.stockedAtHub === false
+        return task.meta.stockedAtHub === false
             && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length)
     })
 }
 
 export const getNotCompleteOrders = (tasks) => {
     return tasks.filter((task) => {
-        return task.meta.dispatched === false
-            && task.meta.stockedAtHub === false
-            && task.meta.scannedAtHub.length > 0
+        return task.meta.scannedAtHub.length > 0
             && task.meta.scannedAtHub.length !== task.meta.bags.length
     })
 }
 
 
 export const isTaskDispatched = (task) => {
-    return task.meta.bags.length === task.meta.scannedAtHub.length;
+    return task.meta.dispatched === true;
 }
 
-export const getItemizationData = (taskItemization, bagItemization) => {
+export const getItemizationData = (taskItemization, bagItemization, scannedBags) => {
     let data = [];
 
     for (let i = 0; i < taskItemization.length; i++) {
         data[taskItemization[i].productReference] = {
             quantity: 0,
             productName: taskItemization[i].name,
-            productReference: taskItemization[i].productReference
+            productReference: taskItemization[i].productReference,
+            expectedQuantity: taskItemization[i].quantity
         }
     }
 
     for (let i = 0; i < bagItemization.length; i++) {
         if (data[bagItemization[i].productReference] !== undefined) {
             data[bagItemization[i].productReference].quantity = bagItemization[i].quantity;
+            data[bagItemization[i].productReference].expectedQuantity += taskItemization[i].quantity;
+        }
+    }
+
+    for (let j = 0; j < scannedBags.length; j++) {
+        let bagItemization = scannedBags[j].dispatcherItemizationItems;
+
+        for (let i = 0; i < bagItemization.length; i++) {
+            if (data[bagItemization[i].productReference] !== undefined) {
+                data[bagItemization[i].productReference].expectedQuantity -= taskItemization[i].quantity;
+            }
         }
     }
 
     return data;
-}
-
-export const isReadyToDispatch = (task) => {
-    if (task.meta.dispatched) {
-        return false;
-    }
-
-    if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
-        return false;
-    }
-
-    return true;
 }
 
 export const isReadyToStock = (task, shift) => {
@@ -128,6 +124,45 @@ export const isReadyToStock = (task, shift) => {
 export const isNotCompleted = (task) => {
     if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
         return true;
+    }
+
+    return false;
+}
+
+export const hasItemizationIssues = (task) => {
+    let taskItemization = [];
+    let hasMissingItems = false;
+
+    for (let j = 0; j < task.itemization.items.length; j++) {
+        let itemizationItem = task.itemization.items[j];
+
+        taskItemization[itemizationItem.name] = itemizationItem.quantity;
+    }
+
+    for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
+        for (let j = 0; j < task.meta.scannedAtHub[k].dispatcherItemizationItems.length; j++) {
+            let itemizationItem = task.meta.scannedAtHub[k].dispatcherItemizationItems[j];
+
+            taskItemization[itemizationItem.productName] -= itemizationItem.quantity;
+        }
+    }
+
+    Object.keys(taskItemization).map(
+        (key) => {
+            if (taskItemization[key] !== 0) {
+                hasMissingItems = true;
+            }
+        }
+    )
+
+    return hasMissingItems;
+}
+
+export const isBagScannedAtHub = (task, barcode) => {
+    for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
+        if (task.meta.scannedAtHub[k].code === barcode) {
+            return true;
+        }
     }
 
     return false;

@@ -3,6 +3,7 @@ import { fontSize } from './util'
 export const colors = {
   white: "#ffffff",
   slate: "#3a4859",
+  coralLight: "#ff8d69",
   coral: "#ff5d39",
   turquoise_green: "#08e298",
   dark: "#273444",

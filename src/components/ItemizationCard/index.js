@@ -13,6 +13,7 @@ export default class ItemizationCard extends React.PureComponent {
             itemQuantity:   this.props.itemQuantity,
             itemName:       this.props.itemName,
             itemReference:  this.props.itemReference,
+            itemExpectedQuantity: this.props.itemExpectedQuantity,
         }
     }
 
@@ -36,7 +37,8 @@ export default class ItemizationCard extends React.PureComponent {
             <View style={[GRID_ITEM, { flexDirection: 'row', height: fontSize(30), padding: 0, backgroundColor: colors.white, justifyContent: 'space-between' }]}>
                 <View style={{flex: 1, alignContent: 'flex-start', justifyContent: 'center', width: '78%'}}>
                     <Text style={[itemizationItem]}>
-                        {this.state.itemName}
+                        <Text style={{fontWeight: 'bold'}}>{this.state.itemName} </Text>
+                        (Expected {this.state.itemExpectedQuantity})
                     </Text>
                 </View>
 

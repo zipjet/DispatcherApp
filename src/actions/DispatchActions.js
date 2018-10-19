@@ -37,3 +37,22 @@ export const dispatchRequest = (reference) => async dispatch => {
             }
         );
 }
+
+export const dispatchBulkRequest = (references) => async dispatch => {
+    return request
+        .request({
+            url: "/account/{account_id}/task/dispatch",
+            method: "POST",
+            data: {tasks: references}
+        })
+        .then(
+            function (response) {
+                return response;
+            }
+        )
+        .catch(
+            function (response) {
+                return response;
+            }
+        );
+}

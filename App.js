@@ -83,7 +83,7 @@ const RootStack = createStackNavigator(
   },
 
   {
-    initialRouteName: "Dispatch", //"SignIn",
+    initialRouteName: "Dashboard", //"SignIn",
 
     /* The header config from HomeScreen is now here */
     navigationOptions: {

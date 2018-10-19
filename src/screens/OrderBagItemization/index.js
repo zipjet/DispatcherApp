@@ -9,10 +9,9 @@ import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import {fontSize, getShift, getItemizationData, isReadyToDispatch, isReadyToStock, isNotCompleted} from '../../constants/util';
+import {fontSize, getShift, getItemizationData, isReadyToStock, isNotCompleted, hasItemizationIssues} from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import ItemizationCard       from "./../../components/ItemizationCard";
 
 import { DropDownHolder } from './../../components/DropdownHolder';
@@ -31,7 +30,7 @@ class OrderBagItemization extends React.Component {
             shift: null,
             barcode: "",
             comment: "",
-            itemizationData: []
+            itemizationData: [],
         };
 
         Promise
@@ -48,7 +47,7 @@ class OrderBagItemization extends React.Component {
                     }
                 }
 
-                let itemizationData = getItemizationData(task.itemization.items, bag.dispatcherItemizationItems);
+                let itemizationData = getItemizationData(task.itemization.items, bag.dispatcherItemizationItems, task.meta.scannedAtHub);
 
                 this.setState({task: task, shift: shift, barcode: barcode, itemizationData: itemizationData});
             })
@@ -100,12 +99,12 @@ class OrderBagItemization extends React.Component {
 
                             if (isReadyToStock(response.data, shift)) {
                                 this.props.navigation.push("Dispatch");
-                            } else if (isReadyToDispatch(response.data)) {
-                                this.props.navigation.push("OrderDetails");
-                            } else if (isNotCompleted(response.data)){
+                            } else if (isNotCompleted(response.data)) {
                                 this.props.navigation.push("Dispatch");
+                            } else if (hasItemizationIssues(response.data)) {
+                                this.props.navigation.push("OrderDetails");
                             } else {
-                                this.props.navigation.push("Scan");
+                                this.props.navigation.push("Dispatch");
                             }
                         }
                     )
@@ -162,14 +161,15 @@ class OrderBagItemization extends React.Component {
 
                                         renderItem={(item, index) => {
                                             return <ItemizationCard
-                                                key={item.item.productReference}
-                                                onPlusClick={this._onItemizationIncrementItemClick}
-                                                onMinusClick={this._onItemizationDecrementItemClick}
+                                                        key={item.item.productReference}
+                                                        onPlusClick={this._onItemizationIncrementItemClick}
+                                                        onMinusClick={this._onItemizationDecrementItemClick}
 
-                                                itemReference={item.item.productReference}
-                                                itemQuantity={item.item.quantity}
-                                                itemName={item.item.productName}
-                                            />
+                                                        itemReference={item.item.productReference}
+                                                        itemQuantity={item.item.quantity}
+                                                        itemName={item.item.productName}
+                                                        itemExpectedQuantity={item.item.expectedQuantity}
+                                                        />
                                         }
                                         }
                                         separatorBorderWidth={20}
@@ -179,13 +179,13 @@ class OrderBagItemization extends React.Component {
 
                                 <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
                                     <TextInput style={{ width: '100%', height: fontSize(40), backgroundColor: colors.white }}
-                                               autoCorrect={true}
-                                               autoCapitalize="sentences"
-                                               keyboardType='default'
-                                               underlineColorAndroid='transparent'
-                                               placeholder="Add a comment"
-                                               onChangeText={(inputModal) => this.setState({comment: inputModal})}
-                                               ref={this.inputRef}
+                                           autoCorrect={true}
+                                           autoCapitalize="sentences"
+                                           keyboardType='default'
+                                           underlineColorAndroid='transparent'
+                                           placeholder="Add a comment"
+                                           onChangeText={(inputModal) => this.setState({comment: inputModal})}
+                                           ref={this.inputRef}
                                     />
                                 </View>
                             </View>

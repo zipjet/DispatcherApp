@@ -18,12 +18,6 @@ class Menu extends React.Component {
     goToListing = () => {
         this.setState({modalVisible: false});
         this.props.navigation.push("Dashboard");
-        // this.props.navigation.push("OrdersList");
-    }
-
-    goToDispatchFinish = () => {
-        this.setState({modalVisible: false});
-        this.props.navigation.push("DispatchFinish");
     }
 
     logout = () => {

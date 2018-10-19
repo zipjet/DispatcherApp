@@ -8,7 +8,6 @@ import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/
 import { translate } from '../../locale';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import Prompt       from "./../../components/Dialog";
 import moment       from "moment";
 import * as types   from '../../actions/types';
 import store from '../../store';
@@ -16,7 +15,7 @@ import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, getNotCom
 import timer from 'react-native-timer';
 import { Select, Option } from "react-native-chooser";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Swipeout from 'react-native-swipeout';
+import DispatchButton from "./../../components/DispatchButton";
 import * as storage from '../../storage';
 
 class Dashboard extends React.Component {
@@ -32,7 +31,7 @@ class Dashboard extends React.Component {
 
         this.state = {
             tasks: [],
-            searchByReferencePrompt: false,
+            modalVisible: false,
 
             shifts:     [],
             shiftValue: "",
@@ -91,7 +90,7 @@ class Dashboard extends React.Component {
     }
 
     _onShiftSelect(value, label) {
-        if (value !== undefined) {
+        if (value !== undefined && label !== undefined) {
             this.setState({ spinner: true });
             this.setState({ shiftValue: value, shiftLabel: label });
 
@@ -249,16 +248,15 @@ class Dashboard extends React.Component {
                         <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
                             {this.state.shiftLabel !== "" &&  <Select
                                 min={false}
-                                visible={null}
+                                visible={this.state.modalVisible}
                                 onSelect = {this._onShiftSelect}
                                 defaultText = {this.state.shiftLabel}
                                 indicatorSize={ fontSize(0) }
-                                style = {[{ borderWidth: 0, height: fontSize(24), justifyContent: 'center' }]}
+                                style = {[{ height: '100%', borderWidth: 0, height: fontSize(24), justifyContent: 'center' }]}
                                 textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), width: '100%', textAlign: 'center' }}
-                                optionListStyle = {{ backgroundColor : colors.screenBackground, width: "100%", height: "100%", justifyContent: 'center', marginRight: "0%", marginTop: fontSize(0) }}
+                                optionListStyle = {{ flex: 1, backgroundColor : colors.screenBackground, width: "100%", justifyContent: 'space-between', marginRight: "0%", marginTop: fontSize(0) }}
                                 selected= {<Text style={{ fontSize: fontSize(14)}}>Shift: { this.state.shiftLabel }</Text>}
                                 transparent={ true }>
-
                                     <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
                                         <Text styleText={{ color: colors.dark }} style={{ fontSize: fontSize(14), marginTop: fontSize(10), marginLeft: fontSize(10) }}>
                                             Choose a Shift
@@ -292,7 +290,7 @@ class Dashboard extends React.Component {
                             </View>
                         </TouchableHighlight>
 
-                        <TouchableHighlight onPress={() => { this._showTasks("Incomplete Orders", getNewOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)})) }} underlayColor={colors.white}>
+                        <TouchableHighlight onPress={() => { this._showTasks("Incomplete Orders", getNotCompleteOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)})) }} underlayColor={colors.white}>
                             <View style={ContentRow}>
                                 <Text style="">Incomplete</Text>
                                 <Text style="">
@@ -313,28 +311,14 @@ class Dashboard extends React.Component {
 
                     <View style={SUBMIT}>
                         <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
-                        <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish")}]} buttonWidth={dimensions.width / 2}>
-                            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", width: "100%", height: "100%" }}>
-                                <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}    </Text>
-                                <Icon name="ellipsis-v" size={fontSize(16)} color={colors.white} />
-                            </View>
-                        </Swipeout>
+                        <DispatchButton
+                            navigation={this.props.navigation}
+                            width={dimensions.width / 2}
+                            />
                     </View>
                 </View>
 
             </View>
-
-            <Prompt
-                isDialogVisible={ this.state.searchByReferencePrompt }
-                title={"Enter reference"}
-                message={""}
-                hintInput={"Reference"}
-                submitInput={ (inputText) => { this._onSearchByReference(inputText) } }
-                closeDialog={ () => {
-                    this.setState({ searchByReferencePrompt: false})
-                }}
-                style={{ width: '50%', height: '50%' }}
-            />
         </View>
     );
   }

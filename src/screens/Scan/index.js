@@ -5,15 +5,15 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, Permission
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT } from "./../../constants/base-style.js";
-import { dimensions, fontSize } from '../../constants/util';
+import { dimensions, fontSize, hasItemizationIssues } from '../../constants/util';
 import Keyboard     from "./../../components/Keyboard";
 import * as storage from '../../storage';
 import { styles } from './style';
 import { translate } from '../../locale';
 import { BarcodePicker, ScanditModule, Barcode, ScanSettings } from 'scandit-react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import Swipeout from 'react-native-swipeout';
 import Menu from "./../../components/Menu";
+import DispatchButton from "./../../components/DispatchButton";
+import {WASH_FOLD} from "../../constants/constants";
 
 ScanditModule.setAppKey('AV7M8wCiHB4AO8A7TgBiY2kQyTwrDPsA2lsWdnVRncV+cpOnp1zUyT0EfE3qDlG3v3dovDx8xwjncqaKFnpAkLR7WVkmIGEVKjasGYlKvJOhMKmB3k/ceZJXZEvvAxYaqA+IOioHqvgcQxHNratCaOCRQabanfS4w1KKKGRnoXaAvn65W/qbQ7EthALKnznHNCdVbZMjJ8rj9O+awa1YhKtK5kTwz6m/h6Js9axez65usE72XLwyPEHr5TeO9HB3+F9iaM6i1wftTxBbX99Xw9JjK6pSMRbOZzcP8YJzhWPzHo8f9xnLqs3zZ1cPTBfFikgE15hslAUOmA68OAbSh0/ZarTzunUR8gQ65+NeJujbLg/q70yb3ZWr0bPUutH13vAVANv2TGakDSohLXFsyuyU+0++VXZgYOXSbxgW9049u6sIQanxdAnUCvE066UbhEKhtockXUufS6nP2Mg/CORp/nmlYwa7KDpw6BOlbMZf+97pZbWeYINUg06URIZBNWDsGrSXCWKY+A8W5qoSfYHL1VnEGGuduj7CPRVCQsZffYXxgqiobS0fYh+KehMEGMvJLvM061sJiQx4rYIn2AaQvsrUEmWxRluiacr69l7hYq0AN0wsacjVJ9ZbMoMnQIUFCjpI3lyIXSsAiwDcMecOPHwkvC2WzDzQKon+YDYz19wzfD72I4TBreckx2LYB7kEIHquXX32xJYAJEJmLF+0FWXNZathU+5kSCytVl/AhB1ZPMUw/raWz+UiovwoTV291OkvsagGsBa/RrcB7DzvsTF6+eTa7dzU+JcKIPqI0zq1wwXj');
 
@@ -86,18 +86,31 @@ class Scan extends React.Component {
             .searchBarcodeRequest(barcode)
             .then(response => {
                     this.setState({spinner: false});
-                    this.scanner && this.scanner.resumeScanning();
 
                     if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('reference')) {
+                        let task = response.data;
+
                         if (response && response.hasOwnProperty('errors') && response.errors.length) {
                             Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
                         }
 
                         storage.saveBarcode(barcode);
-                        storage.saveFulfillment(response.data);
+                        storage.saveFulfillment(task);
+
+                        for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
+                            if (task.meta.scannedAtHub[i].code === barcode) {
+                                if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
+                                    this.props.navigation.push("Dispatch");
+
+                                    return;
+                                }
+                            }
+                        }
 
                         this.props.navigation.push("OrderBagItemization");
                     } else {
+                        this.scanner && this.scanner.resumeScanning();
+
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
                         } else {
@@ -156,13 +169,10 @@ class Scan extends React.Component {
                       }
                       height={fontSize(45)} fontSize={fontSize(15)}
               />
-              <Swipeout style={[SUBMIT, {width: '50%'}]} right={[{text: translate("Scan.Finish"), onPress: () => { this.goToDispatchFinish() }}]} buttonWidth={dimensions.width / 2}>
-                  <View style={{ justifyContent: "space-between", alignItems: "center", flexDirection: "row", width: (dimensions.width / 2), height: "100%" }}>
-                      <Text style={{ width: fontSize(8)}}> </Text>
-                      <Text style={{ justifyContent: "center", alignItems: "center" }}>{translate("Scan.Finish")}</Text>
-                      <Icon name="ellipsis-v" size={fontSize(16)} style={{width: fontSize(8)}} color={colors.white} />
-                  </View>
-              </Swipeout>
+              <DispatchButton
+                  navigation={this.props.navigation}
+                  width={dimensions.width / 2}
+                  />
           </View>
       </View>
     );

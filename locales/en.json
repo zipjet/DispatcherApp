@@ -37,7 +37,8 @@
   },
 
   "Dispatch": {
-    "Dispatch": "DISPATCH"
+    "Dispatch":   "DISPATCH",
+    "Dispatched": "DISPATCHED",
   },
 
   "noRecords": "Not found",
