@@ -129,9 +129,10 @@ class Scan extends React.Component {
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
               <View style={[this.state.showScanner ? {flex: 1} : {height: 0}]}>
                   <Menu
+                      indicatorColor={colors.screenBackground}
                       navigation={this.props.navigation}
                       storage={storage}
-                      style={{ position: 'absolute', top: fontSize(50), left: fontSize(50) }}
+                      style={{ position: 'absolute', top: fontSize(30), left: fontSize(50) }}
                   />
 
                   <BarcodePicker
@@ -143,9 +144,10 @@ class Scan extends React.Component {
                   />
 
                   <Menu
+                      indicatorColor={colors.screenBackground}
                       navigation={this.props.navigation}
                       storage={storage}
-                      style={{ position: 'absolute', top: fontSize(50), left: fontSize(50) }}
+                      style={{ position: 'absolute', top: fontSize(30), left: fontSize(50) }}
                   />
               </View>
 

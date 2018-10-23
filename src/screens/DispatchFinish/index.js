@@ -121,9 +121,9 @@ class Dispatch extends React.Component {
                       <Text style={{ fontSize: fontSize(12) }}>Do you really want to finish?</Text>
                       <Text style={{ fontSize: fontSize(7), marginBottom: fontSize(5) }}>Overview incomplete orders</Text>
 
-                      <View style={{height: '60%', width: '80%'}}>
-                          <View style={{ height: fontSize(28), paddingLeft: fontSize(10), paddingRight: fontSize(10), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
-                              <View style={[styles.headingLeftItems, {flex: 0.2}]}>
+                      <View style={{height: '60%', width: '100%'}}>
+                          <View style={{ height: fontSize(28), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
+                              <View style={[styles.headingLeftItems, {flex: 0.2, alignItems: 'center', justifyContent: 'center'}]}>
                                   <Text style={{ fontSize: fontSize(8), color: colors.dark }}>Order</Text>
                               </View>
 
@@ -132,7 +132,7 @@ class Dispatch extends React.Component {
                               </View>
 
                               <View style={[styles.headingLeftItems, { flex: 0.3, height: '100%', alignItems: 'center', justifyContent: 'center'}]}>
-                                  <Text style={[{fontSize: fontSize(8), color: colors.dark}]}>Issues</Text>
+                                  <Text style={[{fontSize: fontSize(8), color: colors.dark}]}>Missing/Bag</Text>
                               </View>
                           </View>
 
@@ -172,7 +172,7 @@ class Dispatch extends React.Component {
                   <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center', backgroundColor: colors.screenBackground }}>
 
                       <Text style={{ fontSize: fontSize(12) }}>Thank you!</Text>
-                      <Text style={{ fontSize: fontSize(12) }}>Dispatcing has been finalized</Text>
+                      <Text style={{ fontSize: fontSize(12) }}>Dispatching has been finalized</Text>
 
                       { this._getErrors().length > 0 &&
                           <Text style={{ fontSize: fontSize(7), marginBottom: fontSize(5) }}>

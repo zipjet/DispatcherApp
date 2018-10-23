@@ -56,6 +56,7 @@ class OrdersList extends React.Component {
 
             <View style={[ HeaderStyle ]}>
                 <Menu
+                    indicatorColor={colors.dark}
                     navigation={this.props.navigation}
                     storage={storage}
                 />

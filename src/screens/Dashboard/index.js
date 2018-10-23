@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../actions";
-import { Text, TextInput, View, FlatList, Alert, ScrollView, Image, AsyncStorage, TouchableHighlight } from "react-native";
+import { Text, TextInput, View, FlatList, Alert, ScrollView, Image, AsyncStorage, TouchableHighlight, StatusBar } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import { colors, HeaderStyle, ContentWithHeaderStyle, ContentCentered, ContentRow } from "./../../constants/base-style.js";
 import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
@@ -100,32 +100,6 @@ class Dashboard extends React.Component {
         }
     }
 
-    _onSearchByReference = (reference) => {
-        this.setState({searchByReferencePrompt: false});
-        this.setState({spinner: true});
-
-        this.props
-            .searchReferenceRequest(reference)
-            .then(response => {
-                this.setState({ spinner: false });
-                if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('reference')) {
-                    this.setState({spinner: false});
-
-                    store.dispatch({type: types.SAVE_TASK, task:response.data});
-                    storage.saveFulfillment(response.data);
-
-                    this.props.navigation.push("OrderDetails");
-                } else {
-                    if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
-                        Alert.alert(response.errors.userTitle, response.errors.userMessage);
-                    } else {
-                        Alert.alert("", translate("bag.search.fail"));
-                    }
-                }
-            }
-        );
-    }
-
     _loadTasks = (timespan) => {
         this.setState({ noInternet: false });
 
@@ -151,9 +125,11 @@ class Dashboard extends React.Component {
     }
 
     _showTasks = (title, tasks) => {
-        storage.saveTasks({title: title, tasks: tasks});
+        if (tasks.length > 0) {
+            storage.saveTasks({title: title, tasks: tasks});
 
-        this.props.navigation.push("OrdersList");
+            this.props.navigation.push("OrdersList");
+        }
     }
 
     _calculateShifts = () => {
@@ -176,7 +152,9 @@ class Dashboard extends React.Component {
         }
 
         this.setState({ shifts: options.map(
-                (option, index) => <Option style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.white}]} key={index} value={option.start.unix() + "-" + option.end.unix()} styleText={{ color: colors.dark }}>{option.label}</Option>
+                (option, index) =>  <Option style={[ContentRow, {justifyContent: 'space-between', backgroundColor: colors.white}]} key={index} value={option.start.unix() + "-" + option.end.unix()} optionText={{ color: colors.dark }}>
+                                        {option.label}
+                                    </Option>
             )
         });
 
@@ -233,6 +211,7 @@ class Dashboard extends React.Component {
 
             <View style={ HeaderStyle }>
                 <Menu
+                    indicatorColor={colors.dark}
                     navigation={this.props.navigation}
                     storage={storage}
                 />
@@ -254,16 +233,22 @@ class Dashboard extends React.Component {
                                 indicatorSize={ fontSize(0) }
                                 style = {[{ height: '100%', borderWidth: 0, height: fontSize(24), justifyContent: 'center' }]}
                                 textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), width: '100%', textAlign: 'center' }}
-                                optionListStyle = {{ flex: 1, backgroundColor : colors.screenBackground, width: "100%", justifyContent: 'space-between', marginRight: "0%", marginTop: fontSize(0) }}
+                                optionListStyle = {{ height: '100%', backgroundColor: colors.screenBackground, width: "100%", marginRight: "0%" }}
                                 selected= {<Text style={{ fontSize: fontSize(14)}}>Shift: { this.state.shiftLabel }</Text>}
-                                transparent={ true }>
-                                    <View style={[ContentRow, {justifyContent: 'center', backgroundColor: colors.screenBackground}]}>
+                                >
+                                    <View style={[ContentRow, {justifyContent: 'center',  backgroundColor : colors.screenBackground}]}>
                                         <Text styleText={{ color: colors.dark }} style={{ fontSize: fontSize(14), marginTop: fontSize(10), marginLeft: fontSize(10) }}>
                                             Choose a Shift
                                         </Text>
                                     </View>
 
                                     { this.state.shifts }
+
+                                    <TouchableHighlight onPress={() => { this.setState({modalVisible: false}) }} underlayColor={colors.screenBackground}>
+                                        <View style={[SUBMIT, {marginTop: dimensions.height - StatusBar.currentHeight - fontSize(246) }]}>
+                                            <Button text="View" onSubmit={() => { this.setState({modalVisible: false}) }} height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.blueGrey} />
+                                        </View>
+                                    </TouchableHighlight>
                                 </Select>
                             }
                         </View>
@@ -299,22 +284,16 @@ class Dashboard extends React.Component {
                             </View>
                         </TouchableHighlight>
 
-                        <TouchableHighlight onPress={() => { this._showTasks("Total Orders", this.state.tasks) }} underlayColor={colors.white}>
-                            <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                <Text style="">Total Orders</Text>
-                                <Text style="">
-                                    {this.state.tasks.length}
-                                </Text>
-                            </View>
-                        </TouchableHighlight>
+                        <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                            <Text style="">Total Orders</Text>
+                            <Text style="">
+                                {this.state.tasks.length}
+                            </Text>
+                        </View>
                     </View>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
-                        <DispatchButton
-                            navigation={this.props.navigation}
-                            width={dimensions.width / 2}
-                            />
+                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 

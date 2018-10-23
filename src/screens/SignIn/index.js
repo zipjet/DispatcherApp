@@ -115,7 +115,7 @@ class SignIn extends React.Component {
               <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
               <View style={styles.form}>
-                    <TouchableHighlight onLongPress={() => {}} style={LOGO_WRAPPER} underlayColor={colors.white}>
+                    <TouchableHighlight onLongPress={() => {}} style={[LOGO_WRAPPER, {marginLeft: 0}]} underlayColor={colors.white}>
                       <Image
                           source={require('./../../../assets/img/logo-dark.png')}
                           style={LOGO}

@@ -5,12 +5,17 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, Permission
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT, HeaderStyle, HEADER } from "./../../constants/base-style.js";
-import {dimensions, fontSize, isReadyToStock, isNotCompleted} from '../../constants/util';
+import {
+    dimensions, fontSize, isReadyToStock, isNotCompleted, isTaskDispatched,
+    hasItemizationIssues
+} from '../../constants/util';
 import { styles } from './style';
 import { translate } from '../../locale';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
+import Menu from "./../../components/Menu";
 import * as storage from '../../storage';
+import { DropDownHolder } from './../../components/DropdownHolder';
 
 class Dispatch extends React.Component {
     static navigationOptions = {
@@ -27,6 +32,9 @@ class Dispatch extends React.Component {
         errorOverwrite: false
     };
 
+  }
+
+  componentDidMount() {
     Promise.all([storage.loadFulfillment(), storage.loadShift(), storage.loadBarcode()])
         .then(
             (values) => {
@@ -56,16 +64,22 @@ class Dispatch extends React.Component {
                   .stockRequest(this.state.task.reference)
                   .then(
                         () => {
+                            DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
+
                             this.props.navigation.push("Scan");
                         }
                     );
           } else if (isNotCompleted(this.state.task)) {
+              DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
+
               this.props.navigation.push("Scan");
           } else {
               this.props
                   .dispatchRequest(this.state.task.reference)
                   .then(
                       () => {
+                          DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
+
                           this.props.navigation.push("Scan");
                       }
                   );
@@ -79,39 +93,43 @@ class Dispatch extends React.Component {
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
           <View style={ HeaderStyle }>
-              <View style={{width: fontSize(60)}}/>
+              <Menu
+                  indicatorColor={colors.dark}
+                  navigation={this.props.navigation}
+                  storage={storage}
+              />
 
               <View style={HEADER}>
                   <Text style={{fontSize: fontSize(13)}}>{this.state.task !== null && this.state.task.reference.substring(0, this.state.task.reference.length - 2)}</Text>
               </View>
 
-              <View style={{width: fontSize(60)}}/>
+              <View style={{width: fontSize(30)}}/>
           </View>
 
           <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.screenBackground }}>
               <Text style={{ fontSize: fontSize(14) }}>Rack</Text>
 
-              <Text style={{ fontSize: fontSize(14) }}>{"\n\n"}</Text>
+              <Text style={{ fontSize: fontSize(14) }}>{"\n"}</Text>
 
               {this.state.task &&
                   <View>
-                    <Text style={{ fontSize: fontSize(18), color: colors.dark }}>
+                    <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
                         { isReadyToStock(this.state.task, this.state.shift) &&
                             'Stock'
                         }
 
-                        { isReadyToStock(this.state.task, this.state.shift) === false && isNotCompleted(this.state.task) &&
-                            'Incomplete \n' + this.state.task.rack
+                        { isReadyToStock(this.state.task, this.state.shift) === false && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&
+                            'Incomplete \n'
                         }
 
-                        { isReadyToStock(this.state.task, this.state.shift) === false && isNotCompleted(this.state.task) === false &&
-                            this.state.task.rack
+                        { isReadyToStock(this.state.task, this.state.shift) === false &&
+                            ((this.state.task.rack !== undefined) ? this.state.task.rack : 'N/A')
                         }
                     </Text>
 
-                    { this._getOtherBagsBarcodes().length &&
+                    { this._getOtherBagsBarcodes().length > 0 &&
                         <View style={{ alignItems: 'center', marginTop: fontSize(20) }}>
-                            <Text style={{ fontWeight: 'bold', fontSize: fontSize(14), color: colors.dark }}>Other bags {'\n'}</Text>
+                            <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: fontSize(14), color: colors.dark }}>Other bags {'\n'}</Text>
                             <Text style={{ textAlign: 'center', fontSize: fontSize(12), color: colors.dark }}>
                                 { this._getOtherBagsBarcodes() }
                             </Text>

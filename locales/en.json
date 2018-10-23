@@ -2,7 +2,7 @@
   "Login": {
     "Username": "Email",
     "Password": "Password",
-    "Login":    "Login",
+    "Login":    "Sign In",
     "LoginFailed": "Wrong password. Please try again",
   },
 
@@ -13,10 +13,6 @@
     "Yesterday":  "Yesterday",
     "Today":      "Today",
     "Tomorrow":   "Tomorrow"
-  },
-
-  "Dashboard": {
-    "Scan":       "START SCANNING"
   },
 
   "Keyboard": {
@@ -43,9 +39,6 @@
 
   "noRecords": "Not found",
 
-  "login": {
-    "fail": "Wrong credentials"
-  },
   "bag": {
     "dryCleaning": "Dry cleaning",
     "washFold": "Wash & Fold",

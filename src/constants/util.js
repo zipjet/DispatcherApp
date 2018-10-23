@@ -19,6 +19,7 @@ export const getShift = (timestamp) => {
     let shifts = [0, 15, 24];
     let shiftsLabel = ["", translate("Menu.Morning"), translate("Menu.Evening")];
 
+    let todayMoment = moment().startOf('day');
     let tomorrowMoment = moment().startOf('day').add(1, 'day');
     let plus2daysMoment = moment().startOf('day').add(2, 'day');
 
@@ -30,6 +31,10 @@ export const getShift = (timestamp) => {
 
     if (moment(timestamp).startOf('day') < tomorrowMoment) {
         shift.dayLabel = translate("Menu.Today");
+    }
+
+    if (moment(timestamp).startOf('day') < todayMoment) {
+        shift.dayLabel = "";
     }
 
     let shiftHour = parseFloat(timestamp.format("H"));
@@ -122,6 +127,10 @@ export const isReadyToStock = (task, shift) => {
 }
 
 export const isNotCompleted = (task) => {
+    if (task.meta.dispatched) {
+        return false;
+    }
+
     if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
         return true;
     }

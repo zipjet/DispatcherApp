@@ -50,7 +50,10 @@ export default class ItemizationCard extends React.PureComponent {
                     <Text style={[TASK_DATA_HEADER, {fontSize: 14}]}>{this.state.itemQuantity}</Text>
 
                     <TouchableHighlight onPress={this.onPlus} underlayColor={colors.white}>
-                        <Icon name="plus-circle" style={[{fontSize: fontSize(16), lineHeight: fontSize(16), color: colors.itemizationColor}]} />
+                        <Icon name="plus-circle" style={[
+                            {fontSize: fontSize(16), lineHeight: fontSize(16), color: colors.itemizationColor},
+                            this.state.itemExpectedQuantity > this.state.itemQuantity ? {height: fontSize(16)} : {height: 0}
+                        ]}/>
                     </TouchableHighlight>
                 </View>
             </View>

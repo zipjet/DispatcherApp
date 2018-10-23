@@ -136,7 +136,7 @@ export const TableCell = {
     flex: 1,
     alignSelf: 'stretch',
     width: '33%',
-    height: 50,
+    height: fontSize(50),
     backgroundColor: colors.white,
 }
 
@@ -244,6 +244,7 @@ export const LOGO_WRAPPER = {
     marginLeft: '10%',
     width: '80%',
     height: '25%',
+    alignItems: 'center'
 }
 
 export const LOGO = {

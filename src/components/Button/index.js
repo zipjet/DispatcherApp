@@ -9,6 +9,7 @@ export default class Button extends Component {
     this.state = {
         disabled: this.props.disabled || false,
         backgroundColor: this.props.backgroundColor || false,
+        hoverColor: this.props.hoverColor || false,
         color: this.props.color || false,
         fontSize: this.props.fontSize || false,
         borderColor: this.props.borderColor || false,
@@ -32,14 +33,15 @@ export default class Button extends Component {
   }
 
   render() {
-    const { disabled, backgroundColor, color, fontSize, borderColor, borderWidth, height } = this.state;
+    const { disabled, backgroundColor, color, fontSize, borderColor, borderWidth, height, hoverColor } = this.state;
     const { text, borderBottomWidth } = this.props;
 
     return (
-      <View style={[styles.btnWrapper, borderColor ? {borderColor: borderColor} : '', borderBottomWidth ? {borderBottomWidth: borderBottomWidth} : '', borderWidth ? {borderWidth: borderWidth} : '', height ? {height: height} : '']}>
+      <View style={[styles.btnWrapper, borderColor ? {borderColor: borderColor} : '', borderBottomWidth ? {borderBottomWidth: borderBottomWidth} : '', borderWidth ? {borderWidth: borderWidth} : '', height ? {height: height + 2} : '']}>
         <TouchableHighlight
             disabled={disabled}
             style={[styles.btn,disabled ? styles.disabled : "", backgroundColor ? {backgroundColor: backgroundColor}: "", height ? {height: height} : '']}
+            underlayColor={hoverColor ? hoverColor : colors.dark}
             text={text}
             onPress={this._onSubmit}>
                 <Text style={[

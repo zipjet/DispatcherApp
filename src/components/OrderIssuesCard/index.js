@@ -39,7 +39,9 @@ class OrderIssuesCard extends React.Component {
                            <View style={{width: Math.floor(dimensions.width / 3.5)}}>
                                <ScrollView
                                    vertical
-                                   style={[{ paddingTop: 5, paddingBottom: 5, flexDirection: 'column' }]}>
+                                   centerContent={true}
+                                   style={[{ paddingTop: 5, paddingBottom: 5, flexDirection: 'column', height: '100%' }]}
+                                   contentContainerStyle={{flexGrow: 1, justifyContent : 'center'}}>
                                    { this.props.item.issues.map(
                                        (issue) => {
                                             return <Text key={issue} style={[{fontSize: fontSize(8)}]}>{issue}</Text>

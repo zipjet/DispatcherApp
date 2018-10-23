@@ -9,7 +9,7 @@ import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import { fontSize, getShift, hasItemizationIssues, isBagScannedAtHub } from '../../constants/util';
+import {fontSize, getShift, hasItemizationIssues, isBagScannedAtHub, isTaskDispatched, isNotCompleted} from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -112,11 +112,11 @@ class OrderDetails extends React.Component {
                                                             {itemizationItem.quantity} X {itemizationItem.name}
                                                         </Text>
 
-                                                        { dispatcherItemizationCount !== itemizationItem.quantity &&
+                                                        { dispatcherItemizationCount !== itemizationItem.quantity && dispatcherItemizationCount > 0 &&
                                                             <Text style={{color: colors.errorColor}}>Found {dispatcherItemizationCount}</Text>
                                                         }
 
-                                                        { dispatcherItemizationCount !== itemizationItem.quantity &&
+                                                        { dispatcherItemizationCount !== itemizationItem.quantity && dispatcherItemizationCount > 0 &&
                                                             <Icon size={fontSize(14)} name="times-circle" color={colors.errorColor} />
                                                         }
 
@@ -151,10 +151,10 @@ class OrderDetails extends React.Component {
                 let task = response.data;
 
                 if (task.meta.bags.length === task.meta.scannedAtHub.length) {
-                    this.props.navigation.push("OrdersList");
+                    // this.props.navigation.push("Dispatch");
                 }
 
-                this.props.navigation.push("OrdersList");
+                this.props.navigation.push("Dispatch");
             })
     }
 
@@ -171,16 +171,17 @@ class OrderDetails extends React.Component {
                 </View>
 
                 {this.state.shift &&
-                    <View style={{width: fontSize(60), height: fontSize(25), alignItems: 'center', justifyContent: 'center', backgroundColor: this.getShiftColor(this.state.shift.dayLabel, this.state.shift.shiftLabel)}}>
-                        {this.state.shift.shiftLabel === translate("Menu.Morning") &&
+                    <View style={{width: fontSize(60), height: fontSize(30), alignItems: 'center', justifyContent: 'center', backgroundColor: this.getShiftColor(this.state.shift.dayLabel, this.state.shift.shiftLabel)}}>
+
+                        {this.state.shift.dayLabel !== "" && this.state.shift.shiftLabel === translate("Menu.Morning") &&
                             <Icon name="sun-o" size={fontSize(16)} color={colors.white} />
                         }
 
-                        {this.state.shift.shiftLabel === translate("Menu.Evening") &&
+                        {this.state.shift.dayLabel !== "" && this.state.shift.shiftLabel === translate("Menu.Evening") &&
                             <Icon name="moon-o" size={fontSize(16)} color={colors.white} />
                         }
 
-                        {this.state.shift.shiftLabel === "" &&
+                        {this.state.shift.dayLabel === "" &&
                             <Icon name="archive" size={fontSize(16)} color={colors.white} />
                         }
                     </View>
@@ -193,54 +194,56 @@ class OrderDetails extends React.Component {
 
             <View style={[ ContentWithHeaderStyle ]}>
                 <View style={ContentCentered}>
-                    <View>
-                        { this.state.task !== null &&
-                            <View>
-                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                    <Text>
-                                        <Text style={{fontWeight: 'bold', color: colors.dark}}>
-                                            Cleaning Due: {"  "}
-                                        </Text>
-                                        <Text style="">
-                                            {this.state.task.cleaningDueDate}
-                                        </Text>
-                                    </Text>
-                                </View>
-
-                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                    <Text>
-                                        <Text style={{fontWeight: 'bold', color: colors.dark}}>
-                                            Shift: {"  "}
-                                        </Text>
-                                        <Text style="">
-                                            {this.state.shift.dayLabel + " " + this.state.shift.shiftLabel}
-                                        </Text>
-                                    </Text>
-                                </View>
-
-                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                    <Text>
-                                        <Text style={{fontWeight: 'bold', color: colors.dark}}>
-                                            Total Bags: {"  "}
-                                        </Text>
-                                        <Text style="">
-                                            {this.state.task.meta.bags.length}
-                                        </Text>
-                                    </Text>
-                                </View>
-
+                    <View style={{flex: 1}}>
+                        <ScrollView>
+                            { this.state.task !== null &&
                                 <View>
-                                    {this.renderBagsSummary(this.state.bagsSummary)}
+                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                        <Text>
+                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                Cleaning Due: {"  "}
+                                            </Text>
+                                            <Text style="">
+                                                {this.state.task.cleaningDueDate}
+                                            </Text>
+                                        </Text>
+                                    </View>
+
+                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                        <Text>
+                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                Shift: {"  "}
+                                            </Text>
+                                            <Text style="">
+                                                {this.state.shift.dayLabel + " " + this.state.shift.shiftLabel}
+                                            </Text>
+                                        </Text>
+                                    </View>
+
+                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                        <Text>
+                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                Total Bags: {"  "}
+                                            </Text>
+                                            <Text style="">
+                                                {this.state.task.meta.bags.length}
+                                            </Text>
+                                        </Text>
+                                    </View>
+
+                                    <View>
+                                        {this.renderBagsSummary(this.state.bagsSummary)}
+                                    </View>
                                 </View>
-                            </View>
-                        }
+                            }
+                    </ScrollView>
                 </View>
 
-                    { this.state.task && hasItemizationIssues(this.state.task) &&
-                        <View style={[SUBMIT, {padding: fontSize(20)}]}>
-                            <Button text="Move to Incomplete Rack" onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.itemizationColor}/>
-                        </View>
-                    }
+                { this.state.task && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&
+                    <View style={[SUBMIT, {height: fontSize(55), padding: fontSize(10)}]}>
+                        <Button text="Move to Incomplete Rack" onSubmit={() => { this.props.navigation.push("Dispatch") }} height={fontSize(35)} fontSize={fontSize(15)} backgroundColor={colors.screenBackground} color={colors.dark} borderWidth={1} borderColor={colors.dark}/>
+                    </View>
+                }
 
                 <View style={SUBMIT}>
                     <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.dispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>

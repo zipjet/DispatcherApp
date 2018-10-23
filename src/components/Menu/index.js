@@ -20,6 +20,11 @@ class Menu extends React.Component {
         this.props.navigation.push("Dashboard");
     }
 
+    goToDispatchFinish = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.push("DispatchFinish");
+    }
+
     logout = () => {
         this.setState({modalVisible: false});
 
@@ -42,13 +47,14 @@ class Menu extends React.Component {
         return <Select
                     min={true}
                     visible={this.state.modalVisible}
-                    indicatorIcon = {<Icon name="bars" size={fontSize(16)} color={colors.dark} />}
+                    indicatorIcon = {<Icon name="bars" size={fontSize(16)} color={this.props.indicatorColor} />}
                     style = {[{ borderWidth: 0, backgroundColor: colors.backgroundColor, height: fontSize(16), padding: 0, width: fontSize(30) }]}
 
                     textStyle = {{ lineHeight: fontSize(16), fontSize: 0 }}
                     backdropStyle= {{ justifyContent: 'flex-start', alignItems: 'flex-end' }}
-                    optionListStyle = {{ backgroundColor : colors.screenBackground, width: "65%", height: "100%", justifyContent: 'flex-start', marginRight: "35%", marginTop: fontSize(0) }}
-                    transparent={ true }>
+                    optionListStyle = {{ borderColor: colors.blueGrey, borderWidth: 1, backgroundColor : colors.screenBackground, width: "65%", height: "100%", justifyContent: 'flex-start', marginRight: "35%", marginTop: fontSize(0) }}
+                    transparent={ true }
+                    >
                         <View style={[ContentCentered, {height: fontSize(210), backgroundColor: colors.screenBackground}]}>
                             <View style={LOGO_WRAPPER}>
                                 <Image
