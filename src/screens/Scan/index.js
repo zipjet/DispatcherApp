@@ -5,15 +5,18 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, Permission
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT } from "./../../constants/base-style.js";
-import { dimensions, fontSize, hasItemizationIssues } from '../../constants/util';
+import {dimensions, fontSize, hasItemizationIssues, isReadyToStock} from '../../constants/util';
 import Keyboard     from "./../../components/Keyboard";
 import * as storage from '../../storage';
 import { styles } from './style';
+import * as types   from '../../actions/types';
 import { translate } from '../../locale';
 import { BarcodePicker, ScanditModule, Barcode, ScanSettings } from 'scandit-react-native';
 import Menu from "./../../components/Menu";
 import DispatchButton from "./../../components/DispatchButton";
 import {WASH_FOLD} from "../../constants/constants";
+import store from '../../store';
+import { DropDownHolder } from './../../components/DropdownHolder';
 
 ScanditModule.setAppKey('AV7M8wCiHB4AO8A7TgBiY2kQyTwrDPsA2lsWdnVRncV+cpOnp1zUyT0EfE3qDlG3v3dovDx8xwjncqaKFnpAkLR7WVkmIGEVKjasGYlKvJOhMKmB3k/ceZJXZEvvAxYaqA+IOioHqvgcQxHNratCaOCRQabanfS4w1KKKGRnoXaAvn65W/qbQ7EthALKnznHNCdVbZMjJ8rj9O+awa1YhKtK5kTwz6m/h6Js9axez65usE72XLwyPEHr5TeO9HB3+F9iaM6i1wftTxBbX99Xw9JjK6pSMRbOZzcP8YJzhWPzHo8f9xnLqs3zZ1cPTBfFikgE15hslAUOmA68OAbSh0/ZarTzunUR8gQ65+NeJujbLg/q70yb3ZWr0bPUutH13vAVANv2TGakDSohLXFsyuyU+0++VXZgYOXSbxgW9049u6sIQanxdAnUCvE066UbhEKhtockXUufS6nP2Mg/CORp/nmlYwa7KDpw6BOlbMZf+97pZbWeYINUg06URIZBNWDsGrSXCWKY+A8W5qoSfYHL1VnEGGuduj7CPRVCQsZffYXxgqiobS0fYh+KehMEGMvJLvM061sJiQx4rYIn2AaQvsrUEmWxRluiacr69l7hYq0AN0wsacjVJ9ZbMoMnQIUFCjpI3lyIXSsAiwDcMecOPHwkvC2WzDzQKon+YDYz19wzfD72I4TBreckx2LYB7kEIHquXX32xJYAJEJmLF+0FWXNZathU+5kSCytVl/AhB1ZPMUw/raWz+UiovwoTV291OkvsagGsBa/RrcB7DzvsTF6+eTa7dzU+JcKIPqI0zq1wwXj');
 
@@ -27,7 +30,8 @@ class Scan extends React.Component {
 
     this.state = {
         showScanner: true,
-        barcodeKey: 1
+        barcodeKey: 1,
+        shift: null
     };
 
     this.settings = new ScanSettings();
@@ -37,6 +41,15 @@ class Scan extends React.Component {
   }
 
   componentDidMount() {
+      store.dispatch({type: types.SAVE_HOMEPAGE, page: "Scan"});
+
+      storage.loadShift()
+          .then(
+              (shift) => {
+                  this.setState({shift: JSON.parse(shift)});
+              }
+          );
+
       this.requestCameraPermission();
   }
 
@@ -97,24 +110,35 @@ class Scan extends React.Component {
                         storage.saveBarcode(barcode);
                         storage.saveFulfillment(task);
 
+                        // no need to itemize the wash and fold
                         for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
                             if (task.meta.scannedAtHub[i].code === barcode) {
                                 if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
                                     this.props.navigation.push("Dispatch");
+                                    this.scanner && this.scanner.resumeScanning();
 
                                     return;
                                 }
                             }
                         }
 
+                        // no need to itemize the stock orders
+                        if (isReadyToStock(task, this.state.shift)) {
+                            this.props.navigation.push("Dispatch");
+                            this.scanner && this.scanner.resumeScanning();
+
+                            return;
+                        }
+
                         this.props.navigation.push("OrderBagItemization");
+                        this.scanner && this.scanner.resumeScanning();
                     } else {
                         this.scanner && this.scanner.resumeScanning();
 
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
                         } else {
-                            Alert.alert("", translate("bag.search.fail"));
+                            DropDownHolder.alert('error', 'Error', translate("bag.search.fail"));
                         }
                     }
                 }

@@ -5,7 +5,7 @@ import { SAVE_TASK, SAVE_TASKS } from "../actions/types";
 export const searchBarcodeRequest = (barcode) => async dispatch => {
     return request
         .request({
-            url: "/account/{account_id}/task/search?barcode=" + barcode,
+            url: "/account/{account_id}/task/search?shiftStart={shift_start}&shiftEnd={shift_end}&barcode=" + barcode,
             method: "GET",
         })
         .then(

@@ -4,13 +4,15 @@ import * as storage from './storage';
 import { Alert } from "react-native";
 import I18n from 'react-native-i18n';
 import store from './store';
+import packageJson from '../package.json';
 
 const client = axios.create({
     baseURL: GLOBALVARIABLES.API_BASE_URL,
     timeout: 20000,
     headers: {
         'X-Api-Key': GLOBALVARIABLES.API_KEY,
-        'X-Auth-Token': ""
+        'X-Auth-Token': "",
+        'X-version': "",
     }
 });
 
@@ -42,16 +44,15 @@ export const request = function(options) {
         return Promise.reject(error.response || error.message);
     }
 
-    return Promise.all([storage.loadLoginId(), storage.loadFulfillment(), storage.loadAuthToken(), I18n.currentLocale(), storage.loadBarcode()])
+    return Promise.all([storage.loadLoginId(), storage.loadFulfillment(), storage.loadAuthToken(), I18n.currentLocale(), storage.loadBarcode(), storage.loadShift()])
         .then(function (values) {
             if (typeof options.headers === 'undefined') options.headers = {};
 
             let task = { reference: "" };
-            try {
-                task = JSON.parse(values[1]);
-            } catch (e) {
-                task = { reference: "" };
-            }
+            try { task = JSON.parse(values[1]); } catch (e) {}
+
+            let shift = {value: ""};
+            try { shift = JSON.parse(values[5]); } catch (e) {}
 
             // ID injection part
             if (values[0] !== null) {
@@ -71,8 +72,18 @@ export const request = function(options) {
                 options.headers['X-Auth-Token'] = values[2];
             }
 
+            if (shift && shift.value) {
+                let shiftEnds = shift.value.split('-');
+
+                if (shiftEnds.length === 2) {
+                    options.url = options.url.replace('{shift_start}', shiftEnds[0]);
+                    options.url = options.url.replace('{shift_end}',   shiftEnds[1]);
+                }
+            }
+
             // LANG injection part
             options.headers['X-language'] = values[3];
+            options.headers['X-version'] = packageJson.version;
 
             return client(options)
                 .then(onSuccess)

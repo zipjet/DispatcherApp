@@ -7,4 +7,4 @@ export const SAVE_TASK     = "SAVE_TASK";
 
 export const DASHBOARD_MODE= "DASHBOARD_MODE";
 
-export const SAVE_PRODUCTS = "SAVE_PRODUCTS";
+export const SAVE_HOMEPAGE  = "SAVE_HOMEPAGE";

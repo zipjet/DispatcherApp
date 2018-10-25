@@ -51,22 +51,72 @@ export const getShift = (timestamp) => {
 
 export const getStockOrders = (tasks) => {
     return tasks.filter((task) => {
+        let itemizationNotStarted = task.meta.scannedAtHub.length === 0;
+        let itemizationCompleted = false;
+
+        if (task.meta.bags.length === task.meta.scannedAtHub.length) {
+            if (hasItemizationIssues(task)) {
+                itemizationCompleted = false;
+            } else {
+                itemizationCompleted = true;
+            }
+        } else {
+            itemizationCompleted = false;
+        }
+
         return task.meta.stockedAtHub === true
-            && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length);
+            && (
+                itemizationNotStarted
+                || itemizationCompleted
+                || task.meta.dispatched === true
+            );
     });
 }
 
 export const getNewOrders = (tasks) => {
     return tasks.filter((task) => {
+        let itemizationNotStarted = task.meta.scannedAtHub.length === 0;
+        let itemizationCompleted = false;
+
+        if (task.meta.bags.length === task.meta.scannedAtHub.length) {
+            if (hasItemizationIssues(task)) {
+                itemizationCompleted = false;
+            } else {
+                itemizationCompleted = true;
+            }
+        } else {
+            itemizationCompleted = false;
+        }
+
         return task.meta.stockedAtHub === false
-            && (task.meta.scannedAtHub.length === 0 || task.meta.bags.length === task.meta.scannedAtHub.length)
+            && (
+                itemizationNotStarted
+                || itemizationCompleted
+                || task.meta.dispatched === true
+            )
     })
 }
 
 export const getNotCompleteOrders = (tasks) => {
     return tasks.filter((task) => {
+        let itemizationIsStarted = task.meta.scannedAtHub.length !== 0;
+        let itemizationNotCompleted = task.meta.scannedAtHub.length !== task.meta.bags.length;
+        let itemizationNotCorrect = false;
+
+        if (task.meta.bags.length === task.meta.scannedAtHub.length) {
+            if (hasItemizationIssues(task)) {
+                itemizationNotCorrect = true;
+            } else {
+                itemizationNotCorrect = false;
+            }
+        } else {
+            itemizationNotCorrect = true;
+        }
+
         return task.meta.scannedAtHub.length > 0
-            && task.meta.scannedAtHub.length !== task.meta.bags.length
+            && task.meta.dispatched === false
+            && itemizationIsStarted
+            && (itemizationNotCompleted || itemizationNotCorrect)
     })
 }
 
@@ -83,14 +133,15 @@ export const getItemizationData = (taskItemization, bagItemization, scannedBags)
             quantity: 0,
             productName: taskItemization[i].name,
             productReference: taskItemization[i].productReference,
-            expectedQuantity: taskItemization[i].quantity
+            initialExpectedQuantity: taskItemization[i].quantity,
+            expectedQuantity: taskItemization[i].quantity,
         }
     }
 
     for (let i = 0; i < bagItemization.length; i++) {
         if (data[bagItemization[i].productReference] !== undefined) {
             data[bagItemization[i].productReference].quantity = bagItemization[i].quantity;
-            data[bagItemization[i].productReference].expectedQuantity += taskItemization[i].quantity;
+            data[bagItemization[i].productReference].expectedQuantity += bagItemization[i].quantity;
         }
     }
 
@@ -99,7 +150,7 @@ export const getItemizationData = (taskItemization, bagItemization, scannedBags)
 
         for (let i = 0; i < bagItemization.length; i++) {
             if (data[bagItemization[i].productReference] !== undefined) {
-                data[bagItemization[i].productReference].expectedQuantity -= taskItemization[i].quantity;
+                data[bagItemization[i].productReference].expectedQuantity -= bagItemization[i].quantity;
             }
         }
     }

@@ -42,7 +42,7 @@ class Error extends React.Component {
           this.setState({ spinner: false });
 
           if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('authToken')) {
-            this.props.navigation.navigate("Dashboard");
+            this.props.navigation.navigate("DashboardOrders");
           } else {
             if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
               Alert.alert(response.errors.userTitle, response.errors.userMessage);

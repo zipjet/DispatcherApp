@@ -16,6 +16,7 @@ import { colors } from "./src/constants/base-style.js";
 
 import SignIn    from "./src/screens/SignIn";
 import Dashboard from "./src/screens/Dashboard";
+import DashboardOrders from "./src/screens/DashboardOrders";
 import Error from "./src/screens/Error";
 import Scan from "./src/screens/Scan";
 import OrderDetails from "./src/screens/OrderDetails";
@@ -44,7 +45,12 @@ export default class App extends Component<Props> {
               <RootStack />
             </Provider>
 
-            <DropdownAlert ref={ref => DropDownHolder.setDropDown(ref)} closeInterval={6000}/>
+            <DropdownAlert
+                successImageSrc={require("./assets/img/check.png")}
+
+                ref={ref => DropDownHolder.setDropDown(ref)}
+                closeInterval={3000}
+            />
           </View>
       );
     }
@@ -58,6 +64,9 @@ const RootStack = createStackNavigator(
     },
     Dashboard: {
         screen: Dashboard
+    },
+    DashboardOrders: {
+        screen: DashboardOrders
     },
     Dispatch: {
         screen: Dispatch

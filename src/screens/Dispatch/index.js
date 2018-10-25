@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../actions";
-import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, PermissionsAndroid } from "react-native";
+import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, TouchableHighlight, PermissionsAndroid } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT, HeaderStyle, HEADER } from "./../../constants/base-style.js";
@@ -16,6 +16,7 @@ import Swipeout from 'react-native-swipeout';
 import Menu from "./../../components/Menu";
 import * as storage from '../../storage';
 import { DropDownHolder } from './../../components/DropdownHolder';
+import {DRY_CLEANING} from "../../constants/constants";
 
 class Dispatch extends React.Component {
     static navigationOptions = {
@@ -53,11 +54,25 @@ class Dispatch extends React.Component {
               (bag) => { return bag.code !== this.state.barcode; }
           )
           .map(
-              (bag) => { return bag.code + "\n" }
+              (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
           )
   }
 
+    _getMissingBagsBarcodes = () => {
+        let scannedBagCodes = this.state.task.meta.scannedAtHub.map((bag) => {return bag.code});
+
+        return this.state.task && this.state.task.meta.bags
+            .filter(
+                (bag) => { return scannedBagCodes.indexOf(bag.code) === -1; }
+            )
+            .map(
+                (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
+            )
+    }
+
   _dispatch = () => {
+      let redirectPage = this.props.page !== undefined ? this.props.page : 'Scan';
+
       if (this.state.task) {
           if (isReadyToStock(this.state.task, this.state.shift)) {
               this.props
@@ -66,13 +81,13 @@ class Dispatch extends React.Component {
                         () => {
                             DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
-                            this.props.navigation.push("Scan");
+                            this.props.navigation.push(redirectPage);
                         }
                     );
           } else if (isNotCompleted(this.state.task)) {
               DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
-              this.props.navigation.push("Scan");
+              this.props.navigation.push(redirectPage);
           } else {
               this.props
                   .dispatchRequest(this.state.task.reference)
@@ -80,7 +95,7 @@ class Dispatch extends React.Component {
                       () => {
                           DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
-                          this.props.navigation.push("Scan");
+                          this.props.navigation.push(redirectPage);
                       }
                   );
           }
@@ -89,7 +104,7 @@ class Dispatch extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container]}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
           <View style={ HeaderStyle }>
@@ -103,38 +118,36 @@ class Dispatch extends React.Component {
                   <Text style={{fontSize: fontSize(13)}}>{this.state.task !== null && this.state.task.reference.substring(0, this.state.task.reference.length - 2)}</Text>
               </View>
 
-              <View style={{width: fontSize(30)}}/>
+              <View style={{width: fontSize(30)}}>
+                  <TouchableHighlight onPress={() => { this.props.navigation.push("OrderDetails") }} underlayColor={colors.screenBackground}>
+                    <Icon name="info-circle" size={fontSize(20)} color={colors.teal} />
+                  </TouchableHighlight>
+              </View>
           </View>
 
-          <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.screenBackground }}>
-              <Text style={{ fontSize: fontSize(14) }}>Rack</Text>
-
-              <Text style={{ fontSize: fontSize(14) }}>{"\n"}</Text>
+          <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center', backgroundColor: colors.screenBackground }}>
 
               {this.state.task &&
-                  <View>
-                    <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
-                        { isReadyToStock(this.state.task, this.state.shift) &&
-                            'Stock'
-                        }
+                  <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center' }}>
+                      <Text style={{ fontSize: fontSize(14), textAlign: 'center' }}>Rack</Text>
 
-                        { isReadyToStock(this.state.task, this.state.shift) === false && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&
-                            'Incomplete \n'
-                        }
+                      <Text style={{ fontSize: fontSize(14) }}>{"\n"}</Text>
 
-                        { isReadyToStock(this.state.task, this.state.shift) === false &&
-                            ((this.state.task.rack !== undefined) ? this.state.task.rack : 'N/A')
-                        }
-                    </Text>
+                        <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
+                            { isReadyToStock(this.state.task, this.state.shift) &&
+                                'Stock'
+                            }
 
-                    { this._getOtherBagsBarcodes().length > 0 &&
-                        <View style={{ alignItems: 'center', marginTop: fontSize(20) }}>
-                            <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: fontSize(14), color: colors.dark }}>Other bags {'\n'}</Text>
-                            <Text style={{ textAlign: 'center', fontSize: fontSize(12), color: colors.dark }}>
-                                { this._getOtherBagsBarcodes() }
-                            </Text>
-                        </View>
-                    }
+                            { isReadyToStock(this.state.task, this.state.shift) === false && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&
+                                'Incomplete \n'
+                            }
+
+                            { isReadyToStock(this.state.task, this.state.shift) === false &&
+                                <Text style={{ textAlign: 'center', fontSize: fontSize(26), color: colors.dark }}>
+                                    {(this.state.task.rack !== undefined) ? this.state.task.rack : 'N/A'}
+                                </Text>
+                            }
+                        </Text>
                   </View>
               }
           </View>
@@ -153,8 +166,10 @@ class Dispatch extends React.Component {
   }
 }
 
-const mapStateToProps = ({ data }) => {
-    return { };
+const mapStateToProps = ({ scanData }) => {
+    return {
+        page: scanData.page
+    };
 };
 
 const mapDispatchToProps = (dispatch) => {

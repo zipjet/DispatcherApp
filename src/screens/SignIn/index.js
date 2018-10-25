@@ -10,6 +10,7 @@ import { styles } from './singin-style';
 import { translate } from '../../locale';
 import * as storage from '../../storage';
 import Keyboard from '../../keyboard';
+import { DropDownHolder } from './../../components/DropdownHolder';
 import { fontSize } from '../../constants/util';
 import packageJson from '../../../package.json';
 
@@ -48,7 +49,8 @@ class SignIn extends React.Component {
                             storage.saveDispatcher(response.data.user);
 
                             this.setState({ spinner: false });
-                            this.props.navigation.navigate("Dashboard");
+                            // this.props.navigation.navigate("Dashboard");
+                            this.props.navigation.navigate("DashboardOrders");
                         } else {
                             this.setState({ spinner: false });
 
@@ -84,7 +86,8 @@ class SignIn extends React.Component {
               storage.saveDispatcher(response.data.facility);
 
               this.setState({ spinner: false });
-              this.props.navigation.navigate("Dashboard");
+              // this.props.navigation.navigate("Dashboard");
+              this.props.navigation.navigate("DashboardOrders");
           } else {
               this.setState({ spinner: false });
 
@@ -93,9 +96,9 @@ class SignIn extends React.Component {
               }
 
               if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
-                  Alert.alert(response.errors.userTitle, response.errors.userMessage);
+                  Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
               } else {
-                  Alert.alert("", translate("Login.LoginFailed"));
+                  DropDownHolder.alert('error', 'Error', translate("Login.LoginFailed"));
               }
           }
         })

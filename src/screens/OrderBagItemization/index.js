@@ -47,6 +47,12 @@ class OrderBagItemization extends React.Component {
                     }
                 }
 
+                for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
+                    if (task.meta.scannedAtHub[i].code === barcode) {
+                        bag.dispatcherItemizationItems = task.meta.scannedAtHub[i].dispatcherItemizationItems;
+                    }
+                }
+
                 let itemizationData = getItemizationData(task.itemization.items, bag.dispatcherItemizationItems, task.meta.scannedAtHub);
 
                 this.setState({task: task, shift: shift, barcode: barcode, itemizationData: itemizationData});
@@ -170,7 +176,7 @@ class OrderBagItemization extends React.Component {
                                                         itemName={item.item.productName}
                                                         itemExpectedQuantity={item.item.expectedQuantity}
                                                         />
-                                        }
+                                            }
                                         }
                                         separatorBorderWidth={20}
                                         separatorBorderColor={colors.screenBackground}

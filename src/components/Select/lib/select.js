@@ -51,10 +51,7 @@ export default class Select extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.selected == null)
-      this.setState({
-        defaultText: nextProps.defaultText
-      });
+    this.setState({defaultText: nextProps.defaultText});
 
     if (nextProps.visible !== null)
         this.setState({

@@ -47,7 +47,7 @@ class OrderCard extends React.Component {
     render() {
         return <TouchableHighlight onPress={this._onSelect}  underlayColor="white">
                    <View style={[GRID_ITEM, { backgroundColor: colors.white, paddingTop: fontSize(10), paddingBottom: fontSize(10) }]}>
-                       <View style={{ width: '100%', paddingLeft: fontSize(10), paddingRight: fontSize(10), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
+                       <View style={{ width: '100%', paddingLeft: fontSize(6), paddingRight: fontSize(6), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
                            { this.props.item.meta.dispatched &&
                                 <Icon name="check-circle" size={fontSize(16)} color={colors.teal}/>
                            }

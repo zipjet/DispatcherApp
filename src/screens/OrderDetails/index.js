@@ -29,7 +29,8 @@ class OrderDetails extends React.Component {
             task: null,
             spinner: false,
             shift: null,
-            bagsSummary: []
+            bagsSummary: [],
+            showConfirmation: false
         };
 
         Promise
@@ -46,15 +47,28 @@ class OrderDetails extends React.Component {
                 );
 
                 let bags = task.meta.bags.sort((bag1, bag2) => { return bag1.type === DRY_CLEANING });
+
                 for (let i = 0; i < bags.length; i++) {
                     let bag = bags[i];
                     let bagTypeKeys = (bag.type === DRY_CLEANING) ? DRY_CLEANING_ALIAS : WASH_FOLD_ALIAS;
 
                     if (bagsSummary.hasOwnProperty(bagTypeKeys) === false) {
-                        bagsSummary[bagTypeKeys] = {category: bag.type, codes: [], itemization: []};
+                        bagsSummary[bagTypeKeys] = {category: bag.type, bags: [], itemization: []};
                     }
 
-                    bagsSummary[bagTypeKeys].codes.push(bag.code);
+                    bagsSummary[bagTypeKeys].bags[bag.code] = {code: bag.code, dispatcherComments: [], scannedAtHub: false};
+                }
+
+                for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
+                    let bag = task.meta.scannedAtHub[i];
+                    let bagTypeKeys = (bag.type === DRY_CLEANING) ? DRY_CLEANING_ALIAS : WASH_FOLD_ALIAS;
+
+                    if (bagsSummary.hasOwnProperty(bagTypeKeys)) {
+                        if (bagsSummary[bagTypeKeys].bags.hasOwnProperty(bag.code)) {
+                            bagsSummary[bagTypeKeys].bags[bag.code].scannedAtHub = true;
+                            bagsSummary[bagTypeKeys].bags[bag.code].dispatcherComments = bag.dispatcherComments;
+                        }
+                    }
                 }
 
                 if (bagsSummary[DRY_CLEANING_ALIAS] !== undefined) {
@@ -79,22 +93,37 @@ class OrderDetails extends React.Component {
         return count;
     }
 
+    _itemizationEdit = (barcode) => {
+        storage.saveBarcode(barcode);
+
+        this.props.navigation.push("OrderBagItemization");
+    }
+
     renderBagsSummary = (bagsSummary) => {
         let index = 1;
 
         return Object.values(this.state.bagsSummary).map((bagsData) => {
             return <View style={BAG} key={bagsData.category}>
                         <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>Bag {index++}</Text>
-                            { bagsData.codes.map(
-                                (code, categoryIndex) => {
-                                    return  <View key={code} style={{ color: colors.blueGrey, justifyContent: 'space-between', flexDirection: 'row' }}>
-                                                {categoryIndex > 0 && <Text style={divider}/>}
-                                                {categoryIndex > 0 && <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>{"\n"}Bag {index++}{"\n"}</Text>}
+                            { Object.values(bagsData.bags).map(
+                                (bag, categoryIndex) => {
+                                    return  <View key={index} style={{ color: colors.blueGrey, flexDirection: 'column' }}>
+                                                {categoryIndex > 0 && <View style={divider}></View>}
+                                                {categoryIndex > 0 && <Text style={{ color: colors.dark, fontSize: fontSize(8) }}>Bag {index++}</Text>}
 
-                                                <Text style={{fontSize: fontSize(18)}}>{bagsData.category === WASH_FOLD ? "WF" : "DC"} {code}</Text>
-                                                { isBagScannedAtHub(this.state.task, code) &&
-                                                    <Icon name='check-circle' size={fontSize(20)} color={colors.teal} />
-                                                }
+                                                <TouchableHighlight onPress={() => { this._itemizationEdit(bag.code) }} underlayColor="white">
+                                                    <View style={{ color: colors.blueGrey, justifyContent: 'space-between', flexDirection: 'row' }}>
+                                                        <Text style={{fontSize: fontSize(18)}}>{bagsData.category === WASH_FOLD ? "WF" : "DC"} {bag.code}</Text>
+                                                        { bag.scannedAtHub && <Icon name='check-circle' size={fontSize(20)} color={colors.teal} /> }
+                                                    </View>
+                                                </TouchableHighlight>
+
+
+                                                {bag.dispatcherComments && bag.dispatcherComments.map(
+                                                    (comment, index) => {
+                                                        return  <Text key={bag.code + "comment" + index} style={{fontSize: fontSize(8)}}>{comment}</Text>
+                                                    }
+                                                )}
                                             </View>
                                 }
                             )}
@@ -150,12 +179,24 @@ class OrderDetails extends React.Component {
             .then((response) => {
                 let task = response.data;
 
-                if (task.meta.bags.length === task.meta.scannedAtHub.length) {
-                    // this.props.navigation.push("Dispatch");
-                }
-
+                // save the new data and go to dispatch screen
+                storage.saveFulfillment(response.data);
                 this.props.navigation.push("Dispatch");
             })
+    }
+
+    prepareDispatch = () => {
+        if (this.state.task.meta.dispatched) {
+            this.dispatch();
+            return;
+        }
+
+        if (hasItemizationIssues(this.state.task) === false && isNotCompleted(this.state.task) === false) {
+            this.dispatch();
+            return;
+        }
+
+        this.setState({showConfirmation: true});
     }
 
   render() {
@@ -163,92 +204,123 @@ class OrderDetails extends React.Component {
         <View style={{flex: 1, padding: 0}}>
             <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
-            <View style={ HeaderStyle }>
-                <View style={{width: fontSize(60)}}/>
-
-                <View style={HEADER}>
-                    <Text style={{fontSize: fontSize(13)}}>{this.state.task !== null && this.state.task.reference.substring(0, this.state.task.reference.length - 2)}</Text>
-                </View>
-
-                {this.state.shift &&
-                    <View style={{width: fontSize(60), height: fontSize(30), alignItems: 'center', justifyContent: 'center', backgroundColor: this.getShiftColor(this.state.shift.dayLabel, this.state.shift.shiftLabel)}}>
-
-                        {this.state.shift.dayLabel !== "" && this.state.shift.shiftLabel === translate("Menu.Morning") &&
-                            <Icon name="sun-o" size={fontSize(16)} color={colors.white} />
-                        }
-
-                        {this.state.shift.dayLabel !== "" && this.state.shift.shiftLabel === translate("Menu.Evening") &&
-                            <Icon name="moon-o" size={fontSize(16)} color={colors.white} />
-                        }
-
-                        {this.state.shift.dayLabel === "" &&
-                            <Icon name="archive" size={fontSize(16)} color={colors.white} />
-                        }
+            { this.state.showConfirmation === false &&
+                <View style={ HeaderStyle }>
+                    <View style={{width: fontSize(60)}}>
+                        <Menu
+                            indicatorColor={colors.dark}
+                            navigation={this.props.navigation}
+                            storage={storage}
+                        />
                     </View>
-                }
-            </View>
+
+                    <View style={HEADER}>
+                        <Text style={{fontSize: fontSize(13)}}>{this.state.task !== null && this.state.task.reference.substring(0, this.state.task.reference.length - 2)}</Text>
+                    </View>
+
+                    {this.state.shift &&
+                        <View style={{width: fontSize(60), height: fontSize(30), alignItems: 'center', justifyContent: 'center', backgroundColor: this.getShiftColor(this.state.shift.dayLabel, this.state.shift.shiftLabel)}}>
+
+                            {this.state.shift.dayLabel !== "" && this.state.shift.shiftLabel === translate("Menu.Morning") &&
+                                <Icon name="sun-o" size={fontSize(16)} color={colors.white} />
+                            }
+
+                            {this.state.shift.dayLabel !== "" && this.state.shift.shiftLabel === translate("Menu.Evening") &&
+                                <Icon name="moon-o" size={fontSize(16)} color={colors.white} />
+                            }
+
+                            {this.state.shift.dayLabel === "" &&
+                                <Icon name="archive" size={fontSize(16)} color={colors.white} />
+                            }
+                        </View>
+                    }
+                </View>
+            }
+
+            { this.state.showConfirmation &&
+                <View style={ HeaderStyle }></View>
+            }
 
             <View style={[NO_INTERNET_BAR]}>
                 {this.state.noInternet && <Text style={NO_INTERNET_MESSAGE}>{translate("NO_INTERNET")}</Text>}
             </View>
 
             <View style={[ ContentWithHeaderStyle ]}>
-                <View style={ContentCentered}>
-                    <View style={{flex: 1}}>
-                        <ScrollView>
-                            { this.state.task !== null &&
-                                <View>
-                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                        <Text>
-                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
-                                                Cleaning Due: {"  "}
-                                            </Text>
-                                            <Text style="">
-                                                {this.state.task.cleaningDueDate}
-                                            </Text>
-                                        </Text>
-                                    </View>
 
-                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                        <Text>
-                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
-                                                Shift: {"  "}
-                                            </Text>
-                                            <Text style="">
-                                                {this.state.shift.dayLabel + " " + this.state.shift.shiftLabel}
-                                            </Text>
-                                        </Text>
-                                    </View>
-
-                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
-                                        <Text>
-                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
-                                                Total Bags: {"  "}
-                                            </Text>
-                                            <Text style="">
-                                                {this.state.task.meta.bags.length}
-                                            </Text>
-                                        </Text>
-                                    </View>
-
+                { this.state.showConfirmation === false &&
+                    <View style={ContentCentered}>
+                        <View style={{flex: 1}}>
+                            <ScrollView>
+                                { this.state.task !== null &&
                                     <View>
-                                        {this.renderBagsSummary(this.state.bagsSummary)}
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6)}]}>
+                                            <Text>
+                                                <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                    Cleaning Due: {"  "}
+                                                </Text>
+                                                <Text style="">
+                                                    {this.state.task.cleaningDueDate}
+                                                </Text>
+                                            </Text>
+                                        </View>
+
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0)}]}>
+                                            <Text>
+                                                <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                    Shift: {"  "}
+                                                </Text>
+                                                <Text style="">
+                                                    {this.state.shift.dayLabel + " " + this.state.shift.shiftLabel}
+                                                </Text>
+                                            </Text>
+                                        </View>
+
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0)}]}>
+                                            <Text>
+                                                <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                    Total Bags: {"  "}
+                                                </Text>
+                                                <Text style="">
+                                                    {this.state.task.meta.bags.length}
+                                                </Text>
+                                            </Text>
+                                        </View>
+
+                                        <View>
+                                            {this.renderBagsSummary(this.state.bagsSummary)}
+                                        </View>
                                     </View>
-                                </View>
-                            }
-                    </ScrollView>
-                </View>
-
-                { this.state.task && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&
-                    <View style={[SUBMIT, {height: fontSize(55), padding: fontSize(10)}]}>
-                        <Button text="Move to Incomplete Rack" onSubmit={() => { this.props.navigation.push("Dispatch") }} height={fontSize(35)} fontSize={fontSize(15)} backgroundColor={colors.screenBackground} color={colors.dark} borderWidth={1} borderColor={colors.dark}/>
+                                }
+                        </ScrollView>
                     </View>
-                }
 
-                <View style={SUBMIT}>
-                    <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.dispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                    <View style={SUBMIT}>
+                        <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.prepareDispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                    </View>
                 </View>
-            </View>
+            }
+
+            { this.state.showConfirmation &&
+                <View style={ContentCentered}>
+                    <View style={{flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+                        { isNotCompleted(this.state.task) &&
+                            <Text style={{padding: fontSize(6), fontSize: fontSize(16), textAlign: 'center', color: colors.dark}}>Not all bags have been scanned</Text>
+                        }
+
+                        { hasItemizationIssues(this.state.task) &&
+                            <Text style={{padding: fontSize(6), fontSize: fontSize(16), textAlign: 'center', color: colors.dark}}>Not all items have been found</Text>
+                        }
+                    </View>
+
+                    <View style={[SUBMIT, {height: fontSize(55), paddingBottom: fontSize(10)}]}>
+                        <Button text="Move to Incomplete Rack" onSubmit={() => { this.props.navigation.push("Dispatch") }} height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.screenBackground} color={colors.dark} borderWidth={1} borderColor={colors.dark}/>
+                    </View>
+
+                    <View style={SUBMIT}>
+                        <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.dispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                    </View>
+                </View>
+            }
         </View>
     </View>
     );

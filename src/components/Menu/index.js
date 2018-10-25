@@ -17,12 +17,18 @@ class Menu extends React.Component {
 
     goToListing = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.push("Dashboard");
+        // this.props.navigation.push("Dashboard");
+        this.props.navigation.push("DashboardOrders");
     }
 
     goToDispatchFinish = () => {
         this.setState({modalVisible: false});
         this.props.navigation.push("DispatchFinish");
+    }
+
+    goToScan = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.push("Scan");
     }
 
     logout = () => {
@@ -55,18 +61,22 @@ class Menu extends React.Component {
                     optionListStyle = {{ borderColor: colors.blueGrey, borderWidth: 1, backgroundColor : colors.screenBackground, width: "65%", height: "100%", justifyContent: 'flex-start', marginRight: "35%", marginTop: fontSize(0) }}
                     transparent={ true }
                     >
-                        <View style={[ContentCentered, {height: fontSize(210), backgroundColor: colors.screenBackground}]}>
+                        <View style={[ContentCentered, {height: fontSize(230), backgroundColor: colors.screenBackground}]}>
                             <View style={LOGO_WRAPPER}>
                                 <Image
                                     source={require('./../../../assets/img/logo-dark.png')}
                                     style={[LOGO, {height: '100%', marginTop: fontSize(10)}]}
                                 />
 
-                                <Text style={{textAlign: 'center', fontSize: fontSize(8), marginTop: fontSize(-3)}}>Dispatcher App v{packageJson.version}</Text>
+                                <Text style={{textAlign: 'center', fontSize: fontSize(8), marginTop: fontSize(-10)}}>Dispatcher App v{packageJson.version}</Text>
                             </View>
 
                             <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {}} style={[ContentRow, {backgroundColor: colors.screenBackground, padding: 0}]}>
                                 <Text></Text>
+                            </TouchableHighlight>
+
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToScan()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                <Text>Start Scanning</Text>
                             </TouchableHighlight>
 
                             <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToListing()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>

@@ -113,7 +113,7 @@ class Dashboard extends React.Component {
                     store.dispatch({type: types.SAVE_TASKS, tasks: response.data});
                 } else {
                     if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
-                        Alert.alert(response.errors.userTitle, response.errors.userMessage);
+                        Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
                     } else {
                         if (response === undefined) {
                             this.setState({ noInternet: true });
@@ -128,7 +128,7 @@ class Dashboard extends React.Component {
         if (tasks.length > 0) {
             storage.saveTasks({title: title, tasks: tasks});
 
-            this.props.navigation.push("OrdersList");
+            this.props.navigation.push("DashboardOrders");
         }
     }
 
@@ -211,7 +211,6 @@ class Dashboard extends React.Component {
 
             <View style={ HeaderStyle }>
                 <Menu
-                    indicatorColor={colors.dark}
                     navigation={this.props.navigation}
                     storage={storage}
                 />
@@ -293,7 +292,7 @@ class Dashboard extends React.Component {
                     </View>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 

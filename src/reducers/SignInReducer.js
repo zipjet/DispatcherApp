@@ -11,10 +11,6 @@ export default function(state = INITIAL_STATE, action) {
           return { ...state, authToken: action.payload.authToken, user: action.payload.user };
       }
 
-      case SAVE_PRODUCTS: {
-          return { ...state, products: action.payload  };
-      }
-
     default:
       return state;
   }

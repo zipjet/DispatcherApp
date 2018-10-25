@@ -15,7 +15,7 @@ export default function(state = INITIAL_STATE, action) {
     }
 
     case DASHBOARD_MODE: {
-        return { ...state, dashboardMode: action.mode };
+        return { ...state, mode: action.mode };
     }
 
     default:
