@@ -284,13 +284,17 @@ class DashboardOrders extends React.Component {
                         }
 
                         <View>
-                            <TouchableHighlight onPress={() => { this._showTasks(STOCK, getStockOrders(this.state.tasks).length) }} underlayColor={colors.white}>
+                            <TouchableHighlight onPress={
+                                    () => {
+                                        this._showTasks(STOCK, getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task) === false}).length)
+                                    }
+                                }
+                                underlayColor={colors.white}>
+
                                 <View style={ContentRow}>
                                     <Text style={{ fontSize: fontSize(14) }}>Stock</Text>
                                     <Text style={{ fontSize: fontSize(14) }}>
-                                        {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task)}).length}
-                                        /
-                                        {getStockOrders(this.state.tasks).length}
+                                        {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task) === false}).length}
                                     </Text>
                                 </View>
                             </TouchableHighlight>
@@ -303,7 +307,10 @@ class DashboardOrders extends React.Component {
                                         () => <View style={hr} />
                                     }
                                     style={{flex: 1, width: '80%', marginLeft: '10%'}}
-                                    data={getStockOrders(this.state.tasks)}
+                                    data={
+                                        getStockOrders(this.state.tasks)
+                                            .filter((task) => {return isTaskDispatched(task) === false})
+                                    }
                                     keyExtractor={this.keyExtractor}
                                     renderItem={
                                         ({item}) => <OrderCard

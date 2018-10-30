@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
 
     clearButtonWrapper: {
         width: '80%',
-        height: 30,
+        height: fontSize(30),
         borderWidth: 2,
         borderColor: colors.blueGrey,
     },

@@ -76,13 +76,8 @@ class Keyboard extends React.Component {
                         numberOfLines={1}
                         value={this.state.barcode}
                         underlineColorAndroid="transparent"
-                        style={[styles.input, {width: 120}]}
+                        style={[styles.input, {width: fontSize(120)}]}
                     >{this.state.barcode}</Text>
-
-                    <Image
-                        source={require('./../../../assets/img/dashed-input-underline.png')}
-                        style={{ width: 120, height: 6, resizeMode: 'contain' }}
-                    />
                 </View>
 
                 <View style={ Table }>
@@ -111,14 +106,9 @@ class Keyboard extends React.Component {
                 </View>
 
                 <View style={[styles.content, { marginTop: fontSize(20)} ]}>
-                    <View style={styles.clearButtonWrapper}>
-                        <CustomButton
-                            color={ colors.blueGrey }
-                            backgroundColor={ colors.white }
-                            hoverColor={ colors.screenBackground }
-                            text={translate("Keyboard.Clear")}
-                            onSubmit={this._onClear}/>
-                    </View>
+                    <TouchableHighlight onPress={this._onClear} style={[styles.clearButtonWrapper, { backgroundColor: colors.white, justifyContent: 'center', alignItems: 'center' }]} underlayColor="white">
+                        <Icon name="remove" size={fontSize(16)} color={colors.blueGrey} onPress={this._onClear} />
+                    </TouchableHighlight>
                 </View>
             </View>
         );

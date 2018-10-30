@@ -38,6 +38,8 @@ class Scan extends React.Component {
     this.settings.setSymbologyEnabled(Barcode.Symbology.EAN13, true);
     this.settings.setSymbologyEnabled(Barcode.Symbology.EAN8, true);
     this.settings.setSymbologyEnabled(Barcode.Symbology.UPCA, true);
+
+    this.barcode = '';
   }
 
   componentDidMount() {
@@ -51,6 +53,26 @@ class Scan extends React.Component {
           );
 
       this.requestCameraPermission();
+
+      this.willFocusSubscription = this.props.navigation.addListener(
+          'willFocus',
+          () => {
+              this.scanner && this.scanner.resumeScanning();
+          }
+      );
+
+      this.willBlurSubscription = this.props.navigation.addListener(
+          'willBlur',
+          () => {
+              this.scanner.pauseScanning();
+          }
+      );
+  }
+
+  // to remove the listener
+  componentWillUnmount() {
+    this.willFocusSubscription.remove();
+    this.willBlurSubscription.remove();
   }
 
   requestCameraPermission() {
@@ -84,14 +106,12 @@ class Scan extends React.Component {
     // Pause on a detected barcode (camera video is shown, but not parsed for barcodes).
     // Comparison: stop - startScanning() would freeze the camera image up on detection.
     onScan = (code) => {
-        this.scanner && this.scanner.pauseScanning();
+      if (code.newlyRecognizedCodes[0].data !== this.barcode) {
+            this.scanner && this.scanner.pauseScanning();
+            this.barcode = code.newlyRecognizedCodes[0].data;
 
-        this._onSearchByCode(code.newlyRecognizedCodes[0].data);
-    };
-
-    goToDispatchFinish = () => {
-        this.setState({modalVisible: false});
-        this.props.navigation.push("DispatchFinish");
+            this._onSearchByCode(code.newlyRecognizedCodes[0].data);
+      }
     };
 
     _onSearchByCode = (barcode) => {
@@ -152,13 +172,6 @@ class Scan extends React.Component {
       <View style={styles.container}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
               <View style={[this.state.showScanner ? {flex: 1} : {height: 0}]}>
-                  <Menu
-                      indicatorColor={colors.screenBackground}
-                      navigation={this.props.navigation}
-                      storage={storage}
-                      style={{ position: 'absolute', top: fontSize(30), left: fontSize(50) }}
-                  />
-
                   <BarcodePicker
                       key={this.state.barcodeKey}
                       ref={(scan) => { this.scanner = scan }}
@@ -171,7 +184,7 @@ class Scan extends React.Component {
                       indicatorColor={colors.screenBackground}
                       navigation={this.props.navigation}
                       storage={storage}
-                      style={{ position: 'absolute', top: fontSize(30), left: fontSize(50) }}
+                      style={{ position: 'absolute', top: fontSize(-20), left: fontSize(50) }}
                   />
               </View>
 

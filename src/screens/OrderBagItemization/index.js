@@ -39,6 +39,7 @@ class OrderBagItemization extends React.Component {
                 let task = JSON.parse(values[0]);
                 let barcode = values[1];
                 let shift = getShift(moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm'));
+                let itemizationData = [];
 
                 let bag = null;
                 for (let i = 0; i < task.meta.bags.length; i++) {
@@ -53,7 +54,9 @@ class OrderBagItemization extends React.Component {
                     }
                 }
 
-                let itemizationData = getItemizationData(task.itemization.items, bag.dispatcherItemizationItems, task.meta.scannedAtHub);
+                if (bag.type === DRY_CLEANING) {
+                    itemizationData = getItemizationData(task.itemization.items, bag.dispatcherItemizationItems, task.meta.scannedAtHub);
+                }
 
                 this.setState({task: task, shift: shift, barcode: barcode, itemizationData: itemizationData});
             })
@@ -76,7 +79,7 @@ class OrderBagItemization extends React.Component {
     }
 
     cancelItemization = () => {
-        this.props.navigation.push("Scan");
+        this.props.navigation.goBack(null)
     }
 
     saveItemizationForBag = () => {
@@ -159,29 +162,31 @@ class OrderBagItemization extends React.Component {
                                     </Text>
                                 </View>
 
-                                <View style={ContentRow}>
-                                    <FlatList
-                                        data={ Object.keys(this.state.itemizationData).map(key => { return this.state.itemizationData[key]; }) }
-                                        numColumns={1}
-                                        keyExtractor={this.keyExtractor}
+                                { Object.keys(this.state.itemizationData).length > 0 &&
+                                    <View style={ContentRow}>
+                                        <FlatList
+                                            data={ Object.keys(this.state.itemizationData).map(key => { return this.state.itemizationData[key]; }) }
+                                            numColumns={1}
+                                            keyExtractor={this.keyExtractor}
 
-                                        renderItem={(item, index) => {
-                                            return <ItemizationCard
-                                                        key={item.item.productReference}
-                                                        onPlusClick={this._onItemizationIncrementItemClick}
-                                                        onMinusClick={this._onItemizationDecrementItemClick}
+                                            renderItem={(item, index) => {
+                                                return <ItemizationCard
+                                                            key={item.item.productReference}
+                                                            onPlusClick={this._onItemizationIncrementItemClick}
+                                                            onMinusClick={this._onItemizationDecrementItemClick}
 
-                                                        itemReference={item.item.productReference}
-                                                        itemQuantity={item.item.quantity}
-                                                        itemName={item.item.productName}
-                                                        itemExpectedQuantity={item.item.expectedQuantity}
-                                                        />
+                                                            itemReference={item.item.productReference}
+                                                            itemQuantity={item.item.quantity}
+                                                            itemName={item.item.productName}
+                                                            itemExpectedQuantity={item.item.expectedQuantity}
+                                                            />
+                                                }
                                             }
-                                        }
-                                        separatorBorderWidth={20}
-                                        separatorBorderColor={colors.screenBackground}
-                                    />
-                                </View>
+                                            separatorBorderWidth={20}
+                                            separatorBorderColor={colors.screenBackground}
+                                        />
+                                    </View>
+                                }
 
                                 <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
                                     <TextInput style={{ width: '100%', height: fontSize(40), backgroundColor: colors.white }}

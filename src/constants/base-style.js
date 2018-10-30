@@ -64,8 +64,8 @@ export const ContentRow = {
     backgroundColor: colors.white,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginLeft: '10%',
-    width: '80%',
+    marginLeft: '8%',
+    width: '84%',
     padding: fontSize(6),
     marginTop: fontSize(10),
 }
@@ -257,8 +257,8 @@ export const BAG = {
     borderWidth: 1,
     borderColor: colors.dividerColor,
     backgroundColor: colors.white,
-    width: '80%',
-    marginLeft: '10%',
+    width: '84%',
+    marginLeft: '8%',
     borderRadius: 5,
     padding: 10,
     marginTop: fontSize(10)

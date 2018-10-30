@@ -39,21 +39,21 @@ export default class ItemizationCard extends React.PureComponent {
     render() {
         return <TouchableHighlight onPress={this.onPlus} underlayColor="white">
             <View style={[GRID_ITEM, { flexDirection: 'row', height: fontSize(30), padding: 0, backgroundColor: colors.white, justifyContent: 'space-between' }]}>
-                <View style={{flex: 1, alignContent: 'flex-start', justifyContent: 'center', width: '75%'}}>
+                <View style={{flex: 1, alignContent: 'flex-start', justifyContent: 'center', width: '69%'}}>
                     <Text style={[itemizationItem]}>
                         <Text style={{fontWeight: 'bold'}}>{this.state.itemName} </Text>
                         (Expected {this.state.itemExpectedQuantity})
                     </Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '24%'}}>
-                    <TouchableHighlight onPress={this.onMinus} underlayColor={colors.white} style={{padding: fontSize(4)}}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '30%'}}>
+                    <TouchableHighlight onPress={this.onMinus} underlayColor={colors.white} style={{padding: fontSize(8), paddingRight: fontSize(4)}}>
                         <Icon name="minus-circle" style={[{fontSize: fontSize(16), lineHeight: fontSize(16), color: colors.itemizationColor}]} />
                     </TouchableHighlight>
 
                     <Text style={[TASK_DATA_HEADER, {fontSize: 14}]}>{this.state.itemQuantity}</Text>
 
-                    <TouchableHighlight onPress={this.onPlus} underlayColor={colors.white} style={{padding: fontSize(4)}}>
+                    <TouchableHighlight onPress={this.onPlus} underlayColor={colors.white} style={{padding: fontSize(8), paddingLeft: fontSize(4)}}>
                         <Icon name="plus-circle" style={[
                             {fontSize: fontSize(16), lineHeight: fontSize(16), color: colors.itemizationColor},
                             this.state.itemExpectedQuantity > this.state.itemQuantity ? {height: fontSize(16)} : {height: 0}

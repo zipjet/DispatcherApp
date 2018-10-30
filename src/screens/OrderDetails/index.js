@@ -114,10 +114,9 @@ class OrderDetails extends React.Component {
                                                 <TouchableHighlight onPress={() => { this._itemizationEdit(bag.code) }} underlayColor="white">
                                                     <View style={{ color: colors.blueGrey, justifyContent: 'space-between', flexDirection: 'row' }}>
                                                         <Text style={{fontSize: fontSize(18)}}>{bagsData.category === WASH_FOLD ? "WF" : "DC"} {bag.code}</Text>
-                                                        { bag.scannedAtHub && <Icon name='check-circle' size={fontSize(20)} color={colors.teal} /> }
+                                                        { bag.scannedAtHub && <Icon name='check-circle' size={fontSize(18)} color={colors.teal} /> }
                                                     </View>
                                                 </TouchableHighlight>
-
 
                                                 {bag.dispatcherComments && bag.dispatcherComments.map(
                                                     (comment, index) => {
@@ -146,11 +145,11 @@ class OrderDetails extends React.Component {
                                                         }
 
                                                         { dispatcherItemizationCount !== itemizationItem.quantity && dispatcherItemizationCount > 0 &&
-                                                            <Icon size={fontSize(14)} name="times-circle" color={colors.errorColor} />
+                                                            <Icon size={fontSize(12)} name="times-circle" color={colors.errorColor} />
                                                         }
 
                                                         { dispatcherItemizationCount === itemizationItem.quantity &&
-                                                            <Icon size={fontSize(14)} name="check-circle" color={colors.teal} />
+                                                            <Icon size={fontSize(12)} name="check-circle" color={colors.teal} />
                                                         }
                                                     </View>
                                         }
@@ -253,7 +252,7 @@ class OrderDetails extends React.Component {
                             <ScrollView>
                                 { this.state.task !== null &&
                                     <View>
-                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6)}]}>
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6), padding: fontSize(3)}]}>
                                             <Text>
                                                 <Text style={{fontWeight: 'bold', color: colors.dark}}>
                                                     Cleaning Due: {"  "}
@@ -264,7 +263,7 @@ class OrderDetails extends React.Component {
                                             </Text>
                                         </View>
 
-                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0)}]}>
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0), padding: fontSize(3)}]}>
                                             <Text>
                                                 <Text style={{fontWeight: 'bold', color: colors.dark}}>
                                                     Shift: {"  "}
@@ -275,7 +274,7 @@ class OrderDetails extends React.Component {
                                             </Text>
                                         </View>
 
-                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0)}]}>
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0), padding: fontSize(3)}]}>
                                             <Text>
                                                 <Text style={{fontWeight: 'bold', color: colors.dark}}>
                                                     Total Bags: {"  "}
@@ -294,9 +293,23 @@ class OrderDetails extends React.Component {
                         </ScrollView>
                     </View>
 
-                    <View style={SUBMIT}>
-                        <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.prepareDispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>
-                    </View>
+                    { this.state.task && isTaskDispatched(this.state.task) === false && this.state.task.meta.scannedAtHub.length > 0 &&
+                        <View style={SUBMIT}>
+                            <Button text={translate("Dispatch.Dispatch")} onSubmit={() => { this.prepareDispatch() }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        </View>
+                    }
+
+                    { this.state.task && isTaskDispatched(this.state.task) === false && this.state.task.meta.scannedAtHub.length === 0 &&
+                        <View style={SUBMIT}>
+                            <Button disabled text="NOTHING TO DISPATCH" height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.itemizationColor}/>
+                        </View>
+                    }
+
+                    { this.state.task && isTaskDispatched(this.state.task) &&
+                        <View style={SUBMIT}>
+                            <Button disabled text="DISPATCHED" height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.itemizationColor} />
+                        </View>
+                    }
                 </View>
             }
 

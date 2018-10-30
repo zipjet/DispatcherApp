@@ -111,46 +111,58 @@ class Dispatch extends React.Component {
   keyExtractor = (item) => item.reference;
 
   render() {
-    return (
+      let tableContentData = this._getErrors();
+      tableContentData.unshift({reference: "0"}, {reference: "1"});
+
+      return (
         <View style={{flex: 1, padding: 0}}>
             { this._getErrors().length > 0 && this.state.success === false &&
               <View style={styles.container}>
                   <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
-                  <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center', backgroundColor: colors.screenBackground }}>
-                      <Text style={{ fontSize: fontSize(12) }}>Do you really want to finish?</Text>
-                      <Text style={{ fontSize: fontSize(7), marginBottom: fontSize(5) }}>Overview incomplete orders</Text>
+                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center', backgroundColor: colors.screenBackground }}>
+                      <FlatList
+                          style={{flex: 1, width: '100%'}}
+                          stickyHeaderIndices={[0]}
+                          ItemSeparatorComponent={
+                              () => { return <View style={hr} /> }
+                          }
+                          data={tableContentData}
+                          keyExtractor={this.keyExtractor}
+                          renderItem={
+                              (item, index) => <View key={item.reference} style={{width: '100%'}}>
+                                    { item.item.reference === "0" &&
+                                        <View style={{width: '100%', height: fontSize(68), justifyContent: 'center', flexDirection: 'column', alignContent: 'center', padding: fontSize(30)}}>
+                                            <Text style={{ textAlign: 'center', width: '100%', fontSize: fontSize(12), color: colors.dark }}>Do you really want to finish?</Text>
+                                            <Text style={{ textAlign: 'center', width: '100%', fontSize: fontSize(7), marginBottom: fontSize(5) }}>Overview incomplete orders</Text>
+                                        </View>
+                                    }
 
-                      <View style={{height: '60%', width: '100%'}}>
-                          <View style={{ height: fontSize(28), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
-                              <View style={[styles.headingLeftItems, {flex: 0.2, alignItems: 'center', justifyContent: 'center'}]}>
-                                  <Text style={{ fontSize: fontSize(8), color: colors.dark }}>Order</Text>
+                                    { item.item.reference === "1" &&
+                                        <View style={{ height: fontSize(28), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
+                                            <View style={[styles.headingLeftItems, {flex: 0.2, alignItems: 'center', justifyContent: 'center'}]}>
+                                                <Text style={{ fontSize: fontSize(8), color: colors.dark }}>Order</Text>
+                                            </View>
+
+                                            <View style={[styles.headingLeftItems, { flex: 0.5, height: '100%', alignItems: 'center', justifyContent: 'center'}]}>
+                                                <Text style={{ fontSize: fontSize(8), color: colors.dark }}>Location</Text>
+                                            </View>
+
+                                            <View style={[styles.headingLeftItems, { flex: 0.3, height: '100%', alignItems: 'center', justifyContent: 'center'}]}>
+                                                <Text style={[{fontSize: fontSize(8), color: colors.dark}]}>Missing/Bag</Text>
+                                            </View>
+                                        </View>
+                                    }
+
+                                    { item.item.reference.length > 1 &&
+                                        <OrderIssuesCard
+                                          item={item.item}
+                                          navigation={this.props.navigation}
+                                        />
+                                    }
                               </View>
-
-                              <View style={[styles.headingLeftItems, { flex: 0.5, height: '100%', alignItems: 'center', justifyContent: 'center'}]}>
-                                  <Text style={{ fontSize: fontSize(8), color: colors.dark }}>Location</Text>
-                              </View>
-
-                              <View style={[styles.headingLeftItems, { flex: 0.3, height: '100%', alignItems: 'center', justifyContent: 'center'}]}>
-                                  <Text style={[{fontSize: fontSize(8), color: colors.dark}]}>Missing/Bag</Text>
-                              </View>
-                          </View>
-
-                          <FlatList
-                              ItemSeparatorComponent={
-                                  () => { return <View style={hr} /> }
-                              }
-                              data={this._getErrors()}
-                              keyExtractor={this.keyExtractor}
-                              renderItem={
-                                  (item, index) => <OrderIssuesCard
-                                      item={item.item}
-                                      key={item.item.reference}
-                                      navigation={this.props.navigation}
-                                  />
-                              }
-                          />
-                      </View>
+                          }
+                      />
                   </View>
 
                   <View style={SUBMIT}>

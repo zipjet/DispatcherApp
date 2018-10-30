@@ -54,7 +54,7 @@ class Menu extends React.Component {
                     min={true}
                     visible={this.state.modalVisible}
                     indicatorIcon = {<Icon name="bars" size={fontSize(16)} color={this.props.indicatorColor} />}
-                    style = {[{ borderWidth: 0, backgroundColor: colors.backgroundColor, height: fontSize(16), padding: 0, width: fontSize(30) }]}
+                    style = {[{ borderWidth: 0, backgroundColor: colors.backgroundColor, height: fontSize(36), width: fontSize(36), padding: fontSize(10) }]}
 
                     textStyle = {{ lineHeight: fontSize(16), fontSize: 0 }}
                     backdropStyle= {{ justifyContent: 'flex-start', alignItems: 'flex-end' }}
@@ -71,23 +71,23 @@ class Menu extends React.Component {
                                 <Text style={{textAlign: 'center', fontSize: fontSize(8), marginTop: fontSize(-10)}}>Dispatcher App v{packageJson.version}</Text>
                             </View>
 
-                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {}} style={[ContentRow, {backgroundColor: colors.screenBackground, padding: 0}]}>
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground, padding: 0}]}>
                                 <Text></Text>
                             </TouchableHighlight>
 
-                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToScan()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToScan()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
                                 <Text>Start Scanning</Text>
                             </TouchableHighlight>
 
-                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToListing()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToListing()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
                                 <Text>Dispatch List</Text>
                             </TouchableHighlight>
 
-                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToDispatchFinish()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToDispatchFinish()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
                                 <Text>Finish Dispatching</Text>
                             </TouchableHighlight>
 
-                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.logout()}} style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.logout()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
                                 <Text>Log Out</Text>
                             </TouchableHighlight>
                         </View>
