@@ -16,7 +16,7 @@ export const dimensions = {width: width, height: height};
 export const fontSize = (size, fixedSize) => Math.ceil(size * scale + (fixedSize === undefined ? 0 : fixedSize));
 
 export const getShift = (timestamp) => {
-    let shifts = [0, 15, 24];
+    let shifts = [0, 13, 24];
     let shiftsLabel = ["", translate("Menu.Morning"), translate("Menu.Evening")];
 
     let todayMoment = moment().startOf('day');
@@ -25,15 +25,15 @@ export const getShift = (timestamp) => {
 
     let shift = {dayLabel: "", shiftLabel: "", start: 0, end: 0};
 
-    if (moment(timestamp).startOf('day') < plus2daysMoment) {
+    if (moment(timestamp).startOf('day').unix() < plus2daysMoment.unix()) {
         shift.dayLabel = translate("Menu.Tomorrow");
     }
 
-    if (moment(timestamp).startOf('day') < tomorrowMoment) {
+    if (moment(timestamp).startOf('day').unix() < tomorrowMoment.unix()) {
         shift.dayLabel = translate("Menu.Today");
     }
 
-    if (moment(timestamp).startOf('day') < todayMoment) {
+    if (moment(timestamp).startOf('day').unix() < todayMoment.unix()) {
         shift.dayLabel = "";
     }
 
@@ -159,18 +159,18 @@ export const getItemizationData = (taskItemization, bagItemization, scannedBags)
 }
 
 export const isReadyToStock = (task, shift) => {
-    let taskMoment = moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm').unix();
+    let taskMoment = moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm');
     let shiftTimes = shift.value && shift.value.split('-');
 
     if (shiftTimes.length !== 2) {
         return true;
     }
 
-    if (taskMoment < parseInt(shiftTimes[0])) {
+    if (parseInt(taskMoment.unix()) < parseInt(shiftTimes[0])) {
         return true;
     }
 
-    if (taskMoment > parseInt(shiftTimes[1])) {
+    if (parseInt(taskMoment.unix()) > parseInt(shiftTimes[1])) {
         return true;
     }
 

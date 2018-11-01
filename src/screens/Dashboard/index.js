@@ -292,7 +292,7 @@ class Dashboard extends React.Component {
                     </View>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 

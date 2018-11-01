@@ -22,6 +22,19 @@ class Keyboard extends React.Component {
         }
     }
 
+    // add the navigation
+    componentDidMount() {
+        this.willFocusSubscription = this.props.navigation.addListener(
+            'willFocus',
+            () => { }
+        );
+
+        this.willBlurSubscription = this.props.navigation.addListener(
+            'willBlur',
+            () => { this.setState({barcode: ""}) }
+        );
+    }
+
     // remove the listeners
     componentWillUnmount() {
         this.willFocusSubscription &&

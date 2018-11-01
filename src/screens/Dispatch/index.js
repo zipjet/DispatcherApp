@@ -81,7 +81,7 @@ class Dispatch extends React.Component {
                         () => {
                             DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
-                            this.props.navigation.push(redirectPage);
+                            this.props.navigation.navigate(redirectPage);
                         }
                     );
           } else if (isNotCompleted(this.state.task)) {

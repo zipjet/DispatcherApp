@@ -18,7 +18,7 @@ class Menu extends React.Component {
     goToListing = () => {
         this.setState({modalVisible: false});
         // this.props.navigation.push("Dashboard");
-        this.props.navigation.push("DashboardOrders");
+        this.props.navigation.navigate("DashboardOrders");
     }
 
     goToDispatchFinish = () => {
@@ -28,7 +28,7 @@ class Menu extends React.Component {
 
     goToScan = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.push("Scan");
+        this.props.navigation.navigate("Scan");
     }
 
     logout = () => {

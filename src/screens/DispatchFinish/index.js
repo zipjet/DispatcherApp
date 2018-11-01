@@ -166,7 +166,7 @@ class Dispatch extends React.Component {
                   </View>
 
                   <View style={SUBMIT}>
-                      <Button text="No" style={{flex: 1}} onSubmit={() => { this.props.navigation.push('DashboardOrders') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                      <Button text="No" style={{flex: 1}} onSubmit={() => { this.props.navigation.navigate('DashboardOrders') }} height={fontSize(45)} fontSize={fontSize(15)}/>
 
                       <Swipeout style={[SUBMIT, {width: dimensions.width / 2}]} right={[{text: "Yes", onPress: () => this._allDispatch()}]} buttonWidth={dimensions.width / 2}>
                           <View style={{ justifyContent: "space-between", alignItems: "center", flexDirection: "row", width: dimensions.width / 2, height: "100%" }}>
@@ -196,7 +196,7 @@ class Dispatch extends React.Component {
                   </View>
 
                   <View style={SUBMIT}>
-                      <Button text="START NEW SHIFT" style={{flex: 1}} onSubmit={() => { this.props.navigation.push('DashboardOrders') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                      <Button text="START NEW SHIFT" style={{flex: 1}} onSubmit={() => { this.props.navigation.navigate('DashboardOrders') }} height={fontSize(45)} fontSize={fontSize(15)}/>
                   </View>
               </View>
           }

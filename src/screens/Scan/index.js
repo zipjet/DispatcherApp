@@ -18,7 +18,7 @@ import {WASH_FOLD} from "../../constants/constants";
 import store from '../../store';
 import { DropDownHolder } from './../../components/DropdownHolder';
 
-ScanditModule.setAppKey('AV7M8wCiHB4AO8A7TgBiY2kQyTwrDPsA2lsWdnVRncV+cpOnp1zUyT0EfE3qDlG3v3dovDx8xwjncqaKFnpAkLR7WVkmIGEVKjasGYlKvJOhMKmB3k/ceZJXZEvvAxYaqA+IOioHqvgcQxHNratCaOCRQabanfS4w1KKKGRnoXaAvn65W/qbQ7EthALKnznHNCdVbZMjJ8rj9O+awa1YhKtK5kTwz6m/h6Js9axez65usE72XLwyPEHr5TeO9HB3+F9iaM6i1wftTxBbX99Xw9JjK6pSMRbOZzcP8YJzhWPzHo8f9xnLqs3zZ1cPTBfFikgE15hslAUOmA68OAbSh0/ZarTzunUR8gQ65+NeJujbLg/q70yb3ZWr0bPUutH13vAVANv2TGakDSohLXFsyuyU+0++VXZgYOXSbxgW9049u6sIQanxdAnUCvE066UbhEKhtockXUufS6nP2Mg/CORp/nmlYwa7KDpw6BOlbMZf+97pZbWeYINUg06URIZBNWDsGrSXCWKY+A8W5qoSfYHL1VnEGGuduj7CPRVCQsZffYXxgqiobS0fYh+KehMEGMvJLvM061sJiQx4rYIn2AaQvsrUEmWxRluiacr69l7hYq0AN0wsacjVJ9ZbMoMnQIUFCjpI3lyIXSsAiwDcMecOPHwkvC2WzDzQKon+YDYz19wzfD72I4TBreckx2LYB7kEIHquXX32xJYAJEJmLF+0FWXNZathU+5kSCytVl/AhB1ZPMUw/raWz+UiovwoTV291OkvsagGsBa/RrcB7DzvsTF6+eTa7dzU+JcKIPqI0zq1wwXj');
+ScanditModule.setAppKey('AaIMq7uBL6ZFJPWcXi3seBwrfLlcDxzthUWDKykZ7KnwJzUfqxOg5PdYL+btWv9CDntWkuhYC4oQaiDbswyrJoFaEnUKQ11oGQ6fAh1rmCL+M9YTl2flb9BJlqCnB35l8DlQZeAb4ATfIX3aStqEOMO+PDOcaiVDgjq8dBZ9Zq63e+lGvybMS/epdQ6+Cu8rP2iiEW0fI7MSGcmocVh7w8+ZXJN1LjCdk5GJNFt9Ct6AI0j0sQlE4LT1zuL/MiJf9BlTB0PcBKmk8hDeg9BLSrJVMob2a7vYcsfk+jWsdhXBASrCNsqLK9q97TyCvLS1yadU/dX0qAOMW/IkCYW7bNCpu75eeDQvsdGOffe7z6n+NLD93r5J8CU8TxxDqN8T0t6q+T+vjuSNnPtOTH+oeI+iP00ikyaLfc6lVDio+N3LFtAldvJkpOiR+yarq1PkoZ2KhPyn6B/TICvzmvXLjiSNAdL9PZkUtlx4K3qaOn7lce7qWn8bXIOAGIdlSrrMmnGGxb6R3dHzLf8Y958UOTW43zBsUM4YWS/VQm+VGeQpTIgTbaoIZeqwxAXoGde/BOj7JWm23wUPDxKR4U6nho7H6PSH7fTGd0zSjBGzHNQgK2vn8zVUjYalgfvyYMW/6suyVfR27++GUH2cpIgozhBkGC+6JydaaAuaf3trDUVR9x4BByq0W1TUYPrZJeG12c8bXIqASMNIt05sT9rrAuD3RbbYECR2OJ4ijOW8gySpKfISul/bYEUwzrcLA2DLxVKwwc22DUyQPR2azlQC14ktvoa0uQhhRpVbdTcLfwd5urPTmgrO');
 
 class Scan extends React.Component {
     static navigationOptions = {
@@ -40,6 +40,7 @@ class Scan extends React.Component {
     this.settings.setSymbologyEnabled(Barcode.Symbology.UPCA, true);
 
     this.barcode = '';
+    this.scannerEnabled = false;
   }
 
   componentDidMount() {
@@ -57,14 +58,26 @@ class Scan extends React.Component {
       this.willFocusSubscription = this.props.navigation.addListener(
           'willFocus',
           () => {
-              this.scanner && this.scanner.resumeScanning();
+              this.barcode = '';
+              this.scanner && this.scannerEnabled && this.scanner.startScanning();
           }
       );
 
       this.willBlurSubscription = this.props.navigation.addListener(
           'willBlur',
           () => {
-              this.scanner.pauseScanning();
+              this.barcode = '';
+              this.scanner.stopScanning();
+
+              let instance = this;
+
+              // I hate this
+              setTimeout(
+                  function () {
+                      try { instance.setState({showScanner: true}); } catch (e) {}
+                  },
+                  200
+              );
           }
       );
   }
@@ -91,11 +104,15 @@ class Scan extends React.Component {
                 this.setState({barcodeKey: this.state.barcodeKey++});
                 this.scanner.startScanning();
                 this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
+
+                this.scannerEnabled = true;
             })
 
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 this.scanner.startScanning();
                 this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
+
+                this.scannerEnabled = true;
             }
         } catch (err) {
             console.warn(err)
@@ -124,7 +141,7 @@ class Scan extends React.Component {
                         let task = response.data;
 
                         if (response && response.hasOwnProperty('errors') && response.errors.length) {
-                            Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
+                            DropDownHolder.alert('error', response.errors[0].userTitle, response.errors[0].userMessage);
                         }
 
                         storage.saveBarcode(barcode);
@@ -135,7 +152,7 @@ class Scan extends React.Component {
                             if (task.meta.scannedAtHub[i].code === barcode) {
                                 if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
                                     this.props.navigation.push("Dispatch");
-                                    this.scanner && this.scanner.resumeScanning();
+                                    // this.scanner && this.scanner.resumeScanning();
 
                                     return;
                                 }
@@ -145,18 +162,18 @@ class Scan extends React.Component {
                         // no need to itemize the stock orders
                         if (isReadyToStock(task, this.state.shift)) {
                             this.props.navigation.push("Dispatch");
-                            this.scanner && this.scanner.resumeScanning();
+                            // this.scanner && this.scanner.resumeScanning();
 
                             return;
                         }
 
                         this.props.navigation.push("OrderBagItemization");
-                        this.scanner && this.scanner.resumeScanning();
+                        // this.scanner && this.scanner.resumeScanning();
                     } else {
                         this.scanner && this.scanner.resumeScanning();
 
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
-                            Alert.alert(response.errors[0].userTitle, response.errors[0].userMessage);
+                            DropDownHolder.alert('error', response.errors[0].userTitle, response.errors[0].userMessage);
                         } else {
                             DropDownHolder.alert('error', 'Error', translate("bag.search.fail"));
                         }

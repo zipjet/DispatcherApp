@@ -9,7 +9,7 @@ import { translate } from '../../locale';
 import * as storage from '../../storage';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import { dimensions, fontSize, getShift } from '../../constants/util';
+import { dimensions, fontSize } from '../../constants/util';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import OrderCard from "../../components/OrderCard/index";
 import Swipeout from 'react-native-swipeout';
@@ -92,7 +92,7 @@ class OrdersList extends React.Component {
                     />
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 

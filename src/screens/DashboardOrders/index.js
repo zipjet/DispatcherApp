@@ -98,7 +98,6 @@ class DashboardOrders extends React.Component {
             let valueTokens = value.split('-');
 
             if (valueTokens.length !== 2) {
-                this.setState({shiftLabel: this.state.shiftLabel});
                 return;
             }
 
@@ -183,7 +182,8 @@ class DashboardOrders extends React.Component {
                 let shiftTokens = shiftObj.value.split("-");
 
                 for (let i = 0; i < options.length; i++) {
-                    if (options[i].start.unix() === parseInt(shiftTokens[0])) {
+                    if (parseInt(options[i].start.unix()) === parseInt(shiftTokens[0])) {
+                        // why I do this ? In case you selected yesterday - tomorrow shift.. today it should say Today
                         this.setState({shiftValue: shiftObj.value, shiftLabel: options[i].label});
                         storage.saveShift({value: shiftObj.value, label: options[i].label});
 
@@ -195,10 +195,13 @@ class DashboardOrders extends React.Component {
 
                 throw "Old shift";
             } catch (e) {
-                this.setState({shiftValue: options[0].start.unix() + "-" + options[0].end.unix(), shiftLabel: options[0].label});
-                storage.saveShift({value: options[0].start.unix() + "-" + options[0].end.unix(), label: options[0].label});
+                let optionValue = options[0].start.unix() + "-" + options[0].end.unix();
+                let optionLabel = options[0].label;
 
-                this._loadTasks(options[0].start.unix() + "-" + options[0].end.unix());
+                this.setState({shiftValue: optionValue, shiftLabel: optionLabel});
+                storage.saveShift({value: optionValue, label: optionLabel});
+
+                this._loadTasks(optionValue);
             }
         })
     }
@@ -398,7 +401,7 @@ class DashboardOrders extends React.Component {
                     </ScrollView>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.push('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 
