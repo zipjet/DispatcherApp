@@ -78,6 +78,18 @@ class OrderBagItemization extends React.Component {
         }
     }
 
+    _allFoundClick = () => {
+        let itemizationData = this.state.itemizationData;
+
+        Object.keys(itemizationData).map(
+            key => {
+                itemizationData[key].quantity = itemizationData[key].expectedQuantity;
+            }
+        )
+
+        this.setState({itemizationData: itemizationData});
+    }
+
     cancelItemization = () => {
         this.props.navigation.goBack(null)
     }
@@ -125,7 +137,19 @@ class OrderBagItemization extends React.Component {
             })
     }
 
-    keyExtractor = (item) => { return item.productReference }
+    _getItemizationTotal = () => {
+        let itemizationTotal = 0;
+
+        Object.keys(this.state.itemizationData).map(
+            key => {
+                itemizationTotal += this.state.itemizationData[key].expectedQuantity;
+            }
+        )
+
+        return itemizationTotal;
+    }
+
+    keyExtractor = (item) => { return item.productReference + " / " + item.quantity }
 
   render() {
     return (
@@ -148,10 +172,23 @@ class OrderBagItemization extends React.Component {
 
             <View style={[ ContentWithHeaderStyle ]}>
                 <View style={ContentCentered}>
-                    <View>
+                    <View style={{ flex: 1}}>
                         { this.state.task !== null &&
                             <View>
-                                <View style={[ContentRow, {backgroundColor: colors.screenBackground}]}>
+                                { this.state.task &&
+                                    <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6), padding: fontSize(3)}]}>
+                                        <Text>
+                                            <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                Customer Name: {"  "}
+                                            </Text>
+                                            <Text style="">
+                                                {this.state.task.customer.name}
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                }
+
+                                <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: 0}]}>
                                     <Text>
                                         <Text style={{fontWeight: 'bold', color: colors.dark}}>
                                             Cleaning Due: {"  "}
@@ -171,7 +208,7 @@ class OrderBagItemization extends React.Component {
 
                                             renderItem={(item, index) => {
                                                 return <ItemizationCard
-                                                            key={item.item.productReference}
+                                                            key={item.item.productReference + " / " + item.item.quantity}
                                                             onPlusClick={this._onItemizationIncrementItemClick}
                                                             onMinusClick={this._onItemizationDecrementItemClick}
 
@@ -202,6 +239,14 @@ class OrderBagItemization extends React.Component {
                             </View>
                         }
                 </View>
+
+                { this.state.task && this.state.task.type !== WASH_FOLD && Object.keys(this.state.itemizationData).length > 0 &&
+                    <View style={[SUBMIT, {height: fontSize(55), paddingBottom: fontSize(10), justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text style={{ height: fontSize(45), fontSize: fontSize(15), backgroundColor: colors.screenBackground, color: colors.dark}}>
+                            Total: {this._getItemizationTotal()}
+                        </Text>
+                    </View>
+                }
 
                 <View style={SUBMIT}>
                     <Button text={translate("Itemization.Cancel")} onSubmit={() => { this.cancelItemization() }} height={fontSize(45)} fontSize={fontSize(15)} backgroundColor={colors.white} color={colors.dark}/>

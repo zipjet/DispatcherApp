@@ -39,8 +39,10 @@ class Scan extends React.Component {
     this.settings.setSymbologyEnabled(Barcode.Symbology.EAN8, true);
     this.settings.setSymbologyEnabled(Barcode.Symbology.UPCA, true);
 
+    this.settings.workingRange = ScanSettings.WorkingRange.STANDARD;
+
     this.barcode = '';
-    this.scannerEnabled = false;
+    this.scannerEnabled = true;
   }
 
   componentDidMount() {
@@ -58,16 +60,24 @@ class Scan extends React.Component {
       this.willFocusSubscription = this.props.navigation.addListener(
           'willFocus',
           () => {
-              this.barcode = '';
-              this.scanner && this.scannerEnabled && this.scanner.startScanning();
+              if (this.state.barcodeKey > 1) {
+                  this.scannerEnabled = true;
+                  this.barcode = '';
+                  // this.scanner && this.scanner.resumeScanning();
+
+                  this.setState({barcodeKey: this.state.barcodeKey++});
+              }
           }
       );
 
       this.willBlurSubscription = this.props.navigation.addListener(
           'willBlur',
           () => {
-              this.barcode = '';
-              this.scanner.stopScanning();
+              if (this.state.barcodeKey > 1) {
+                  this.scannerEnabled = false;
+                  this.barcode = '';
+                  // this.scanner && this.scanner.pauseScanning();
+              }
 
               let instance = this;
 
@@ -109,6 +119,8 @@ class Scan extends React.Component {
             })
 
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                this.setState({barcodeKey: this.state.barcodeKey++});
+
                 this.scanner.startScanning();
                 this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
 
@@ -123,11 +135,12 @@ class Scan extends React.Component {
     // Pause on a detected barcode (camera video is shown, but not parsed for barcodes).
     // Comparison: stop - startScanning() would freeze the camera image up on detection.
     onScan = (code) => {
-      if (code.newlyRecognizedCodes[0].data !== this.barcode) {
-            this.scanner && this.scanner.pauseScanning();
-            this.barcode = code.newlyRecognizedCodes[0].data;
+      if (this.scannerEnabled) {
+          if (code.newlyRecognizedCodes[0].data !== this.barcode) {
+                this.barcode = code.newlyRecognizedCodes[0].data;
 
-            this._onSearchByCode(code.newlyRecognizedCodes[0].data);
+                this._onSearchByCode(code.newlyRecognizedCodes[0].data);
+          }
       }
     };
 
@@ -152,7 +165,6 @@ class Scan extends React.Component {
                             if (task.meta.scannedAtHub[i].code === barcode) {
                                 if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
                                     this.props.navigation.push("Dispatch");
-                                    // this.scanner && this.scanner.resumeScanning();
 
                                     return;
                                 }
@@ -162,13 +174,11 @@ class Scan extends React.Component {
                         // no need to itemize the stock orders
                         if (isReadyToStock(task, this.state.shift)) {
                             this.props.navigation.push("Dispatch");
-                            // this.scanner && this.scanner.resumeScanning();
 
                             return;
                         }
 
                         this.props.navigation.push("OrderBagItemization");
-                        // this.scanner && this.scanner.resumeScanning();
                     } else {
                         this.scanner && this.scanner.resumeScanning();
 

@@ -88,6 +88,10 @@ class Dispatch extends React.Component {
               DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
               this.props.navigation.push(redirectPage);
+          } else if (hasItemizationIssues(this.state.task)) {
+              DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
+
+              this.props.navigation.push(redirectPage);
           } else {
               this.props
                   .dispatchRequest(this.state.task.reference)

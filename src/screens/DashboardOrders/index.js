@@ -206,7 +206,7 @@ class DashboardOrders extends React.Component {
         })
     }
 
-    keyExtractor = (item) => item.reference;
+    keyExtractor = (item) => { return item.reference + item.meta.dispatched; }
 
 
 
@@ -289,7 +289,7 @@ class DashboardOrders extends React.Component {
                         <View>
                             <TouchableHighlight onPress={
                                     () => {
-                                        this._showTasks(STOCK, getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task) === false}).length)
+                                        this._showTasks(STOCK, getStockOrders(this.state.tasks).length)
                                     }
                                 }
                                 underlayColor={colors.white}>
@@ -297,7 +297,9 @@ class DashboardOrders extends React.Component {
                                 <View style={ContentRow}>
                                     <Text style={{ fontSize: fontSize(14) }}>Stock</Text>
                                     <Text style={{ fontSize: fontSize(14) }}>
-                                        {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task) === false}).length}
+                                        {getStockOrders(this.state.tasks).filter((task) => {return isTaskDispatched(task); }).length}
+                                        /
+                                        {getStockOrders(this.state.tasks).length}
                                     </Text>
                                 </View>
                             </TouchableHighlight>
@@ -310,15 +312,12 @@ class DashboardOrders extends React.Component {
                                         () => <View style={hr} />
                                     }
                                     style={{flex: 1, width: '80%', marginLeft: '10%'}}
-                                    data={
-                                        getStockOrders(this.state.tasks)
-                                            .filter((task) => {return isTaskDispatched(task) === false})
-                                    }
+                                    data={ getStockOrders(this.state.tasks) }
                                     keyExtractor={this.keyExtractor}
                                     renderItem={
                                         ({item}) => <OrderCard
                                             item={item}
-                                            key={item.reference}
+                                            key={item.reference + item.meta.dispatched}
                                             navigation={this.props.navigation}
                                         />
                                     }
@@ -351,7 +350,7 @@ class DashboardOrders extends React.Component {
                                     renderItem={
                                         ({item}) => <OrderCard
                                             item={item}
-                                            key={item.reference}
+                                            key={item.reference + item.meta.dispatched}
                                             navigation={this.props.navigation}
                                         />
                                     }
@@ -382,7 +381,7 @@ class DashboardOrders extends React.Component {
                                     renderItem={
                                         ({item}) => <OrderCard
                                             item={item}
-                                            key={item.reference}
+                                            key={item.reference + item.meta.dispatched}
                                             navigation={this.props.navigation}
                                         />
                                     }

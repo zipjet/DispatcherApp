@@ -11,7 +11,7 @@ import { translate } from '../../locale';
 import * as storage from '../../storage';
 import Keyboard from '../../keyboard';
 import { DropDownHolder } from './../../components/DropdownHolder';
-import { fontSize } from '../../constants/util';
+import { dimensions, fontSize } from '../../constants/util';
 import packageJson from '../../../package.json';
 
 class SignIn extends React.Component {
@@ -110,7 +110,7 @@ class SignIn extends React.Component {
   render() {
     const { disabled } = this.state;
     return (
-          <View style={styles.container}>
+          <View style={[styles.container, {minHeight: dimensions.height}]}>
               <View style={[NO_INTERNET_BAR]}>
                 {this.state.noInternet && <Text style={NO_INTERNET_MESSAGE}>{translate("NO_INTERNET")}</Text>}
               </View>

@@ -123,7 +123,7 @@ class Dispatch extends React.Component {
                   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center', backgroundColor: colors.screenBackground }}>
                       <FlatList
                           style={{flex: 1, width: '100%'}}
-                          stickyHeaderIndices={[0]}
+                          stickyHeaderIndices={[0, 1]}
                           ItemSeparatorComponent={
                               () => { return <View style={hr} /> }
                           }
@@ -132,14 +132,14 @@ class Dispatch extends React.Component {
                           renderItem={
                               (item, index) => <View key={item.reference} style={{width: '100%'}}>
                                     { item.item.reference === "0" &&
-                                        <View style={{width: '100%', height: fontSize(68), justifyContent: 'center', flexDirection: 'column', alignContent: 'center', padding: fontSize(30)}}>
+                                        <View style={{width: '100%', height: fontSize(68), backgroundColor: colors.screenBackground, justifyContent: 'center', flexDirection: 'column', alignContent: 'center', padding: fontSize(30)}}>
                                             <Text style={{ textAlign: 'center', width: '100%', fontSize: fontSize(12), color: colors.dark }}>Do you really want to finish?</Text>
                                             <Text style={{ textAlign: 'center', width: '100%', fontSize: fontSize(7), marginBottom: fontSize(5) }}>Overview incomplete orders</Text>
                                         </View>
                                     }
 
                                     { item.item.reference === "1" &&
-                                        <View style={{ height: fontSize(28), flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
+                                        <View style={{ height: fontSize(28), backgroundColor: colors.screenBackground, flexDirection: 'row', justifyContent: "space-between", alignItems: 'center' }}>
                                             <View style={[styles.headingLeftItems, {flex: 0.2, alignItems: 'center', justifyContent: 'center'}]}>
                                                 <Text style={{ fontSize: fontSize(8), color: colors.dark }}>Order</Text>
                                             </View>

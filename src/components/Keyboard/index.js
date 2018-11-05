@@ -89,7 +89,7 @@ class Keyboard extends React.Component {
                         numberOfLines={1}
                         value={this.state.barcode}
                         underlineColorAndroid="transparent"
-                        style={[styles.input, {width: fontSize(120)}]}
+                        style={[styles.input, {fontSize: fontSize(25), textAlign: 'center', width: fontSize(120)}]}
                     >{this.state.barcode}</Text>
                 </View>
 

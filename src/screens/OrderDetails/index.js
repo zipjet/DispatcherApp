@@ -34,7 +34,7 @@ class OrderDetails extends React.Component {
         };
 
         Promise
-            .all([storage.loadFulfillment(), storage.loadShift()])
+            .all([storage.loadFulfillment()])
             .then(values => {
                 let task = JSON.parse(values[0]);
                 let bagsSummary = {};
@@ -253,6 +253,17 @@ class OrderDetails extends React.Component {
                                 { this.state.task !== null &&
                                     <View>
                                         <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6), padding: fontSize(3)}]}>
+                                            <Text>
+                                                <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                    Customer Name: {"  "}
+                                                </Text>
+                                                <Text style="">
+                                                    {this.state.task.customer.name}
+                                                </Text>
+                                            </Text>
+                                        </View>
+
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0), padding: fontSize(3)}]}>
                                             <Text>
                                                 <Text style={{fontWeight: 'bold', color: colors.dark}}>
                                                     Cleaning Due: {"  "}

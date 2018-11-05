@@ -52,6 +52,10 @@ class OrderCard extends React.Component {
                                 <Icon name="check-circle" size={fontSize(16)} color={colors.teal}/>
                            }
 
+                           { this.props.item.meta.dispatched === false && this.props.item.meta.stockedAtHub &&
+                                <Icon name="archive" size={fontSize(16)} color={colors.teal}/>
+                           }
+
                            <View style={[styles.headingLeftItems, {flex: 0.3}]}>
                                 <Text style={{ fontSize: fontSize(8) }}>{this.props.item.reference.substring(0, this.props.item.reference.length - 2)}</Text>
                            </View>
