@@ -9,10 +9,11 @@ import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import {fontSize, getShift, hasItemizationIssues, isBagScannedAtHub, isTaskDispatched, isNotCompleted} from '../../constants/util';
+import { fontSize, getShift, hasItemizationIssues, isBagScannedAtHub, isTaskDispatched, isNotCompleted, isReadyToStock } from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { DropDownHolder } from './../../components/DropdownHolder';
 
 const WASH_FOLD_ALIAS    = "1";
 const DRY_CLEANING_ALIAS = "2";
@@ -94,9 +95,20 @@ class OrderDetails extends React.Component {
     }
 
     _itemizationEdit = (barcode) => {
-        storage.saveBarcode(barcode);
+        storage.loadShift()
+            .then(
+                (shiftJSON) => {
+                    let shiftObj = JSON.parse(shiftJSON);
 
-        this.props.navigation.push("OrderBagItemization");
+                    if (isReadyToStock(this.state.task, shiftObj)) {
+                        DropDownHolder.alert('info', "Itemization not possible", "The bags that are stocked can be itemized only when they can be dispatched");
+                    } else {
+                        storage.saveBarcode(barcode);
+
+                        this.props.navigation.push("OrderBagItemization");
+                    }
+                }
+            );
     }
 
     renderBagsSummary = (bagsSummary) => {
@@ -252,7 +264,20 @@ class OrderDetails extends React.Component {
                             <ScrollView>
                                 { this.state.task !== null &&
                                     <View>
-                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6), padding: fontSize(3)}]}>
+                                        { this.state.task.corporate !== undefined && this.state.task.corporate.name !== undefined &&
+                                            <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6), padding: fontSize(3)}]}>
+                                                <Text>
+                                                    <Text style={{fontWeight: 'bold', color: colors.dark}}>
+                                                        Corporate: {"  "}
+                                                    </Text>
+                                                    <Text style="">
+                                                        {this.state.task.corporate.name}
+                                                    </Text>
+                                                </Text>
+                                            </View>
+                                        }
+
+                                        <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(0), padding: fontSize(3)}]}>
                                             <Text>
                                                 <Text style={{fontWeight: 'bold', color: colors.dark}}>
                                                     Customer Name: {"  "}

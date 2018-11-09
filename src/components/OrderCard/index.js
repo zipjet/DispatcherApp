@@ -3,7 +3,7 @@ import { Text, TextInput, View, FlatList, Alert, Image, AsyncStorage, TouchableH
 import { colors, HeaderStyle, ContentWithHeaderStyle, ContentStyle, KeyboardStyle, Table, TableRow, TableCell, hr } from "./../../constants/base-style.js";
 import { TASK_DATA, TASK_DATA_HEADER, GRID, GRID_ITEM, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
 import { styles } from './style';
-import { fontSize } from '../../constants/util';
+import { fontSize, getMissingBagsBarcodes } from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import store from '../../store';
@@ -64,15 +64,25 @@ class OrderCard extends React.Component {
                                 <Text style={{ fontSize: fontSize(8) }}>{this.props.item.customer.name}</Text>
                            </View>
 
-                           <View style={{ width: fontSize(20), flexDirection: 'column' }}>
-                               { this.getWFBagsCount(this.props.item) > 0 &&
-                                    <Text style={[{fontSize: fontSize(8), flex: 1}]}>{this.getWFBagsCount(this.props.item)} WF</Text>
+                           { this.props.showMissingBags && getMissingBagsBarcodes(this.props.item).map(
+                               (bagDetails) => {
+                                   return <View style={{ width: fontSize(60), flexDirection: 'column', justifyContent: 'center' }}>
+                                            <Text style={[{fontSize: fontSize(8)}]}>{ bagDetails }</Text>
+                                          </View>
                                }
+                           )}
 
-                               { this.getDCBagsCount(this.props.item) > 0 &&
-                                    <Text style={[{fontSize: fontSize(8), flex: 1}]}>{this.getDCBagsCount(this.props.item)} DC</Text>
-                               }
-                           </View>
+                           { this.props.showMissingBags === undefined &&
+                                <View style={{ width: fontSize(20), flexDirection: 'column', justifyContent: 'center' }}>
+                                   { this.getWFBagsCount(this.props.item) > 0 &&
+                                        <Text style={[{fontSize: fontSize(8)}]}>{this.getWFBagsCount(this.props.item)} WF</Text>
+                                   }
+
+                                   { this.getDCBagsCount(this.props.item) > 0 &&
+                                        <Text style={[{fontSize: fontSize(8)}]}>{this.getDCBagsCount(this.props.item)} DC</Text>
+                                   }
+                                </View>
+                           }
                        </View>
                    </View>
                </TouchableHighlight>

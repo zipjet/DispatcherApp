@@ -5,10 +5,7 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, TouchableH
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT, HeaderStyle, HEADER } from "./../../constants/base-style.js";
-import {
-    dimensions, fontSize, isReadyToStock, isNotCompleted, isTaskDispatched,
-    hasItemizationIssues
-} from '../../constants/util';
+import { dimensions, fontSize, isReadyToStock, isNotCompleted, isTaskDispatched, hasItemizationIssues, getTaskIssues } from '../../constants/util';
 import { styles } from './style';
 import { translate } from '../../locale';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -47,28 +44,6 @@ class Dispatch extends React.Component {
             }
         )
   }
-
-  _getOtherBagsBarcodes = () => {
-      return this.state.task && this.state.task.meta.scannedAtHub
-          .filter(
-              (bag) => { return bag.code !== this.state.barcode; }
-          )
-          .map(
-              (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
-          )
-  }
-
-    _getMissingBagsBarcodes = () => {
-        let scannedBagCodes = this.state.task.meta.scannedAtHub.map((bag) => {return bag.code});
-
-        return this.state.task && this.state.task.meta.bags
-            .filter(
-                (bag) => { return scannedBagCodes.indexOf(bag.code) === -1; }
-            )
-            .map(
-                (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
-            )
-    }
 
   _dispatch = () => {
       let redirectPage = this.props.page !== undefined ? this.props.page : 'Scan';
@@ -151,10 +126,29 @@ class Dispatch extends React.Component {
                                     {(this.state.task.rack !== undefined) ? this.state.task.rack : 'N/A'}
                                 </Text>
                             }
+
+                            { this.state.task && this.state.task.corporate !== undefined && this.state.task.corporate.name !== undefined &&
+                                <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: fontSize(14), color: colors.dark }}>
+                                    {"\n"} !! CORPORATE !!
+                                </Text>
+                            }
                         </Text>
                   </View>
               }
           </View>
+
+          { this.state.task && getTaskIssues(this.state.task) &&
+                <View style={{ width: '100%', alignContent: 'center', justifyContent: "center", alignItems: 'center', flexDirection: 'column', marginBottom: fontSize(10) }}>
+
+                    <Text style={{ fontSize: fontSize(12), fontWeigth: 'bold' }}>Missing Items</Text>
+
+                    { getTaskIssues(this.state.task, true).map(
+                        (issue) => {
+                            return <Text key={issue} style={[{fontSize: fontSize(8)}]}>{issue}</Text>
+                        }
+                    )}
+                </View>
+          }
 
           <View style={SUBMIT}>
               <Swipeout style={[SUBMIT, {width: '100%'}]} right={[{text: translate("Dispatch.Dispatched"), onPress: () => this._dispatch(), backgroundColor: colors.coral}]} buttonWidth={dimensions.width}>

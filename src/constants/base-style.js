@@ -1,4 +1,4 @@
-import { fontSize } from './util'
+import {dimensions, fontSize} from './util'
 
 export const colors = {
   white: "#ffffff",
@@ -36,7 +36,7 @@ export const FontFamily = {
 
 export const HeaderStyle = {
     width: '100%',
-    height: '8%',
+    height: dimensions.height * 0.08,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -47,7 +47,7 @@ export const HeaderStyle = {
 
 export const ContentWithHeaderStyle = {
     width: '100%',
-    height: '92%',
+    flex: 1,
     flexDirection: 'row',
     backgroundColor: colors.screenBackground,
 }

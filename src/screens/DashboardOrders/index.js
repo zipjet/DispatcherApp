@@ -382,6 +382,7 @@ class DashboardOrders extends React.Component {
                                         ({item}) => <OrderCard
                                             item={item}
                                             key={item.reference + item.meta.dispatched}
+                                            showMissingBags={true}
                                             navigation={this.props.navigation}
                                         />
                                     }

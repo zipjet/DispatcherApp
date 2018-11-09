@@ -1,6 +1,7 @@
 import {Dimensions, Alert} from 'react-native'
 import { translate } from '../locale';
 import moment       from "moment";
+import { WASH_FOLD, DRY_CLEANING } from "./constants";
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,7 +13,6 @@ const scaleHeight = height / baseHeight;
 const scale = Math.min(scaleWidth, scaleHeight);
 
 export const dimensions = {width: width, height: height};
-
 export const fontSize = (size, fixedSize) => Math.ceil(size * scale + (fixedSize === undefined ? 0 : fixedSize));
 
 export const getShift = (timestamp) => {
@@ -226,4 +226,66 @@ export const isBagScannedAtHub = (task, barcode) => {
     }
 
     return false;
+}
+
+export const getTaskIssues = (task, showBagType) => {
+    let issues = [];
+
+    // search for missing bags
+    for (let j = 0; j < task.meta.bags.length; j++) {
+        let bagFound = false;
+
+        for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
+            if (task.meta.bags[j].code === task.meta.scannedAtHub[k].code) {
+                bagFound = true;
+            }
+        }
+
+        if (bagFound === false) {
+            if (showBagType === true) {
+                issues.push((task.meta.bags[j].type === WASH_FOLD ? "WF" : "DC") + " " + task.meta.bags[j].code);
+            } else {
+                issues.push('Missing: ' + task.meta.bags[j].code);
+            }
+        }
+    }
+
+    // search for missing items
+    let taskItemization = [];
+
+    for (let j = 0; j < task.itemization.items.length; j++) {
+        let itemizationItem = task.itemization.items[j];
+
+        taskItemization[itemizationItem.name] = itemizationItem.quantity;
+    }
+
+    for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
+        for (let j = 0; j < task.meta.scannedAtHub[k].dispatcherItemizationItems.length; j++) {
+            let itemizationItem = task.meta.scannedAtHub[k].dispatcherItemizationItems[j];
+
+            taskItemization[itemizationItem.productName] -= itemizationItem.quantity;
+        }
+    }
+
+    Object.keys(taskItemization).map(
+        (key) => {
+            if (taskItemization[key] > 0) {
+                issues.push('Missing: ' + taskItemization[key] + " " + key);
+            }
+        }
+    )
+
+    return issues;
+}
+
+export const getMissingBagsBarcodes = (task) => {
+    let scannedBagCodes = task.meta.scannedAtHub.map((bag) => {return bag.code});
+
+    return task.meta.bags
+        .filter(
+            (bag) => { return scannedBagCodes.indexOf(bag.code) === -1; }
+        )
+        .map(
+            (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
+        )
 }

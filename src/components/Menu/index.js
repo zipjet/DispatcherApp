@@ -21,6 +21,11 @@ class Menu extends React.Component {
         this.props.navigation.navigate("DashboardOrders");
     }
 
+    goToStockListing = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.navigate("Stock");
+    }
+
     goToDispatchFinish = () => {
         this.setState({modalVisible: false});
         this.props.navigation.push("DispatchFinish");
@@ -29,6 +34,11 @@ class Menu extends React.Component {
     goToScan = () => {
         this.setState({modalVisible: false});
         this.props.navigation.navigate("Scan");
+    }
+
+    goToSearch = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.navigate("Search");
     }
 
     logout = () => {
@@ -61,7 +71,7 @@ class Menu extends React.Component {
                     optionListStyle = {{ borderColor: colors.blueGrey, borderWidth: 1, backgroundColor : colors.screenBackground, width: "65%", height: "100%", justifyContent: 'flex-start', marginRight: "35%", marginTop: fontSize(0) }}
                     transparent={ true }
                     >
-                        <View style={[ContentCentered, {height: fontSize(230), backgroundColor: colors.screenBackground}]}>
+                        <View style={[ContentCentered, {height: fontSize(310), backgroundColor: colors.screenBackground}]}>
                             <View style={LOGO_WRAPPER}>
                                 <Image
                                     source={require('./../../../assets/img/logo-dark.png')}
@@ -79,8 +89,16 @@ class Menu extends React.Component {
                                 <Text>Start Scanning</Text>
                             </TouchableHighlight>
 
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToSearch()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
+                                <Text>Search</Text>
+                            </TouchableHighlight>
+
                             <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToListing()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
                                 <Text>Dispatch List</Text>
+                            </TouchableHighlight>
+
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToStockListing()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
+                                <Text>Stock List</Text>
                             </TouchableHighlight>
 
                             <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToDispatchFinish()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>

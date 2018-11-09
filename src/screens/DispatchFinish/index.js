@@ -5,7 +5,7 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, Permission
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT, hr } from "./../../constants/base-style.js";
-import {dimensions, fontSize, isReadyToStock, isNotCompleted} from '../../constants/util';
+import {dimensions, fontSize, isReadyToStock, isNotCompleted, getTaskIssues} from '../../constants/util';
 import { styles } from './style';
 import { translate } from '../../locale';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -35,50 +35,9 @@ class Dispatch extends React.Component {
           let task = this.props.tasks[i];
 
           issues[task.reference] = task;
-          issues[task.reference].issues = [];
-
-          // search for missing bags
-          for (let j = 0; j < task.meta.bags.length; j++) {
-              let bagFound = false;
-
-              for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
-                  if (task.meta.bags[j].code === task.meta.scannedAtHub[k].code) {
-                      bagFound = true;
-                  }
-              }
-
-              if (bagFound === false) {
-                  issues[task.reference].issues.push('Missing: ' + task.meta.bags[j].code);
-              }
-          }
-
-          // search for missing items
-          let taskItemization = [];
-
-          for (let j = 0; j < task.itemization.items.length; j++) {
-              let itemizationItem = task.itemization.items[j];
-
-              taskItemization[itemizationItem.name] = itemizationItem.quantity;
-          }
-
-          for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
-              for (let j = 0; j < task.meta.scannedAtHub[k].dispatcherItemizationItems.length; j++) {
-                  let itemizationItem = task.meta.scannedAtHub[k].dispatcherItemizationItems[j];
-
-                  taskItemization[itemizationItem.productName] -= itemizationItem.quantity;
-              }
-          }
-
-          Object.keys(taskItemization).map(
-              (key) => {
-                  if (taskItemization[key] > 0) {
-                      issues[task.reference].issues.push('Missing: ' + taskItemization[key] + " " + key);
-                  }
-              }
-          )
+          issues[task.reference].issues = getTaskIssues(task);
 
           // search for not dispatched stuff
-
           if (task.meta.dispatched === false && issues[task.reference] === undefined) {
               issues[task.reference].issues.push('Not dispatched !');
           }
