@@ -25,8 +25,8 @@ export const saveLoginId = async function (id) {
     saveData(LOGIN_ID, id);
 }
 
-export const saveDispatcher = async function (facility) {
-    saveData(LOGIN_DISPATCHER, JSON.stringify(facility));
+export const saveDispatcher = async function (dispatcher) {
+    saveData(LOGIN_DISPATCHER, JSON.stringify(dispatcher));
 }
 
 export const saveBarcode = async function (barcode) {

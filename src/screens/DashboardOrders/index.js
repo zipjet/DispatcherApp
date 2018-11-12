@@ -6,6 +6,7 @@ import Spinner from "react-native-loading-spinner-overlay";
 import { colors, HeaderStyle, ContentWithHeaderStyle, ContentCentered, ContentRow } from "./../../constants/base-style.js";
 import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE, HEADER, hr } from "./../../constants/base-style.js";
 import { translate } from '../../locale';
+import { FR_PARIS } from '../../constants/constants';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
 import moment       from "moment";
@@ -14,8 +15,6 @@ import store from '../../store';
 import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, getNotCompleteOrders, isTaskDispatched } from '../../constants/util';
 import timer from 'react-native-timer';
 import { Select, Option } from "./../../components/Select";
-import Icon from 'react-native-vector-icons/FontAwesome';
-import DispatchButton from "./../../components/DispatchButton";
 import OrderCard from "./../../components/OrderCard";
 import * as storage from '../../storage';
 
@@ -39,58 +38,70 @@ class DashboardOrders extends React.Component {
             shiftValue: "",
             shiftLabel: ""
         };
+
+        willFocusSubscription = null;
+        willBlurSubscription = null
     }
 
     // add the listener
     componentWillMount() {
-        this._calculateShifts();
-        this._onShiftSelect   = this._onShiftSelect.bind(this);
+        storage.loadDispatcher()
+            .then(
+                (dispatcherJSON) => {
+                    let dispatcherObj = JSON.parse(dispatcherJSON);
+                    let locationId    = dispatcherObj !== undefined ? dispatcherObj.locationId : ''
 
-        store.dispatch({type: types.SAVE_HOMEPAGE, page: "DashboardOrders"});
+                    this._calculateShifts(locationId);
+                    this._onShiftSelect   = this._onShiftSelect.bind(this);
 
-        this.willFocusSubscription = this.props.navigation.addListener(
-            'willFocus',
-            () => {
-                storage.loadShift().then((shift) => {
-                    let shiftObject = JSON.parse(shift);
-
-                    if (shiftObject) {
-                        this.setState({spinner: true});
-
-                        this._loadTasks(shiftObject.value);
-                    }
-
-                    timer.setInterval(
-                        "refreshDashboard",
+                    this.willFocusSubscription = this.props.navigation.addListener(
+                        'willFocus',
                         () => {
                             storage.loadShift().then((shift) => {
                                 let shiftObject = JSON.parse(shift);
 
                                 if (shiftObject) {
+                                    this.setState({spinner: true});
+
                                     this._loadTasks(shiftObject.value);
                                 }
-                            })
-                        },
-                        60000
-                    );
-                })
-            }
-        );
 
-        this.willBlurSubscription = this.props.navigation.addListener(
-            'willBlur',
-            () => {
-                if (timer.intervalExists("refreshDashboard")) {
-                    timer.clearInterval("refreshDashboard");
+                                timer.setInterval(
+                                    "refreshDashboard",
+                                    () => {
+                                        storage.loadShift().then((shift) => {
+                                            let shiftObject = JSON.parse(shift);
+
+                                            if (shiftObject) {
+                                                this._loadTasks(shiftObject.value);
+                                            }
+                                        })
+                                    },
+                                    60000
+                                );
+                            })
+                        }
+                    );
+
+                    this.willBlurSubscription = this.props.navigation.addListener(
+                        'willBlur',
+                        () => {
+                            if (timer.intervalExists("refreshDashboard")) {
+                                timer.clearInterval("refreshDashboard");
+                            }
+                        }
+                    );
                 }
-            }
-        );
+            );
+
+
+        store.dispatch({type: types.SAVE_HOMEPAGE, page: "DashboardOrders"});
     }
 
     // to remove the listener
     componentWillUnmount() {
-        this.willFocusSubscription.remove();
-        this.willBlurSubscription.remove();
+        this.willFocusSubscription && this.willFocusSubscription.remove();
+        this.willBlurSubscription  && this.willBlurSubscription.remove();
     }
 
     _onShiftSelect(value, label) {
@@ -146,20 +157,27 @@ class DashboardOrders extends React.Component {
         }
     }
 
-    _calculateShifts = () => {
+    _calculateShifts = (locationId) => {
         let shifts = [12, 23];
         let todayMoment = moment().startOf('day');
         let tomorrowMoment = moment().startOf('day').add(1, 'day');
 
         let options = [];
 
-        for (i = 0; i < shifts.length; i++) {
+        for (let i = 0; i < shifts.length; i++) {
             let shift = getShift(moment(todayMoment).add(shifts[i], 'hours'));
 
             options.push({start: shift.start, end:shift.end, label:shift.dayLabel + " " + shift.shiftLabel});
         }
 
-        for (i = 0; i < shifts.length; i++) {
+        if (locationId === FR_PARIS) {
+            // add this shift for Paris
+            let lastShiftToday = getShift(moment(todayMoment).add(shifts[shifts.length - 1], 'hours'));
+            let firstShiftTomorrow = getShift(moment(tomorrowMoment).add(shifts[0], 'hours'));
+            options.push({start: lastShiftToday.start, end:firstShiftTomorrow.end, label:lastShiftToday.dayLabel + " " + lastShiftToday.shiftLabel + " + " + firstShiftTomorrow.dayLabel + " " + firstShiftTomorrow.shiftLabel});
+        }
+
+        for (let i = 0; i < shifts.length; i++) {
             let shift = getShift(moment(tomorrowMoment).add(shifts[i], 'hours'));
 
             options.push({start: shift.start, end:shift.end, label:shift.dayLabel + " " + shift.shiftLabel});
@@ -182,7 +200,7 @@ class DashboardOrders extends React.Component {
                 let shiftTokens = shiftObj.value.split("-");
 
                 for (let i = 0; i < options.length; i++) {
-                    if (parseInt(options[i].start.unix()) === parseInt(shiftTokens[0])) {
+                    if (parseInt(options[i].start.unix()) === parseInt(shiftTokens[0]) && parseInt(options[i].end.unix()) === parseInt(shiftTokens[1])) {
                         // why I do this ? In case you selected yesterday - tomorrow shift.. today it should say Today
                         this.setState({shiftValue: shiftObj.value, shiftLabel: options[i].label});
                         storage.saveShift({value: shiftObj.value, label: options[i].label});
@@ -263,7 +281,7 @@ class DashboardOrders extends React.Component {
                                     onSelect = {this._onShiftSelect}
                                     defaultText = {this.state.shiftLabel}
                                     indicatorSize={ fontSize(0) }
-                                    style = {[{ height: '100%', borderWidth: 0, height: fontSize(24), justifyContent: 'center' }]}
+                                    style = {[{ height: '100%', borderWidth: 0, height: fontSize(34), justifyContent: 'center' }]}
                                     textStyle = {{ lineHeight: fontSize(16), fontSize: fontSize(14), width: '100%', textAlign: 'center' }}
                                     optionListStyle = {{ height: '100%', backgroundColor: colors.screenBackground, width: "100%", marginRight: "0%" }}
                                     selected= {<Text style={{ fontSize: fontSize(14)}}>{ this.state.shiftLabel }</Text>}

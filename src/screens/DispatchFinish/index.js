@@ -46,9 +46,6 @@ class Dispatch extends React.Component {
       let orderIssues = Object.values(issues)
           .filter(
               (task) => { return task.meta.dispatched === false }
-          )
-          .filter(
-              (task) => { return task.issues.length > 0 }
           );
 
       return orderIssues;

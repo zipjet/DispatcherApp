@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../actions";
-import { Text, TextInput, View, Alert, Image, AsyncStorage, TouchableHighlight } from "react-native";
+import { Text, TextInput, View, Alert, Image, AsyncStorage, TouchableHighlight, StatusBar } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, LOGO, LOGO_WRAPPER, SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
@@ -83,7 +83,7 @@ class SignIn extends React.Component {
           if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('authToken')) {
               storage.saveAuthToken(response.data.authToken);
               storage.saveLoginId(response.data.user.id);
-              storage.saveDispatcher(response.data.facility);
+              storage.saveDispatcher(response.data.user);
 
               this.setState({ spinner: false });
               // this.props.navigation.navigate("Dashboard");
@@ -110,7 +110,7 @@ class SignIn extends React.Component {
   render() {
     const { disabled } = this.state;
     return (
-          <View style={[styles.container, {minHeight: dimensions.height}]}>
+          <View style={[styles.container, {minHeight: dimensions.height - StatusBar.currentHeight}]}>
               <View style={[NO_INTERNET_BAR]}>
                 {this.state.noInternet && <Text style={NO_INTERNET_MESSAGE}>{translate("NO_INTERNET")}</Text>}
               </View>

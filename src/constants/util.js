@@ -1,7 +1,7 @@
 import {Dimensions, Alert} from 'react-native'
 import { translate } from '../locale';
 import moment       from "moment";
-import { WASH_FOLD, DRY_CLEANING } from "./constants";
+import {WASH_FOLD, DRY_CLEANING, FR_PARIS} from "./constants";
 
 const { width, height } = Dimensions.get('window');
 
@@ -288,4 +288,31 @@ export const getMissingBagsBarcodes = (task) => {
         .map(
             (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
         )
+}
+
+export const isDispatchingForMultipleShifts = (task, shift, dispatcher) => {
+
+    if (shift === null || shift === undefined || shift.value === undefined) {
+        return true;
+    }
+
+    let shiftTokens = shift.value.split('-');
+
+    if (shiftTokens.length < 2) {
+        return false
+    }
+
+    if (isReadyToStock(task, shift)) {
+        return false;
+    }
+
+    if (dispatcher.locationId !== FR_PARIS) {
+        return false;
+    }
+
+    if (parseInt(shiftTokens[1]) - parseInt(shiftTokens[0]) < 3600 * 20) {
+        return false;
+    }
+
+    return true;
 }

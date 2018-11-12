@@ -9,7 +9,10 @@ import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import {fontSize, getShift, getItemizationData, isReadyToStock, isNotCompleted, hasItemizationIssues} from '../../constants/util';
+import {
+    fontSize, getShift, getItemizationData, isReadyToStock, isNotCompleted, hasItemizationIssues,
+    isTaskDispatched
+} from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
 import ItemizationCard       from "./../../components/ItemizationCard";
@@ -123,7 +126,11 @@ class OrderBagItemization extends React.Component {
                             } else if (isNotCompleted(response.data)) {
                                 this.props.navigation.push("Dispatch");
                             } else if (hasItemizationIssues(response.data)) {
-                                this.props.navigation.push("OrderDetails");
+                                if (isTaskDispatched) {
+                                    this.props.navigation.push("Dispatch");
+                                } else {
+                                    this.props.navigation.push("OrderDetails");
+                                }
                             } else {
                                 this.props.navigation.push("Dispatch");
                             }

@@ -1,4 +1,4 @@
-export default const shift = function () {
+export default const Shift = function () {
     let value = '';
     let label = '';
 }

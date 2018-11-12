@@ -5,15 +5,16 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, TouchableH
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT, HeaderStyle, HEADER } from "./../../constants/base-style.js";
-import { dimensions, fontSize, isReadyToStock, isNotCompleted, isTaskDispatched, hasItemizationIssues, getTaskIssues } from '../../constants/util';
+import { dimensions, fontSize, isReadyToStock, isNotCompleted, isTaskDispatched, hasItemizationIssues, getTaskIssues, getShift, isDispatchingForMultipleShifts } from '../../constants/util';
 import { styles } from './style';
 import { translate } from '../../locale';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
 import Menu from "./../../components/Menu";
 import * as storage from '../../storage';
+import moment from 'moment';
 import { DropDownHolder } from './../../components/DropdownHolder';
-import {DRY_CLEANING} from "../../constants/constants";
+import { DATE_FORMAT } from "../../constants/constants";
 
 class Dispatch extends React.Component {
     static navigationOptions = {
@@ -27,19 +28,21 @@ class Dispatch extends React.Component {
         task: null,
         shift: null,
         barcode: null,
+        dispatcher: null,
+
         errorOverwrite: false
     };
-
   }
 
   componentDidMount() {
-    Promise.all([storage.loadFulfillment(), storage.loadShift(), storage.loadBarcode()])
+    Promise.all([storage.loadFulfillment(), storage.loadShift(), storage.loadBarcode(), storage.loadDispatcher()])
         .then(
             (values) => {
                 this.setState({
                     task: JSON.parse(values[0]),
                     shift: JSON.parse(values[1]),
-                    barcode: values[2]
+                    barcode: values[2],
+                    dispatcher: JSON.parse(values[3])
                 })
             }
         )
@@ -82,6 +85,8 @@ class Dispatch extends React.Component {
   }
 
   render() {
+    let correctShift = this.state.task && getShift(moment(this.state.task.cleaningDueDate, DATE_FORMAT));
+
     return (
       <View style={[styles.container]}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
@@ -115,6 +120,12 @@ class Dispatch extends React.Component {
                         <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
                             { isReadyToStock(this.state.task, this.state.shift) &&
                                 'Stock'
+                            }
+
+                            { isReadyToStock(this.state.task, this.state.shift) === false && isDispatchingForMultipleShifts(this.state.task, this.state.shift, this.state.dispatcher) &&
+                                <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
+                                    { correctShift.dayLabel + " " + correctShift.shiftLabel + "\n"}
+                                </Text>
                             }
 
                             { isReadyToStock(this.state.task, this.state.shift) === false && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&

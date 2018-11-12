@@ -11,11 +11,9 @@ import Menu from "./../../components/Menu";
 import moment       from "moment";
 import * as types   from '../../actions/types';
 import store from '../../store';
-import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, getNotCompleteOrders, isTaskDispatched } from '../../constants/util';
+import { fontSize } from '../../constants/util';
 import timer from 'react-native-timer';
-import { Select, Option } from "./../../components/Select";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import DispatchButton from "./../../components/DispatchButton";
 import OrderCard from "./../../components/OrderCard";
 import * as storage from '../../storage';
 import { SearchBar } from 'react-native-elements'
@@ -137,6 +135,7 @@ class Search extends React.Component {
                             placeholder='Search by Reference or barcode... (min 2 chars)'
                             lightTheme={true}
                             containerStyle={{backgroundColor: colors.screenBackground}}
+                            clearIcon={{ color: 'red' }}
                             />
                     </View>
                 </View>
