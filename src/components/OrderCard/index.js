@@ -64,22 +64,30 @@ class OrderCard extends React.Component {
                                 <Text style={{ fontSize: fontSize(8) }}>{this.props.item.customer.name}</Text>
                            </View>
 
-                           { this.props.showMissingBags && getMissingBagsBarcodes(this.props.item).map(
-                               (bagDetails) => {
-                                   return <View style={{ width: fontSize(60), flexDirection: 'column', justifyContent: 'center' }}>
-                                            <Text style={[{fontSize: fontSize(8)}]}>{ bagDetails }</Text>
-                                          </View>
-                               }
-                           )}
+                           { this.props.showMissingBags && getMissingBagsBarcodes(this.props.item).length > 0 &&
+                                <View style={{ width: fontSize(60), flexDirection: 'column', justifyContent: 'center' }}>
+                                    { getMissingBagsBarcodes(this.props.item).map(
+                                       (bagDetails) => {
+                                           return <View style={{ width: fontSize(60), flexDirection: 'column', justifyContent: 'center' }}>
+                                                    <Text style={[{fontSize: fontSize(8)}]}>{ bagDetails }</Text>
+                                                  </View>
+                                       }
+                                    )}
+                                </View>
+                           }
 
                            { this.props.showMissingBags === undefined &&
                                 <View style={{ width: fontSize(20), flexDirection: 'column', justifyContent: 'center' }}>
                                    { this.getWFBagsCount(this.props.item) > 0 &&
-                                        <Text style={[{fontSize: fontSize(8)}]}>{this.getWFBagsCount(this.props.item)} WF</Text>
+                                       <View>
+                                            <Text style={[{fontSize: fontSize(8)}]}>{this.getWFBagsCount(this.props.item)} WF</Text>
+                                       </View>
                                    }
 
                                    { this.getDCBagsCount(this.props.item) > 0 &&
-                                        <Text style={[{fontSize: fontSize(8)}]}>{this.getDCBagsCount(this.props.item)} DC</Text>
+                                        <View>
+                                            <Text style={[{fontSize: fontSize(8)}]}>{this.getDCBagsCount(this.props.item)} DC</Text>
+                                        </View>
                                    }
                                 </View>
                            }

@@ -205,7 +205,7 @@ export const GRID = {
 export const GRID_ITEM = {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: fontSize(40),
+    height: fontSize(50),
 }
 
 export const NO_INTERNET_BAR = {

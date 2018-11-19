@@ -123,7 +123,7 @@ class Dispatch extends React.Component {
                             }
 
                             { isReadyToStock(this.state.task, this.state.shift) === false && isDispatchingForMultipleShifts(this.state.task, this.state.shift, this.state.dispatcher) &&
-                                <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
+                                <Text style={{ textAlign: 'center', fontSize: fontSize(16), color: colors.dark }}>
                                     { correctShift.dayLabel + " " + correctShift.shiftLabel + "\n"}
                                 </Text>
                             }
@@ -148,7 +148,7 @@ class Dispatch extends React.Component {
               }
           </View>
 
-          { this.state.task && getTaskIssues(this.state.task) &&
+          { this.state.task && getTaskIssues(this.state.task).length > 0 &&
                 <View style={{ width: '100%', alignContent: 'center', justifyContent: "center", alignItems: 'center', flexDirection: 'column', marginBottom: fontSize(10) }}>
 
                     <Text style={{ fontSize: fontSize(12), fontWeigth: 'bold' }}>Missing Items</Text>
