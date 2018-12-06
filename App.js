@@ -23,6 +23,7 @@ import OrderDetails from "./src/screens/OrderDetails";
 import OrdersList from "./src/screens/OrdersList";
 import Dispatch from "./src/screens/Dispatch";
 import DispatchFinish from "./src/screens/DispatchFinish";
+import DriversList from "./src/screens/DriversList";
 import OrderBagItemization from "./src/screens/OrderBagItemization";
 import Stock from "./src/screens/Stock";
 import Search from "./src/screens/Search";
@@ -76,6 +77,9 @@ const RootStack = createStackNavigator(
     },
     DispatchFinish: {
         screen: DispatchFinish
+    },
+    DriversList: {
+        screen: DriversList
     },
     Scan: {
         screen: Scan

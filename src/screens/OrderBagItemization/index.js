@@ -8,15 +8,10 @@ import { SUBMIT, HEADER, NO_INTERNET_BAR, NO_INTERNET_MESSAGE, BAG, BAG_SHADOW }
 import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
-import Menu from "./../../components/Menu";
-import {
-    fontSize, getShift, getItemizationData, isReadyToStock, isNotCompleted, hasItemizationIssues,
-    isTaskDispatched
-} from '../../constants/util';
-import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
+import { fontSize, getShift, getItemizationData, isReadyToStock, isNotCompleted, hasItemizationIssues, isTaskDispatched } from '../../constants/util';
+import { WASH_FOLD, DRY_CLEANING, DATE_FORMAT } from "./../../constants/constants";
 import * as storage from '../../storage';
 import ItemizationCard       from "./../../components/ItemizationCard";
-
 import { DropDownHolder } from './../../components/DropdownHolder';
 
 class OrderBagItemization extends React.Component {
@@ -41,7 +36,7 @@ class OrderBagItemization extends React.Component {
             .then(values => {
                 let task = JSON.parse(values[0]);
                 let barcode = values[1];
-                let shift = getShift(moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm'));
+                let shift = getShift(moment(task.cleaningDueDate, DATE_FORMAT));
                 let itemizationData = [];
 
                 let bag = null;
@@ -63,14 +58,14 @@ class OrderBagItemization extends React.Component {
 
                 this.setState({task: task, shift: shift, barcode: barcode, itemizationData: itemizationData});
             })
-    }
+    };
 
     _onItemizationIncrementItemClick = (reference) => {
         let itemizationData = this.state.itemizationData;
         itemizationData[reference].quantity++;
 
         this.setState({itemizationData: itemizationData});
-    }
+    };
 
     _onItemizationDecrementItemClick = (reference) => {
         let itemizationData = this.state.itemizationData;
@@ -79,23 +74,23 @@ class OrderBagItemization extends React.Component {
 
             this.setState({itemizationData: itemizationData});
         }
-    }
+    };
 
-    _allFoundClick = () => {
-        let itemizationData = this.state.itemizationData;
-
-        Object.keys(itemizationData).map(
-            key => {
-                itemizationData[key].quantity = itemizationData[key].expectedQuantity;
-            }
-        )
-
-        this.setState({itemizationData: itemizationData});
-    }
+    // _allFoundClick = () => {
+    //     let itemizationData = this.state.itemizationData;
+    //
+    //     Object.keys(itemizationData).map(
+    //         key => {
+    //             itemizationData[key].quantity = itemizationData[key].expectedQuantity;
+    //         }
+    //     )
+    //
+    //     this.setState({itemizationData: itemizationData});
+    // }
 
     cancelItemization = () => {
         this.props.navigation.goBack(null)
-    }
+    };
 
     saveItemizationForBag = () => {
         this.setState({spinner: true});
@@ -142,7 +137,7 @@ class OrderBagItemization extends React.Component {
                     this.setState({ noInternet: true });
                 }
             })
-    }
+    };
 
     _getItemizationTotal = () => {
         let itemizationTotal = 0;
@@ -154,7 +149,7 @@ class OrderBagItemization extends React.Component {
         )
 
         return itemizationTotal;
-    }
+    };
 
     keyExtractor = (item) => { return item.productReference + " / " + item.quantity }
 

@@ -71,7 +71,7 @@ class Search extends React.Component {
     _loadSearchResults = (token) => {
         this.setState({ noInternet: false });
 
-        if (token.length < 2) {
+        if (token.length < 5) {
             return;
         }
 
@@ -132,7 +132,7 @@ class Search extends React.Component {
                             searchIcon={{ size: 24 }}
                             onChangeText={this._loadSearchResults}
                             onClear={this._loadSearchResults}
-                            placeholder='Search by Reference or barcode... (min 2 chars)'
+                            placeholder='Reference or barcode... 5+ chars'
                             lightTheme={true}
                             containerStyle={{backgroundColor: colors.screenBackground}}
                             clearIcon={{ color: 'red' }}
@@ -150,7 +150,7 @@ class Search extends React.Component {
                             ItemSeparatorComponent={
                                 () => <View style={hr} />
                             }
-                            style={{flex: 1, width: '80%', marginLeft: '10%'}}
+                            style={{flex: 1, width: '90%', marginLeft: '5%'}}
                             data={ this.state.tasks }
                             keyExtractor={this.keyExtractor}
                             renderItem={

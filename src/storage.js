@@ -12,7 +12,6 @@ const TASKS              = 'Tasks';
 const BARCODE            = 'Barcode';
 
 
-
 export const saveEmail = async function (email) {
     saveData(LOGIN_EMAIL, email);
 }

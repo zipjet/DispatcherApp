@@ -17,7 +17,6 @@ class Menu extends React.Component {
 
     goToListing = () => {
         this.setState({modalVisible: false});
-        // this.props.navigation.push("Dashboard");
         this.props.navigation.navigate("DashboardOrders");
     }
 
@@ -39,6 +38,11 @@ class Menu extends React.Component {
     goToSearch = () => {
         this.setState({modalVisible: false});
         this.props.navigation.navigate("Search");
+    }
+
+    goToDriversList = () => {
+        this.setState({modalVisible: false});
+        this.props.navigation.navigate("DriversList");
     }
 
     logout = () => {
@@ -71,7 +75,7 @@ class Menu extends React.Component {
                     optionListStyle = {{ borderColor: colors.blueGrey, borderWidth: 1, backgroundColor : colors.screenBackground, width: "65%", height: "100%", justifyContent: 'flex-start', marginRight: "35%", marginTop: fontSize(0) }}
                     transparent={ true }
                     >
-                        <View style={[ContentCentered, {height: fontSize(310), backgroundColor: colors.screenBackground}]}>
+                        <View style={[ContentCentered, {height: fontSize(350), backgroundColor: colors.screenBackground}]}>
                             <View style={LOGO_WRAPPER}>
                                 <Image
                                     source={require('./../../../assets/img/logo-dark.png')}
@@ -95,6 +99,10 @@ class Menu extends React.Component {
 
                             <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToListing()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
                                 <Text>Dispatch List</Text>
+                            </TouchableHighlight>
+
+                            <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToDriversList()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>
+                                <Text>Drivers List</Text>
                             </TouchableHighlight>
 
                             <TouchableHighlight underlayColor={colors.screenBackground} onPress={() => {this.goToStockListing()}} style={[ContentRow, {paddingTop: fontSize(4), paddingBottom: fontSize(4), backgroundColor: colors.screenBackground}]}>

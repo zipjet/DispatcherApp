@@ -63,9 +63,6 @@ class Scan extends React.Component {
               if (this.state.barcodeKey > 1) {
                   this.scannerEnabled = true;
                   this.barcode = '';
-                  // this.scanner && this.scanner.resumeScanning();
-
-                  this.setState({barcodeKey: this.state.barcodeKey++});
               }
           }
       );
@@ -76,7 +73,6 @@ class Scan extends React.Component {
               if (this.state.barcodeKey > 1) {
                   this.scannerEnabled = false;
                   this.barcode = '';
-                  // this.scanner && this.scanner.pauseScanning();
               }
 
               let instance = this;
@@ -101,7 +97,7 @@ class Scan extends React.Component {
   requestCameraPermission() {
       if (Platform.OS === 'ios') {
           this.scanner.startScanning();
-          this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
+          this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
       } else {
         try {
             const granted = PermissionsAndroid.request(
@@ -113,7 +109,9 @@ class Scan extends React.Component {
             ).then((granted) => {
                 this.setState({barcodeKey: this.state.barcodeKey++});
                 this.scanner.startScanning();
-                this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
+                this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
+
+                this.scanner && this.scanner.dispatcher.pickerViewHandle;
 
                 this.scannerEnabled = true;
             })
@@ -122,7 +120,9 @@ class Scan extends React.Component {
                 this.setState({barcodeKey: this.state.barcodeKey++});
 
                 this.scanner.startScanning();
-                this.scanner.setTorchButtonMarginsAndSize(dimensions.width - 50, 20, 30, 30);
+                this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
+
+                this.scanner && this.scanner.dispatcher.pickerViewHandle;
 
                 this.scannerEnabled = true;
             }
@@ -154,7 +154,7 @@ class Scan extends React.Component {
                         let task = response.data;
 
                         if (response && response.hasOwnProperty('errors') && response.errors.length) {
-                            DropDownHolder.alert('error', response.errors[0].userTitle, response.errors[0].userMessage);
+                            DropDownHolder.alert('info', response.errors[0].userTitle, response.errors[0].userMessage);
                         }
 
                         storage.saveBarcode(barcode);

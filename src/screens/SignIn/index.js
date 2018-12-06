@@ -1,20 +1,19 @@
-import React, { Component } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import * as actions from "../../actions";
 import { Text, TextInput, View, Alert, Image, AsyncStorage, TouchableHighlight, StatusBar } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
+import Component from "./../../components/Component";
 import { colors, LOGO, LOGO_WRAPPER, SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/base-style.js";
-import { API_BASE_URL } from "./../../constants/global.js";
 import { styles } from './singin-style';
 import { translate } from '../../locale';
 import * as storage from '../../storage';
-import Keyboard from '../../keyboard';
 import { DropDownHolder } from './../../components/DropdownHolder';
 import { dimensions, fontSize } from '../../constants/util';
 import packageJson from '../../../package.json';
 
-class SignIn extends React.Component {
+class SignIn extends Component {
     static navigationOptions = {
         header: null,
     };
@@ -44,12 +43,12 @@ class SignIn extends React.Component {
                     .sendAutoLoginRequest()
                     .then(response => {
                         if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('authToken')) {
-                            storage.saveAuthToken(response.data.authToken);
-                            storage.saveLoginId(response.data.user.id);
-                            storage.saveDispatcher(response.data.user);
+                            storage.saveAuthToken(response.data.authToken).then();
+                            storage.saveLoginId(response.data.user.id).then();
+                            storage.saveDispatcher(response.data.user).then();
 
                             this.setState({ spinner: false });
-                            // this.props.navigation.navigate("Dashboard");
+
                             this.props.navigation.navigate("DashboardOrders");
                         } else {
                             this.setState({ spinner: false });
@@ -72,26 +71,25 @@ class SignIn extends React.Component {
   _onConfirm() {
     this.setState({ spinner: true });
     this.setState({ noInternet: false });
-    const { email, password } = this.state;
 
     // store the email
-    storage.saveEmail(email);
+    storage.saveEmail(this.state.email).then();
 
     this.props
-        .sendLoginRequest(email, password)
+        .sendLoginRequest(this.state.email, this.state.password)
         .then(response => {
           if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('authToken')) {
-              storage.saveAuthToken(response.data.authToken);
-              storage.saveLoginId(response.data.user.id);
-              storage.saveDispatcher(response.data.user);
+              storage.saveAuthToken(response.data.authToken).then();
+              storage.saveLoginId(response.data.user.id).then();
+              storage.saveDispatcher(response.data.user).the();
 
               this.setState({ spinner: false });
-              // this.props.navigation.navigate("Dashboard");
+
               this.props.navigation.navigate("DashboardOrders");
           } else {
               this.setState({ spinner: false });
 
-              if (response == undefined) {
+              if (response === undefined) {
                   this.setState({ noInternet: true });
               }
 
@@ -108,7 +106,6 @@ class SignIn extends React.Component {
   }
 
   render() {
-    const { disabled } = this.state;
     return (
           <View style={[styles.container, {minHeight: dimensions.height - StatusBar.currentHeight}]}>
               <View style={[NO_INTERNET_BAR]}>

@@ -1,4 +1,9 @@
-export default const Shift = function () {
-    let value = '';
-    let label = '';
+export default class Shift {
+    value = '';
+    label = '';
+
+    dayLabel = '';
+    shiftLabel = '';
+    start = 0;
+    end = 0;
 }

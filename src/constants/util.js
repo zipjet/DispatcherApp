@@ -1,7 +1,7 @@
-import {Dimensions, Alert} from 'react-native'
+import {Dimensions, Alert} from 'react-native';
 import { translate } from '../locale';
 import moment       from "moment";
-import {WASH_FOLD, DRY_CLEANING, FR_PARIS} from "./constants";
+import {WASH_FOLD, DRY_CLEANING, FR_PARIS, DATE_FORMAT} from "./constants";
 
 const { width, height } = Dimensions.get('window');
 
@@ -15,6 +15,11 @@ const scale = Math.min(scaleWidth, scaleHeight);
 export const dimensions = {width: width, height: height};
 export const fontSize = (size, fixedSize) => Math.ceil(size * scale + (fixedSize === undefined ? 0 : fixedSize));
 
+/**
+ * @param {moment} timestamp
+ *
+ * @returns {Shift}
+ */
 export const getShift = (timestamp) => {
     let shifts = [0, 13, 24];
     let shiftsLabel = ["", translate("Menu.Morning"), translate("Menu.Evening")];
@@ -47,19 +52,20 @@ export const getShift = (timestamp) => {
     }
 
     return shift;
-}
+};
 
+/**
+ * @param {Array<Fulfillment>} tasks
+ *
+ * @return {Array<Fulfillment>}
+ */
 export const getStockOrders = (tasks) => {
     return tasks.filter((task) => {
         let itemizationNotStarted = task.meta.scannedAtHub.length === 0;
         let itemizationCompleted = false;
 
         if (task.meta.bags.length === task.meta.scannedAtHub.length) {
-            if (hasItemizationIssues(task)) {
-                itemizationCompleted = false;
-            } else {
-                itemizationCompleted = true;
-            }
+            itemizationCompleted = hasItemizationIssues(task) === false;
         } else {
             itemizationCompleted = false;
         }
@@ -71,19 +77,20 @@ export const getStockOrders = (tasks) => {
                 || task.meta.dispatched === true
             );
     });
-}
+};
 
+/**
+ * @param {Array<Fulfillment>} tasks
+ *
+ * @return {Array<Fulfillment>}
+ */
 export const getNewOrders = (tasks) => {
     return tasks.filter((task) => {
         let itemizationNotStarted = task.meta.scannedAtHub.length === 0;
         let itemizationCompleted = false;
 
         if (task.meta.bags.length === task.meta.scannedAtHub.length) {
-            if (hasItemizationIssues(task)) {
-                itemizationCompleted = false;
-            } else {
-                itemizationCompleted = true;
-            }
+            itemizationCompleted = hasItemizationIssues(task) === false;
         } else {
             itemizationCompleted = false;
         }
@@ -95,8 +102,13 @@ export const getNewOrders = (tasks) => {
                 || task.meta.dispatched === true
             )
     })
-}
+};
 
+/**
+ * @param {Array<Fulfillment>} tasks
+ *
+ * @return {Array<Fulfillment>}
+ */
 export const getNotCompleteOrders = (tasks) => {
     return tasks.filter((task) => {
         let itemizationIsStarted = task.meta.scannedAtHub.length !== 0;
@@ -104,11 +116,7 @@ export const getNotCompleteOrders = (tasks) => {
         let itemizationNotCorrect = false;
 
         if (task.meta.bags.length === task.meta.scannedAtHub.length) {
-            if (hasItemizationIssues(task)) {
-                itemizationNotCorrect = true;
-            } else {
-                itemizationNotCorrect = false;
-            }
+            itemizationNotCorrect = hasItemizationIssues(task);
         } else {
             itemizationNotCorrect = true;
         }
@@ -118,12 +126,16 @@ export const getNotCompleteOrders = (tasks) => {
             && itemizationIsStarted
             && (itemizationNotCompleted || itemizationNotCorrect)
     })
-}
+};
 
-
+/**
+ * @param {Fulfillment} task
+ *
+ * @returns {boolean}
+ */
 export const isTaskDispatched = (task) => {
     return task.meta.dispatched === true;
-}
+};
 
 export const getItemizationData = (taskItemization, bagItemization, scannedBags) => {
     let data = [];
@@ -156,10 +168,16 @@ export const getItemizationData = (taskItemization, bagItemization, scannedBags)
     }
 
     return data;
-}
+};
 
+/**
+ * @param {Fulfillment} task
+ * @param {Shift}       shift
+ *
+ * @returns {boolean}
+ */
 export const isReadyToStock = (task, shift) => {
-    let taskMoment = moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm');
+    let taskMoment = moment(task.cleaningDueDate, DATE_FORMAT);
     let shiftTimes = shift.value && shift.value.split('-');
 
     if (shiftTimes.length !== 2) {
@@ -170,25 +188,27 @@ export const isReadyToStock = (task, shift) => {
         return true;
     }
 
-    if (parseInt(taskMoment.unix()) > parseInt(shiftTimes[1])) {
-        return true;
-    }
+    return parseInt(taskMoment.unix()) > parseInt(shiftTimes[1]);
+};
 
-    return false;
-}
-
+/**
+ * @param {Fulfillment} task
+ *
+ * @returns {boolean}
+ */
 export const isNotCompleted = (task) => {
     if (task.meta.dispatched) {
         return false;
     }
 
-    if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
-        return true;
-    }
+    return task.meta.bags.length !== task.meta.scannedAtHub.length;
+};
 
-    return false;
-}
-
+/**
+ * @param {Fulfillment} task
+ *
+ * @returns {boolean}
+ */
 export const hasItemizationIssues = (task) => {
     let taskItemization = [];
     let hasMissingItems = false;
@@ -213,21 +233,17 @@ export const hasItemizationIssues = (task) => {
                 hasMissingItems = true;
             }
         }
-    )
+    );
 
     return hasMissingItems;
-}
+};
 
-export const isBagScannedAtHub = (task, barcode) => {
-    for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
-        if (task.meta.scannedAtHub[k].code === barcode) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
+/**
+ * @param {Fulfillment} task
+ * @param {boolean}     showBagType
+ *
+ * @returns {boolean}
+ */
 export const getTaskIssues = (task, showBagType) => {
     let issues = [];
 
@@ -273,10 +289,10 @@ export const getTaskIssues = (task, showBagType) => {
                 issues.push('Missing: ' + taskItemization[key] + " " + key);
             }
         }
-    )
+    );
 
     return issues;
-}
+};
 
 export const getMissingBagsBarcodes = (task) => {
     let scannedBagCodes = task.meta.scannedAtHub.map((bag) => {return bag.code});
@@ -288,8 +304,15 @@ export const getMissingBagsBarcodes = (task) => {
         .map(
             (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code + "\n" }
         )
-}
+};
 
+/**
+ * @param {Fulfillment} task
+ * @param {Shift}       shift
+ * @param {Dispatcher}  dispatcher
+ *
+ * @returns {boolean}
+ */
 export const isDispatchingForMultipleShifts = (task, shift, dispatcher) => {
 
     if (shift === null || shift === undefined || shift.value === undefined) {
@@ -310,9 +333,5 @@ export const isDispatchingForMultipleShifts = (task, shift, dispatcher) => {
         return false;
     }
 
-    if (parseInt(shiftTokens[1]) - parseInt(shiftTokens[0]) < 3600 * 20) {
-        return false;
-    }
-
-    return true;
-}
+    return parseInt(shiftTokens[1]) - parseInt(shiftTokens[0]) > 3600 * 20;
+};

@@ -3,6 +3,7 @@ package com.zipjet.dispatcher;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.cubicphuse.RCTTorch.RCTTorchPackage;
 import com.github.yamill.orientation.OrientationPackage;
 import com.scandit.reactnative.ScanditPackage;
 import com.AlexanderZaytsev.RNI18n.RNI18nPackage;
@@ -27,6 +28,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RCTTorchPackage(),
             new OrientationPackage(),
             new ScanditPackage(),
             new RNI18nPackage(),

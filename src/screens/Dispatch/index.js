@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import * as actions from "../../actions";
 import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, TouchableHighlight, PermissionsAndroid } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-import Button from "./../../components/Button";
 import { colors, SUBMIT, HeaderStyle, HEADER } from "./../../constants/base-style.js";
 import { dimensions, fontSize, isReadyToStock, isNotCompleted, isTaskDispatched, hasItemizationIssues, getTaskIssues, getShift, isDispatchingForMultipleShifts } from '../../constants/util';
 import { styles } from './style';
@@ -14,7 +13,7 @@ import Menu from "./../../components/Menu";
 import * as storage from '../../storage';
 import moment from 'moment';
 import { DropDownHolder } from './../../components/DropdownHolder';
-import { DATE_FORMAT } from "../../constants/constants";
+import { DATE_FORMAT, DRY_CLEANING } from "../../constants/constants";
 
 class Dispatch extends React.Component {
     static navigationOptions = {
@@ -32,7 +31,7 @@ class Dispatch extends React.Component {
 
         errorOverwrite: false
     };
-  }
+  };
 
   componentDidMount() {
     Promise.all([storage.loadFulfillment(), storage.loadShift(), storage.loadBarcode(), storage.loadDispatcher()])
@@ -46,7 +45,7 @@ class Dispatch extends React.Component {
                 })
             }
         )
-  }
+  };
 
   _dispatch = () => {
       let redirectPage = this.props.page !== undefined ? this.props.page : 'Scan';
@@ -63,11 +62,11 @@ class Dispatch extends React.Component {
                         }
                     );
           } else if (isNotCompleted(this.state.task)) {
-              DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
+              DropDownHolder.alert('warn', 'Success', 'The dispatch has completed successfully');
 
               this.props.navigation.push(redirectPage);
           } else if (hasItemizationIssues(this.state.task)) {
-              DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
+              DropDownHolder.alert('warn', 'Success', 'The dispatch has completed successfully');
 
               this.props.navigation.push(redirectPage);
           } else {
@@ -82,11 +81,48 @@ class Dispatch extends React.Component {
                   );
           }
       }
-  }
+  };
+
+    /**
+     * @returns {Array<String>}
+     */
+  _getOtherBagsBarcodes = () => {
+    return this.state.task && this.state.task.meta.scannedAtHub
+        .filter(
+            (bag) => { return bag.code !== this.state.barcode; }
+        )
+        .map(
+            (bag) => { return (bag.type === DRY_CLEANING ? "DC" : "WF") + "  " + bag.code }
+        )
+  };
+
+    /**
+     * @returns {String}
+     */
+  _getTaskRack = () => {
+      let rackData     = '';
+      let correctShift = this.state.task && getShift(moment(this.state.task.cleaningDueDate, DATE_FORMAT));
+
+      if (isReadyToStock(this.state.task, this.state.shift)) {
+          rackData += 'Stock';
+      }
+
+      if (isReadyToStock(this.state.task, this.state.shift) === false && isDispatchingForMultipleShifts(this.state.task, this.state.shift, this.state.dispatcher)) {
+          rackData += correctShift.dayLabel + " " + correctShift.shiftLabel + "\n";
+      }
+
+      if (isReadyToStock(this.state.task, this.state.shift) === false && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task))) {
+          rackData += 'Incomplete \n';
+      }
+
+      if (isReadyToStock(this.state.task, this.state.shift) === false) {
+          rackData += (this.state.task.rack !== undefined) ? this.state.task.rack : 'N/A';
+      }
+
+      return rackData;
+  };
 
   render() {
-    let correctShift = this.state.task && getShift(moment(this.state.task.cleaningDueDate, DATE_FORMAT));
-
     return (
       <View style={[styles.container]}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
@@ -113,30 +149,10 @@ class Dispatch extends React.Component {
 
               {this.state.task &&
                   <View style={{ width: '100%', flex: 1, alignItems: 'center', justifyContent: 'center', alignContent: 'center' }}>
-                      <Text style={{ fontSize: fontSize(14), textAlign: 'center' }}>Rack</Text>
-
-                      <Text style={{ fontSize: fontSize(14) }}>{"\n"}</Text>
+                      <Text style={{ fontSize: fontSize(14), textAlign: 'center' }}>Rack{"\n"}</Text>
 
                         <Text style={{ textAlign: 'center', fontSize: fontSize(20), color: colors.dark }}>
-                            { isReadyToStock(this.state.task, this.state.shift) &&
-                                'Stock'
-                            }
-
-                            { isReadyToStock(this.state.task, this.state.shift) === false && isDispatchingForMultipleShifts(this.state.task, this.state.shift, this.state.dispatcher) &&
-                                <Text style={{ textAlign: 'center', fontSize: fontSize(16), color: colors.dark }}>
-                                    { correctShift.dayLabel + " " + correctShift.shiftLabel + "\n"}
-                                </Text>
-                            }
-
-                            { isReadyToStock(this.state.task, this.state.shift) === false && isTaskDispatched(this.state.task) === false && (isNotCompleted(this.state.task) || hasItemizationIssues(this.state.task)) &&
-                                'Incomplete \n'
-                            }
-
-                            { isReadyToStock(this.state.task, this.state.shift) === false &&
-                                <Text style={{ textAlign: 'center', fontSize: fontSize(26), color: colors.dark }}>
-                                    {(this.state.task.rack !== undefined) ? this.state.task.rack : 'N/A'}
-                                </Text>
-                            }
+                            { this._getTaskRack() }
 
                             { this.state.task && this.state.task.corporate !== undefined && this.state.task.corporate.name !== undefined &&
                                 <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: fontSize(14), color: colors.dark }}>
@@ -151,11 +167,23 @@ class Dispatch extends React.Component {
           { this.state.task && getTaskIssues(this.state.task).length > 0 &&
                 <View style={{ width: '100%', alignContent: 'center', justifyContent: "center", alignItems: 'center', flexDirection: 'column', marginBottom: fontSize(10) }}>
 
-                    <Text style={{ fontSize: fontSize(12), fontWeigth: 'bold' }}>Missing Items</Text>
+                    <Text style={{ fontSize: fontSize(12), fontWeight: 'bold' }}>Missing Items</Text>
 
                     { getTaskIssues(this.state.task, true).map(
                         (issue) => {
                             return <Text key={issue} style={[{fontSize: fontSize(8)}]}>{issue}</Text>
+                        }
+                    )}
+                </View>
+          }
+
+          { this.state.task && this._getOtherBagsBarcodes().length > 0 &&
+                <View style={{ width: '100%', alignContent: 'center', justifyContent: "center", alignItems: 'center', flexDirection: 'column', marginBottom: fontSize(10) }}>
+                    <Text style={{ fontSize: fontSize(12), fontWeight: 'bold' }}>Other bags {'\n'}</Text>
+
+                    { this._getOtherBagsBarcodes().map(
+                        (bagDescription) => {
+                            return <Text key={bagDescription} style={[{fontSize: fontSize(8)}]}>{bagDescription}</Text>
                         }
                     )}
                 </View>

@@ -9,11 +9,12 @@ import { translate } from '../../locale';
 import moment from 'moment';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import { fontSize, getShift, hasItemizationIssues, isBagScannedAtHub, isTaskDispatched, isNotCompleted, isReadyToStock } from '../../constants/util';
+import { fontSize, getShift, hasItemizationIssues, isTaskDispatched, isNotCompleted, isReadyToStock } from '../../constants/util';
 import { WASH_FOLD, DRY_CLEANING } from "./../../constants/constants";
 import * as storage from '../../storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { DropDownHolder } from './../../components/DropdownHolder';
+import { DATE_FORMAT } from "../../constants/constants";
 
 const WASH_FOLD_ALIAS    = "1";
 const DRY_CLEANING_ALIAS = "2";
@@ -43,7 +44,7 @@ class OrderDetails extends React.Component {
                 this.setState(
                     {
                         task: task,
-                        shift: getShift(moment(task.cleaningDueDate, 'DD.MM.YYYY HH:mm'))
+                        shift: getShift(moment(task.cleaningDueDate, DATE_FORMAT))
                     }
                 );
 

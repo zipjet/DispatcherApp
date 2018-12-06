@@ -18,7 +18,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import DispatchButton from "./../../components/DispatchButton";
 import * as storage from '../../storage';
 
-class Dashboard extends React.Component {
+class Dashboard extends Component {
     static navigationOptions = {
         header: null
     };
@@ -27,7 +27,6 @@ class Dashboard extends React.Component {
         super(props);
 
         this.dashboardMode = '';
-        this.isLoading = false;
 
         this.state = {
             tasks: [],
@@ -94,7 +93,7 @@ class Dashboard extends React.Component {
             this.setState({ spinner: true });
             this.setState({ shiftValue: value, shiftLabel: label });
 
-            storage.saveShift({value: value, label: label});
+            storage.saveShift({value: value, label: label}).then();
 
             this._loadTasks(value);
         }
@@ -126,7 +125,7 @@ class Dashboard extends React.Component {
 
     _showTasks = (title, tasks) => {
         if (tasks.length > 0) {
-            storage.saveTasks({title: title, tasks: tasks});
+            storage.saveTasks({title: title, tasks: tasks}).then();
 
             this.props.navigation.push("DashboardOrders");
         }
@@ -139,19 +138,20 @@ class Dashboard extends React.Component {
 
         let options = [];
 
-        for (i = 0; i < shifts.length; i++) {
+        for (let i = 0; i < shifts.length; i++) {
             let shift = getShift(moment(todayMoment).add(shifts[i], 'hours'));
 
             options.push({start: shift.start, end:shift.end, label:shift.dayLabel + " " + shift.shiftLabel});
         }
 
-        for (i = 0; i < shifts.length; i++) {
+        for (let i = 0; i < shifts.length; i++) {
             let shift = getShift(moment(tomorrowMoment).add(shifts[i], 'hours'));
 
             options.push({start: shift.start, end:shift.end, label:shift.dayLabel + " " + shift.shiftLabel});
         }
 
-        this.setState({ shifts: options.map(
+        this.setState({
+            shifts: options.map(
                 (option, index) =>  <Option style={[ContentRow, {justifyContent: 'space-between', backgroundColor: colors.white}]} key={index} value={option.start.unix() + "-" + option.end.unix()} optionText={{ color: colors.dark }}>
                                         {option.label}
                                     </Option>
@@ -168,7 +168,8 @@ class Dashboard extends React.Component {
                 for (let i = 0; i < options.length; i++) {
                     if (options[i].start.unix() === shiftTokens[0]) {
                         this.setState({shiftValue: shiftObj.value, shiftLabel: options[i].label});
-                        storage.saveShift({value: shiftObj.value, label: options[i].label});
+
+                        storage.saveShift({value: shiftObj.value, label: options[i].label}).then();
 
                         this._loadTasks(shiftObj.value);
 
@@ -179,7 +180,8 @@ class Dashboard extends React.Component {
                 throw "Old shift";
             } catch (e) {
                 this.setState({shiftValue: options[0].start.unix() + "-" + options[0].end.unix(), shiftLabel: options[0].label});
-                storage.saveShift({value: options[0].start.unix() + "-" + options[0].end.unix(), label: options[0].label});
+
+                storage.saveShift({value: options[0].start.unix() + "-" + options[0].end.unix(), label: options[0].label}).then();
 
                 this._loadTasks(options[0].start.unix() + "-" + options[0].end.unix());
             }
