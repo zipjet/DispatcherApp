@@ -53,7 +53,7 @@ class Dispatch extends React.Component {
       if (this.state.task) {
           if (isReadyToStock(this.state.task, this.state.shift)) {
               this.props
-                  .stockRequest(this.state.task.reference)
+                  .stockRequest(this.state.task.reference, this.state.shift.value, this._getTaskRack(this.state.task))
                   .then(
                         () => {
                             DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
@@ -71,7 +71,7 @@ class Dispatch extends React.Component {
               this.props.navigation.push(redirectPage);
           } else {
               this.props
-                  .dispatchRequest(this.state.task.reference)
+                  .dispatchRequest(this.state.task.reference, this.state.shift.value, this._getTaskRack(this.state.task))
                   .then(
                       () => {
                           DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
@@ -211,11 +211,11 @@ const mapStateToProps = ({ scanData }) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        stockRequest: (reference) => {
-            return dispatch(actions.stockRequest(reference));
+        stockRequest: (reference, shiftValue, rack) => {
+            return dispatch(actions.stockRequest(reference, shiftValue, rack));
         },
-        dispatchRequest: (reference) => {
-            return dispatch(actions.dispatchRequest(reference));
+        dispatchRequest: (reference, shiftValue, rack) => {
+            return dispatch(actions.dispatchRequest(reference, shiftValue, rack));
         },
     };
 };

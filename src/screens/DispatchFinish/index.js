@@ -5,7 +5,7 @@ import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, Permission
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT, hr } from "./../../constants/base-style.js";
-import {dimensions, fontSize, isReadyToStock, isNotCompleted, getTaskIssues} from '../../constants/util';
+import {dimensions, fontSize, isReadyToStock, getTaskIssues} from '../../constants/util';
 import { styles } from './style';
 import { translate } from '../../locale';
 import Icon from 'react-native-vector-icons/FontAwesome';

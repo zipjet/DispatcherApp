@@ -39,7 +39,7 @@ class OrderCard extends React.Component {
 
     _onSelect = () => {
         store.dispatch({type: types.SAVE_TASK, task:this.props.item});
-        storage.saveFulfillment(this.props.item);
+        storage.saveFulfillment(this.props.item).then();
 
         this.props.navigation.push("OrderDetails");
     }

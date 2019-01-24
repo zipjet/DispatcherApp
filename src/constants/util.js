@@ -201,7 +201,32 @@ export const isNotCompleted = (task) => {
         return false;
     }
 
-    return task.meta.bags.length !== task.meta.scannedAtHub.length;
+    let wfBagsCount = 0;
+    let wfScannedBagsCount = 0;
+
+    for (let i = 0; i < task.meta.bags.length; i++) {
+        if (task.meta.bags[i].type === WASH_FOLD) {
+            wfBagsCount++;
+        }
+    }
+
+    for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
+        if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
+            wfScannedBagsCount++;
+        }
+    }
+
+    if (wfBagsCount !== wfScannedBagsCount) {
+        return true;
+    }
+
+    if (task.meta.bags.length !== task.meta.scannedAtHub.length) {
+        if (hasItemizationIssues(task)) {
+            return true;
+        }
+    }
+
+    return false;
 };
 
 /**

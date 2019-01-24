@@ -81,7 +81,7 @@ class SignIn extends Component {
           if (response && response.hasOwnProperty('data') && response.data.hasOwnProperty('authToken')) {
               storage.saveAuthToken(response.data.authToken).then();
               storage.saveLoginId(response.data.user.id).then();
-              storage.saveDispatcher(response.data.user).the();
+              storage.saveDispatcher(response.data.user).then();
 
               this.setState({ spinner: false });
 

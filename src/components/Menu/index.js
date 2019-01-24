@@ -32,17 +32,17 @@ class Menu extends React.Component {
 
     goToScan = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.navigate("Scan");
+        this.props.navigation.push("Scan");
     }
 
     goToSearch = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.navigate("Search");
+        this.props.navigation.push("Search");
     }
 
     goToDriversList = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.navigate("DriversList");
+        this.props.navigation.push("DriversList");
     }
 
     logout = () => {

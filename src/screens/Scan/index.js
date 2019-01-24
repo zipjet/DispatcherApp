@@ -60,9 +60,11 @@ class Scan extends React.Component {
       this.willFocusSubscription = this.props.navigation.addListener(
           'willFocus',
           () => {
+              this.scannerEnabled = true;
+              this.barcode = '';
+
               if (this.state.barcodeKey > 1) {
-                  this.scannerEnabled = true;
-                  this.barcode = '';
+                  this.startScanning();
               }
           }
       );
@@ -88,16 +90,36 @@ class Scan extends React.Component {
       );
   }
 
+  startScanning() {
+      try {
+          this.scanner.startScanning();
+      } catch (e) {
+
+      }
+
+      this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
+      this.scannerEnabled = true;
+  }
+
+  stopScanning(session) {
+      try {
+          session.stopScanning();
+      } catch (e) {
+
+      }
+  }
+
   // to remove the listener
   componentWillUnmount() {
     this.willFocusSubscription.remove();
     this.willBlurSubscription.remove();
+
+    this.scanner.pauseScanning();
   }
 
   requestCameraPermission() {
       if (Platform.OS === 'ios') {
-          this.scanner.startScanning();
-          this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
+          this.startScanning();
       } else {
         try {
             const granted = PermissionsAndroid.request(
@@ -108,23 +130,12 @@ class Scan extends React.Component {
                 }
             ).then((granted) => {
                 this.setState({barcodeKey: this.state.barcodeKey++});
-                this.scanner.startScanning();
-                this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
-
-                this.scanner && this.scanner.dispatcher.pickerViewHandle;
-
-                this.scannerEnabled = true;
+                this.startScanning();
             })
 
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 this.setState({barcodeKey: this.state.barcodeKey++});
-
-                this.scanner.startScanning();
-                this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
-
-                this.scanner && this.scanner.dispatcher.pickerViewHandle;
-
-                this.scannerEnabled = true;
+                this.startScanning();
             }
         } catch (err) {
             console.warn(err)
@@ -134,17 +145,17 @@ class Scan extends React.Component {
 
     // Pause on a detected barcode (camera video is shown, but not parsed for barcodes).
     // Comparison: stop - startScanning() would freeze the camera image up on detection.
-    onScan = (code) => {
+    onScan = (session) => {
       if (this.scannerEnabled) {
-          if (code.newlyRecognizedCodes[0].data !== this.barcode) {
-                this.barcode = code.newlyRecognizedCodes[0].data;
+          if (session.newlyRecognizedCodes[0].data !== this.barcode) {
+                this.barcode = session.newlyRecognizedCodes[0].data;
 
-                this._onSearchByCode(code.newlyRecognizedCodes[0].data);
+                this._onSearchByCode(session.newlyRecognizedCodes[0].data, session);
           }
       }
     };
 
-    _onSearchByCode = (barcode) => {
+    _onSearchByCode = (barcode, session) => {
         this.props
             .searchBarcodeRequest(barcode)
             .then(response => {
@@ -164,6 +175,8 @@ class Scan extends React.Component {
                         for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
                             if (task.meta.scannedAtHub[i].code === barcode) {
                                 if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
+                                    this.stopScanning(session);
+
                                     this.props.navigation.push("Dispatch");
 
                                     return;
@@ -173,6 +186,8 @@ class Scan extends React.Component {
 
                         // no need to itemize the stock orders
                         if (isReadyToStock(task, this.state.shift)) {
+                            this.stopScanning(session);
+
                             this.props.navigation.push("Dispatch");
 
                             return;
@@ -180,8 +195,6 @@ class Scan extends React.Component {
 
                         this.props.navigation.push("OrderBagItemization");
                     } else {
-                        this.scanner && this.scanner.resumeScanning();
-
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             DropDownHolder.alert('error', response.errors[0].userTitle, response.errors[0].userMessage);
                         } else {

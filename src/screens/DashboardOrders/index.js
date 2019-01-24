@@ -332,6 +332,8 @@ class DashboardOrders extends React.Component {
                                     style={{flex: 1, width: '80%', marginLeft: '10%'}}
                                     data={ getStockOrders(this.state.tasks) }
                                     keyExtractor={this.keyExtractor}
+                                    removeClippedSubviews
+                                    initialNumToRender={8}
                                     renderItem={
                                         ({item}) => <OrderCard
                                             item={item}
@@ -365,6 +367,8 @@ class DashboardOrders extends React.Component {
                                     style={{width: '80%', marginLeft: '10%'}}
                                     data={getNewOrders(this.state.tasks)}
                                     keyExtractor={this.keyExtractor}
+                                    removeClippedSubviews
+                                    initialNumToRender={8}
                                     renderItem={
                                         ({item}) => <OrderCard
                                             item={item}
@@ -396,6 +400,8 @@ class DashboardOrders extends React.Component {
                                     style={{width: '80%', marginLeft: '10%'}}
                                     data={getNotCompleteOrders(this.state.tasks).filter((task) => {return !isTaskDispatched(task)})}
                                     keyExtractor={this.keyExtractor}
+                                    removeClippedSubviews
+                                    initialNumToRender={8}
                                     renderItem={
                                         ({item}) => <OrderCard
                                             item={item}

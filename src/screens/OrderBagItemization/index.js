@@ -112,25 +112,31 @@ class OrderBagItemization extends React.Component {
 
                     DropDownHolder.alert('success', 'Success', 'The itemization has been saved');
 
-                    storage.loadShift().then(
-                        (shiftJson) => {
-                            let shift = JSON.parse(shiftJson);
+                    storage.loadShift()
+                        .then(
+                            (shiftJson) => {
+                                let shift = JSON.parse(shiftJson);
 
-                            if (isReadyToStock(response.data, shift)) {
-                                this.props.navigation.push("Dispatch");
-                            } else if (isNotCompleted(response.data)) {
-                                this.props.navigation.push("Dispatch");
-                            } else if (hasItemizationIssues(response.data)) {
-                                if (isTaskDispatched) {
+                                if (isReadyToStock(response.data, shift)) {
                                     this.props.navigation.push("Dispatch");
+                                } else if (isNotCompleted(response.data)) {
+                                    this.props.navigation.push("Dispatch");
+                                } else if (hasItemizationIssues(response.data)) {
+                                    if (isTaskDispatched) {
+                                        this.props.navigation.push("Dispatch");
+                                    } else {
+                                        this.props.navigation.push("OrderDetails");
+                                    }
                                 } else {
-                                    this.props.navigation.push("OrderDetails");
+                                    this.props.navigation.push("Dispatch");
                                 }
-                            } else {
-                                this.props.navigation.push("Dispatch");
                             }
-                        }
-                    )
+                        )
+                        .catch(
+                            (e) => {
+                                DropDownHolder.alert('error', 'Itemization', 'There is a problem');
+                            }
+                        )
                 }
 
                 if (response === undefined) {
@@ -269,10 +275,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         sendItemization: (itemizationData, barcode, comment) => {
             return dispatch(actions.sendItemization(itemizationData, barcode, comment));
-        },
-        dispatchRequest: (reference) => {
-            return dispatch(actions.dispatchRequest(reference));
-        },
+        }
     };
 };
 
