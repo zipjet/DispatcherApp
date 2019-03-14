@@ -9,9 +9,12 @@ import { colors, LOGO, LOGO_WRAPPER, SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAG
 import { styles } from './singin-style';
 import { translate } from '../../locale';
 import * as storage from '../../storage';
+import { refreshClientSettings } from '../../request';
 import { DropDownHolder } from './../../components/DropdownHolder';
 import { dimensions, fontSize } from '../../constants/util';
 import packageJson from '../../../package.json';
+import { Dropdown } from 'react-native-material-dropdown';
+import { Constants } from '../../constants/global';
 
 class SignIn extends Component {
     static navigationOptions = {
@@ -26,7 +29,8 @@ class SignIn extends Component {
         email: "d@example.com",
         password: "123123",
         disabled: true,
-        spinner: false
+        spinner: false,
+        showEnvSelector: false
     };
     
     this._onConfirm = this._onConfirm.bind(this);
@@ -115,13 +119,32 @@ class SignIn extends Component {
               <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
 
               <View style={styles.form}>
-                    <TouchableHighlight onLongPress={() => {}} style={[LOGO_WRAPPER, {marginLeft: 0}]} underlayColor={colors.white}>
-                      <Image
-                          source={require('./../../../assets/img/logo-dark.png')}
-                          style={LOGO}
-                          on
-                          />
-                    </TouchableHighlight>
+                    { this.state.showEnvSelector === false &&
+                        <TouchableHighlight onLongPress={() => {this.setState({showEnvSelector: true})}} style={[LOGO_WRAPPER, {marginLeft: 0}]} underlayColor={colors.white}>
+                          <Image
+                              source={require('./../../../assets/img/logo-dark.png')}
+                              style={LOGO}
+                              on
+                              />
+                        </TouchableHighlight>
+                    }
+
+                  { this.state.showEnvSelector === true &&
+                      <Dropdown
+                          containerStyle={{width: '100%'}}
+                          pickerStyle={{width: '100%'}}
+                          value={Constants.API_BASE_URL}
+                          data={[
+                            {value: 'http://dispatcher-api.intwash.local/v1/'},
+                            {value: 'http://dispatcher-api-qa-ab.qa.zipjet.com/v1/'},
+                            {value: 'https://dispatcher-api-staging.zipjet.co.uk/v1/'},
+                            {value: 'https://dispatcher-api.zipjet.co.uk/v1/'}
+                          ]}
+                          onChangeText={(value, index, data) => {
+                              Constants.API_BASE_URL = value;
+                          }}
+                      />
+                  }
 
                     <Text style={[styles.vertical_label]}>Dispatcher App{"\n"} v{packageJson.version}</Text>
 
@@ -132,6 +155,7 @@ class SignIn extends Component {
                             onChangeText={(email) => this.setState({email})}
                             placeholder={ translate('Login.Username') }
                             style={[styles.input]}
+                            label=""
                             />
                     </View>
 
@@ -142,6 +166,7 @@ class SignIn extends Component {
                             onChangeText={(password) => this.setState({password: password})}
                             placeholder={ translate('Login.Password') }
                             style={[styles.input]}
+                            label=""
                             />
                     </View>
               </View>

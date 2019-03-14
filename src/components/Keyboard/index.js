@@ -11,6 +11,7 @@ import CustomButton from "./../../components/Button";
 import { fontSize } from '../../constants/util';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Menu from "./../../components/Menu";
+import navigator from '../../navigator';
 
 class Keyboard extends React.Component {
     constructor(props) {
@@ -24,15 +25,17 @@ class Keyboard extends React.Component {
 
     // add the navigation
     componentDidMount() {
-        this.willFocusSubscription = this.props.navigation.addListener(
-            'willFocus',
-            () => { }
-        );
+        if (this.props.navigation) {
+            this.willFocusSubscription = this.props.navigation.addListener(
+                'willFocus',
+                () => { }
+            );
 
-        this.willBlurSubscription = this.props.navigation.addListener(
-            'willBlur',
-            () => { this.setState({barcode: ""}) }
-        );
+            this.willBlurSubscription = this.props.navigation.addListener(
+                'willBlur',
+                () => { this.setState({barcode: ""}) }
+            );
+        }
     }
 
     // remove the listeners
@@ -73,7 +76,7 @@ class Keyboard extends React.Component {
             <View style={[ KeyboardStyle, {} ]}>
                 <View style={ HeaderStyle }>
                     <Menu
-                        navigation={this.props.navigation}
+                        navigation={navigator}
                         storage={storage}
                     />
 

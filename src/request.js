@@ -3,14 +3,13 @@ import axios from 'axios';
 import * as storage from './storage';
 import { Alert } from "react-native";
 import I18n from 'react-native-i18n';
-import store from './store';
 import packageJson from '../package.json';
 
 const client = axios.create({
-    baseURL: GLOBALVARIABLES.API_BASE_URL,
+    baseURL: GLOBALVARIABLES.Constants.API_BASE_URL,
     timeout: 20000,
     headers: {
-        'X-Api-Key': GLOBALVARIABLES.API_KEY,
+        'X-Api-Key': GLOBALVARIABLES.Constants.API_KEY,
         'X-Auth-Token': "",
         'X-version': "",
     }
@@ -84,6 +83,9 @@ export const request = function(options) {
             // LANG injection part
             options.headers['X-language'] = values[3];
             options.headers['X-version'] = packageJson.version;
+
+            // inject the baseURL like this now
+            options.baseURL = GLOBALVARIABLES.Constants.getApiBaseUrl();
 
             return client(options)
                 .then(onSuccess)

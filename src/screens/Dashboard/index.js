@@ -8,14 +8,13 @@ import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE } from "./../../constants/
 import { translate } from '../../locale';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
+import { ScannerHolder } from "./../../components/ScannerHolder";
 import moment       from "moment";
 import * as types   from '../../actions/types';
 import store from '../../store';
 import { dimensions, fontSize, getShift, getStockOrders, getNewOrders, getNotCompleteOrders, isTaskDispatched } from '../../constants/util';
 import timer from 'react-native-timer';
 import { Select, Option } from "react-native-chooser";
-import Icon from 'react-native-vector-icons/FontAwesome';
-import DispatchButton from "./../../components/DispatchButton";
 import * as storage from '../../storage';
 
 class Dashboard extends Component {
@@ -294,7 +293,7 @@ class Dashboard extends Component {
                     </View>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Scan")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Scan")} onSubmit={() => { ScannerHolder.showScanner() }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 

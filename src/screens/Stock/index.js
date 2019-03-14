@@ -13,11 +13,9 @@ import * as types   from '../../actions/types';
 import store from '../../store';
 import { dimensions, fontSize } from '../../constants/util';
 import timer from 'react-native-timer';
-import { Select, Option } from "./../../components/Select";
-import Icon from 'react-native-vector-icons/FontAwesome';
-import DispatchButton from "./../../components/DispatchButton";
 import OrderCard from "./../../components/OrderCard";
 import * as storage from '../../storage';
+import { ScannerHolder } from "./../../components/ScannerHolder";
 
 class Stock extends React.Component {
     static navigationOptions = {
@@ -153,7 +151,7 @@ class Stock extends React.Component {
                         />
 
                         <View style={SUBMIT}>
-                            <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                            <Button text={translate("Scan.Start")} onSubmit={() => { ScannerHolder.showScanner() }} height={fontSize(45)} fontSize={fontSize(15)}/>
                         </View>
                     </View>
 

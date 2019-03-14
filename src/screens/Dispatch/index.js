@@ -13,7 +13,8 @@ import Menu from "./../../components/Menu";
 import * as storage from '../../storage';
 import moment from 'moment';
 import { DropDownHolder } from './../../components/DropdownHolder';
-import { DATE_FORMAT, DRY_CLEANING } from "../../constants/constants";
+import { ScannerHolder } from "./../../components/ScannerHolder";
+import { DATE_FORMAT, DRY_CLEANING, LUNCH_SHIFT_END } from "../../constants/constants";
 
 class Dispatch extends React.Component {
     static navigationOptions = {
@@ -47,9 +48,17 @@ class Dispatch extends React.Component {
         )
   };
 
-  _dispatch = () => {
-      let redirectPage = this.props.page !== undefined ? this.props.page : 'Scan';
+  redirectToReferral() {
+    let redirectPage = this.props.page !== undefined ? this.props.page : 'Scan';
 
+    if (redirectPage === 'Scan') {
+        ScannerHolder.showScanner();
+    } else {
+        this.props.navigation.push(redirectPage);
+    }
+  }
+
+  _dispatch = () => {
       if (this.state.task) {
           if (isReadyToStock(this.state.task, this.state.shift)) {
               this.props
@@ -58,17 +67,17 @@ class Dispatch extends React.Component {
                         () => {
                             DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
-                            this.props.navigation.navigate(redirectPage);
+                            this.redirectToReferral();
                         }
                     );
           } else if (isNotCompleted(this.state.task)) {
               DropDownHolder.alert('warn', 'Success', 'The dispatch has completed successfully');
 
-              this.props.navigation.push(redirectPage);
+              this.redirectToReferral();
           } else if (hasItemizationIssues(this.state.task)) {
               DropDownHolder.alert('warn', 'Success', 'The dispatch has completed successfully');
 
-              this.props.navigation.push(redirectPage);
+              this.redirectToReferral();
           } else {
               this.props
                   .dispatchRequest(this.state.task.reference, this.state.shift.value, this._getTaskRack(this.state.task))
@@ -76,7 +85,7 @@ class Dispatch extends React.Component {
                       () => {
                           DropDownHolder.alert('success', 'Success', 'The dispatch has completed successfully');
 
-                          this.props.navigation.push(redirectPage);
+                          this.redirectToReferral();
                       }
                   );
           }
@@ -122,6 +131,21 @@ class Dispatch extends React.Component {
       return rackData;
   };
 
+  _getIsTaskInTheWrongShift = () => {
+      let cleaningDueDateMoment = moment(this.state.task.cleaningDueDate, DATE_FORMAT);
+      let deliveryDueDateMoment = moment(this.state.task.deliveryDeadline, DATE_FORMAT);
+
+      if (cleaningDueDateMoment.hour() < LUNCH_SHIFT_END && deliveryDueDateMoment > LUNCH_SHIFT_END) {
+          return ' AFTERNOON';
+      }
+
+      if (cleaningDueDateMoment.hour() > LUNCH_SHIFT_END && deliveryDueDateMoment < LUNCH_SHIFT_END) {
+          return ' MORNING';
+      }
+
+      return '';
+  }
+
   render() {
     return (
       <View style={[styles.container]}>
@@ -156,7 +180,7 @@ class Dispatch extends React.Component {
 
                             { this.state.task && this.state.task.corporate !== undefined && this.state.task.corporate.name !== undefined &&
                                 <Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: fontSize(14), color: colors.dark }}>
-                                    {"\n"} !! CORPORATE !!
+                                    {"\n"} !! CORPORATE{ this._getIsTaskInTheWrongShift() } !!
                                 </Text>
                             }
                         </Text>

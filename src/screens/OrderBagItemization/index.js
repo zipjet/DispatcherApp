@@ -182,7 +182,7 @@ class OrderBagItemization extends React.Component {
                 <View style={ContentCentered}>
                     <View style={{ flex: 1}}>
                         { this.state.task !== null &&
-                            <View>
+                            <ScrollView style={{ height: '100%', width: '100%' }}>
                                 { this.state.task &&
                                     <View style={[ContentRow, {backgroundColor: colors.screenBackground, marginTop: fontSize(6), padding: fontSize(3)}]}>
                                         <Text>
@@ -244,7 +244,7 @@ class OrderBagItemization extends React.Component {
                                            ref={this.inputRef}
                                     />
                                 </View>
-                            </View>
+                            </ScrollView>
                         }
                 </View>
 

@@ -17,6 +17,7 @@ import timer from 'react-native-timer';
 import { Select, Option } from "./../../components/Select";
 import OrderCard from "./../../components/OrderCard";
 import * as storage from '../../storage';
+import { ScannerHolder } from "./../../components/ScannerHolder";
 
 const STOCK         = 'STOCK';
 const NEW           = 'NEW';
@@ -40,7 +41,7 @@ class DashboardOrders extends React.Component {
         };
 
         willFocusSubscription = null;
-        willBlurSubscription = null
+        willBlurSubscription = null;
     }
 
     // add the listener
@@ -102,6 +103,10 @@ class DashboardOrders extends React.Component {
     componentWillUnmount() {
         this.willFocusSubscription && this.willFocusSubscription.remove();
         this.willBlurSubscription  && this.willBlurSubscription.remove();
+    }
+
+    showBarcodeScanner() {
+        ScannerHolder.showScanner()
     }
 
     _onShiftSelect(value, label) {
@@ -425,7 +430,7 @@ class DashboardOrders extends React.Component {
                     </ScrollView>
 
                     <View style={SUBMIT}>
-                        <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                        <Button text={translate("Scan.Start")} onSubmit={() => { this.showBarcodeScanner() }} height={fontSize(45)} fontSize={fontSize(15)}/>
                     </View>
                 </View>
 

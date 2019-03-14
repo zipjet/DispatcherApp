@@ -292,26 +292,28 @@ export const getTaskIssues = (task, showBagType) => {
     }
 
     // search for missing items
-    let taskItemization = [];
+    let taskItemizationCount = [];
+    let taskItemizationName = [];
 
     for (let j = 0; j < task.itemization.items.length; j++) {
         let itemizationItem = task.itemization.items[j];
 
-        taskItemization[itemizationItem.name] = itemizationItem.quantity;
+        taskItemizationCount[itemizationItem.productReference] = itemizationItem.quantity;
+        taskItemizationName[itemizationItem.productReference] = itemizationItem.name;
     }
 
     for (let k = 0; k < task.meta.scannedAtHub.length; k++) {
         for (let j = 0; j < task.meta.scannedAtHub[k].dispatcherItemizationItems.length; j++) {
             let itemizationItem = task.meta.scannedAtHub[k].dispatcherItemizationItems[j];
 
-            taskItemization[itemizationItem.productName] -= itemizationItem.quantity;
+            taskItemizationCount[itemizationItem.productReference] -= itemizationItem.quantity;
         }
     }
 
-    Object.keys(taskItemization).map(
+    Object.keys(taskItemizationCount).map(
         (key) => {
-            if (taskItemization[key] > 0) {
-                issues.push('Missing: ' + taskItemization[key] + " " + key);
+            if (taskItemizationCount[key] > 0) {
+                issues.push('Missing: ' + taskItemizationCount[key]  + " x " + taskItemizationName[key]);
             }
         }
     );

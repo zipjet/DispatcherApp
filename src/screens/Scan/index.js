@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import * as actions from "../../actions";
-import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, PermissionsAndroid } from "react-native";
+import { Platform, Text, TextInput, View, Alert, Image, AsyncStorage, PermissionsAndroid, AppState } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Button from "./../../components/Button";
 import { colors, SUBMIT } from "./../../constants/base-style.js";
@@ -11,14 +11,13 @@ import * as storage from '../../storage';
 import { styles } from './style';
 import * as types   from '../../actions/types';
 import { translate } from '../../locale';
-import { BarcodePicker, ScanditModule, Barcode, ScanSettings } from 'scandit-react-native';
 import Menu from "./../../components/Menu";
 import DispatchButton from "./../../components/DispatchButton";
 import {WASH_FOLD} from "../../constants/constants";
 import store from '../../store';
 import { DropDownHolder } from './../../components/DropdownHolder';
-
-ScanditModule.setAppKey('AaIMq7uBL6ZFJPWcXi3seBwrfLlcDxzthUWDKykZ7KnwJzUfqxOg5PdYL+btWv9CDntWkuhYC4oQaiDbswyrJoFaEnUKQ11oGQ6fAh1rmCL+M9YTl2flb9BJlqCnB35l8DlQZeAb4ATfIX3aStqEOMO+PDOcaiVDgjq8dBZ9Zq63e+lGvybMS/epdQ6+Cu8rP2iiEW0fI7MSGcmocVh7w8+ZXJN1LjCdk5GJNFt9Ct6AI0j0sQlE4LT1zuL/MiJf9BlTB0PcBKmk8hDeg9BLSrJVMob2a7vYcsfk+jWsdhXBASrCNsqLK9q97TyCvLS1yadU/dX0qAOMW/IkCYW7bNCpu75eeDQvsdGOffe7z6n+NLD93r5J8CU8TxxDqN8T0t6q+T+vjuSNnPtOTH+oeI+iP00ikyaLfc6lVDio+N3LFtAldvJkpOiR+yarq1PkoZ2KhPyn6B/TICvzmvXLjiSNAdL9PZkUtlx4K3qaOn7lce7qWn8bXIOAGIdlSrrMmnGGxb6R3dHzLf8Y958UOTW43zBsUM4YWS/VQm+VGeQpTIgTbaoIZeqwxAXoGde/BOj7JWm23wUPDxKR4U6nho7H6PSH7fTGd0zSjBGzHNQgK2vn8zVUjYalgfvyYMW/6suyVfR27++GUH2cpIgozhBkGC+6JydaaAuaf3trDUVR9x4BByq0W1TUYPrZJeG12c8bXIqASMNIt05sT9rrAuD3RbbYECR2OJ4ijOW8gySpKfISul/bYEUwzrcLA2DLxVKwwc22DUyQPR2azlQC14ktvoa0uQhhRpVbdTcLfwd5urPTmgrO');
+import { RNCamera } from 'react-native-camera';
+import navigator from '../../navigator';
 
 class Scan extends React.Component {
     static navigationOptions = {
@@ -30,23 +29,23 @@ class Scan extends React.Component {
 
     this.state = {
         showScanner: true,
-        barcodeKey: 1,
-        shift: null
+        scannerEnabled: false,
+
+        shift: null,
     };
 
-    this.settings = new ScanSettings();
-    this.settings.setSymbologyEnabled(Barcode.Symbology.EAN13, true);
-    this.settings.setSymbologyEnabled(Barcode.Symbology.EAN8, true);
-    this.settings.setSymbologyEnabled(Barcode.Symbology.UPCA, true);
-
-    this.settings.workingRange = ScanSettings.WorkingRange.STANDARD;
-
     this.barcode = '';
-    this.scannerEnabled = true;
   }
 
   componentDidMount() {
-      store.dispatch({type: types.SAVE_HOMEPAGE, page: "Scan"});
+      AppState.addEventListener('change', (state) => {
+          if (state === 'active') {
+          }
+
+          if(state === 'background'){
+              this.pauseScanning();
+          }
+      });
 
       storage.loadShift()
           .then(
@@ -55,107 +54,46 @@ class Scan extends React.Component {
               }
           );
 
-      this.requestCameraPermission();
+      if (this.props.navigation) {
+          this.willFocusSubscription = this.props.navigation.addListener(
+              'willFocus',
+              () => {
+                  this.resumeScanning();
 
-      this.willFocusSubscription = this.props.navigation.addListener(
-          'willFocus',
-          () => {
-              this.scannerEnabled = true;
-              this.barcode = '';
-
-              if (this.state.barcodeKey > 1) {
-                  this.startScanning();
+                  store.dispatch({type: types.SAVE_HOMEPAGE, page: "Scan"});
               }
-          }
-      );
+          );
 
-      this.willBlurSubscription = this.props.navigation.addListener(
-          'willBlur',
-          () => {
-              if (this.state.barcodeKey > 1) {
-                  this.scannerEnabled = false;
-                  this.barcode = '';
+          this.willBlurSubscription = this.props.navigation.addListener(
+              'willBlur',
+              () => {
+                  this.pauseScanning();
               }
-
-              let instance = this;
-
-              // I hate this
-              setTimeout(
-                  function () {
-                      try { instance.setState({showScanner: true}); } catch (e) {}
-                  },
-                  200
-              );
-          }
-      );
-  }
-
-  startScanning() {
-      try {
-          this.scanner.startScanning();
-      } catch (e) {
-
-      }
-
-      this.scanner.setTorchButtonMarginsAndSize(0, dimensions.height * 0.66 - fontSize(14), dimensions.width, dimensions.height);
-      this.scannerEnabled = true;
-  }
-
-  stopScanning(session) {
-      try {
-          session.stopScanning();
-      } catch (e) {
-
+          );
       }
   }
 
   // to remove the listener
   componentWillUnmount() {
-    this.willFocusSubscription.remove();
-    this.willBlurSubscription.remove();
+    this.willFocusSubscription && this.willFocusSubscription.remove();
+    this.willBlurSubscription && this.willBlurSubscription.remove();
 
-    this.scanner.pauseScanning();
+    AppState.removeAllListeners('change');
   }
 
-  requestCameraPermission() {
-      if (Platform.OS === 'ios') {
-          this.startScanning();
-      } else {
-        try {
-            const granted = PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-                {
-                    'title': 'Camera Permission',
-                    'message': 'Dispatcher App needs access to your camera'
-                }
-            ).then((granted) => {
-                this.setState({barcodeKey: this.state.barcodeKey++});
-                this.startScanning();
-            })
+  pauseScanning() {
+      this.barcode = '';
 
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                this.setState({barcodeKey: this.state.barcodeKey++});
-                this.startScanning();
-            }
-        } catch (err) {
-            console.warn(err)
-        }
-      }
+      this.setState({scannerEnabled: false});
   }
 
-    // Pause on a detected barcode (camera video is shown, but not parsed for barcodes).
-    // Comparison: stop - startScanning() would freeze the camera image up on detection.
-    onScan = (session) => {
-      if (this.scannerEnabled) {
-          if (session.newlyRecognizedCodes[0].data !== this.barcode) {
-                this.barcode = session.newlyRecognizedCodes[0].data;
+  resumeScanning() {
+      this.setState({scannerEnabled: true});
 
-                this._onSearchByCode(session.newlyRecognizedCodes[0].data, session);
-          }
-      }
-    };
+      store.dispatch({type: types.SAVE_HOMEPAGE, page: "Scan"});
+  }
 
-    _onSearchByCode = (barcode, session) => {
+    _onSearchByCode = (barcode) => {
         this.props
             .searchBarcodeRequest(barcode)
             .then(response => {
@@ -175,9 +113,11 @@ class Scan extends React.Component {
                         for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
                             if (task.meta.scannedAtHub[i].code === barcode) {
                                 if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
-                                    this.stopScanning(session);
+                                    // Alert.alert("Scan", "Dispatch WF");
 
-                                    this.props.navigation.push("Dispatch");
+                                    this.pauseScanning();
+
+                                    navigator.push("Dispatch");
 
                                     return;
                                 }
@@ -186,14 +126,19 @@ class Scan extends React.Component {
 
                         // no need to itemize the stock orders
                         if (isReadyToStock(task, this.state.shift)) {
-                            this.stopScanning(session);
+                            // Alert.alert("Scan", "Dispatch Stock");
 
-                            this.props.navigation.push("Dispatch");
+                            this.pauseScanning();
+
+                            navigator.push("Dispatch");
 
                             return;
                         }
 
-                        this.props.navigation.push("OrderBagItemization");
+                        // Alert.alert("Scan", "Dispatch Bag Itemization");
+
+                        this.pauseScanning();
+                        navigator.push("OrderBagItemization");
                     } else {
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             DropDownHolder.alert('error', response.errors[0].userTitle, response.errors[0].userMessage);
@@ -205,24 +150,43 @@ class Scan extends React.Component {
             );
     }
 
-
-
   render() {
+    if (this.state.scannerEnabled === false) {
+        return <View style={{ height: 0}}></View>
+    }
+
     return (
-      <View style={styles.container}>
+      <View style={{ top: 0, bottom: 0, left: 0, right: 0, position: 'absolute'}}>
           <Spinner visible={this.state.spinner} textContent={""} textStyle={{ color: colors.white }} />
               <View style={[this.state.showScanner ? {flex: 1} : {height: 0}]}>
-                  <BarcodePicker
-                      key={this.state.barcodeKey}
-                      ref={(scan) => { this.scanner = scan }}
-                      scanSettings={ this.settings }
-                      onScan={(session) => { this.onScan(session) }}
-                      style={{ position: 'absolute', top: 0, left: 0, height: fontSize(0, dimensions.height), width: fontSize(0, dimensions.width)}}
-                  />
+                  { this.state.scannerEnabled &&
+                    <RNCamera
+                          ref={ref => {
+                              this.camera = ref;
+                          }}
+                          autoFocus={true}
+                          focusDepth={0.4}
+                          captureAudio={false}
+                          type={RNCamera.Constants.Type.back}
+                          flashMode={RNCamera.Constants.FlashMode.torch}
+                          permissionDialogTitle={'Permission to use camera'}
+                          permissionDialogMessage={'We need your permission to use your camera phone'}
+                          onGoogleVisionBarcodesDetected={({ barcodes }) => {
+                                if (this.state.scannerEnabled && this.state.showScanner) {
+                                    if (barcodes[0].data !== this.barcode) {
+                                          this.barcode = barcodes[0].data;
+
+                                          this._onSearchByCode(barcodes[0].data);
+                                    }
+                                }
+                          }}
+                          style={{ position: 'absolute', top: 0, left: 0, height: fontSize(0, dimensions.height), width: fontSize(0, dimensions.width)}}
+                      />
+                  }
 
                   <Menu
                       indicatorColor={colors.screenBackground}
-                      navigation={this.props.navigation}
+                      navigation={navigator}
                       storage={storage}
                       style={{ position: 'absolute', top: fontSize(-20), left: fontSize(50) }}
                   />
@@ -249,18 +213,15 @@ class Scan extends React.Component {
                       height={fontSize(45)} fontSize={fontSize(15)}
               />
               <DispatchButton
-                  navigation={this.props.navigation}
+                  navigation={navigator}
                   width={dimensions.width / 2}
+                  onClick={() => {this.pauseScanning()}}
                   />
           </View>
       </View>
     );
   }
 }
-
-const mapStateToProps = ({ data }) => {
-    return { };
-};
 
 const mapDispatchToProps = (dispatch) => {
     return {
@@ -270,6 +231,7 @@ const mapDispatchToProps = (dispatch) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Scan);
+let ScanContainer = connect(null, mapDispatchToProps, null, { withRef: true, copyMethods: ['resumeScanning', 'pauseScanning']})(Scan);
+export default ScanContainer;
 
 

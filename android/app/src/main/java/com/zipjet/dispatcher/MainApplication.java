@@ -3,6 +3,8 @@ package com.zipjet.dispatcher;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
+import com.slowpath.hockeyapp.RNHockeyAppPackage;
 import com.cubicphuse.RCTTorch.RCTTorchPackage;
 import com.github.yamill.orientation.OrientationPackage;
 import com.scandit.reactnative.ScanditPackage;
@@ -12,6 +14,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.oblador.vectoricons.VectorIconsPackage;
+import org.reactnative.camera.RNCameraPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +31,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNGestureHandlerPackage(),
+              new RNCameraPackage(),
+//            new RNHockeyAppPackage(),
             new RCTTorchPackage(),
             new OrientationPackage(),
             new ScanditPackage(),

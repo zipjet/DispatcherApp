@@ -12,13 +12,13 @@ import { Provider } from "react-redux";
 import store from "./src/store";
 
 import { createStackNavigator } from "react-navigation";
+import { createAppContainer } from 'react-navigation';
 import { colors } from "./src/constants/base-style.js";
 
 import SignIn    from "./src/screens/SignIn";
 import Dashboard from "./src/screens/Dashboard";
 import DashboardOrders from "./src/screens/DashboardOrders";
 import Error from "./src/screens/Error";
-import Scan from "./src/screens/Scan";
 import OrderDetails from "./src/screens/OrderDetails";
 import OrdersList from "./src/screens/OrdersList";
 import Dispatch from "./src/screens/Dispatch";
@@ -27,6 +27,10 @@ import DriversList from "./src/screens/DriversList";
 import OrderBagItemization from "./src/screens/OrderBagItemization";
 import Stock from "./src/screens/Stock";
 import Search from "./src/screens/Search";
+import navigator from './src/navigator';
+
+import Scan from "./src/screens/Scan";
+import { ScannerHolder } from './src/components/ScannerHolder';
 
 import DropdownAlert from 'react-native-dropdownalert';
 import { DropDownHolder } from './src/components/DropdownHolder';
@@ -45,8 +49,17 @@ export default class App extends Component<Props> {
     if (!this.state.isLoadingComplete) {
       return (
           <View style={{height : '100%', width: '100%'}}>
-            <Provider store={store}>
-              <RootStack />
+            <Provider store={store} scanner={this.refs.scanner}>
+                <View style={{height : '100%', width: '100%'}}>
+                    <View style={{flex: 1, width: '100%'}}>
+                        <AppContainer
+                            style={{flex: 1, width: '100%'}}
+                            ref={navigatorRef => {navigator.setContainer(navigatorRef);}}
+                        />
+                    </View>
+
+                    <Scan ref={scannerRef => {ScannerHolder.setScanner(scannerRef);}} />
+                </View>
             </Provider>
 
             <DropdownAlert
@@ -80,9 +93,6 @@ const RootStack = createStackNavigator(
     },
     DriversList: {
         screen: DriversList
-    },
-    Scan: {
-        screen: Scan
     },
     Search: {
         screen: Search
@@ -119,6 +129,8 @@ const RootStack = createStackNavigator(
     }
   }
 );
+
+const AppContainer = createAppContainer(RootStack);
 
 const styles = StyleSheet.create({
   container: {

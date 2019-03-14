@@ -1,19 +1,36 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    def DEFAULT_COMPILE_SDK_VERSION             = 26
+    def DEFAULT_BUILD_TOOLS_VERSION             = "26.0.2"
+    def DEFAULT_TARGET_SDK_VERSION              = 26
+    def DEFAULT_GOOGLE_PLAY_SERVICES_VERSION    = "12.0.1"
+    def DEFAULT_SUPPORT_LIBRARY_VERSION         = "27.1.0"
+
     repositories {
         jcenter()
         maven {
             url 'https://maven.google.com/'
-            name 'Google'
+            name 'google'
         }
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        // classpath 'com.android.tools.build:gradle:2.3.3'
         // classpath 'com.android.tools.build:gradle:2.2.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+
+        def googlePlayServicesVersion = rootProject.hasProperty('googlePlayServicesVersion')  ? rootProject.googlePlayServicesVersion : DEFAULT_GOOGLE_PLAY_SERVICES_VERSION
+        def supportLibVersion = rootProject.hasProperty('supportLibVersion')  ? rootProject.supportLibVersion : DEFAULT_SUPPORT_LIBRARY_VERSION
+
+          classpath 'com.facebook.react:react-native:+'
+          classpath "com.google.zxing:core:3.2.1"
+          classpath "com.drewnoakes:metadata-extractor:2.9.1"
+          classpath 'com.google.android.gms:play-services-vision:' + googlePlayServicesVersion
+          classpath 'com.android.support:exifinterface:' + supportLibVersion
     }
 }
 
@@ -28,6 +45,7 @@ allprojects {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url "$rootDir/../node_modules/react-native/android"
         }
+        maven { url "https://jitpack.io" }
         maven {
             url 'https://maven.google.com/'
             name 'Google'
@@ -51,5 +69,5 @@ ext {
     minSdkVersion = 16
     compileSdkVersion = 26
     targetSdkVersion = 26
-    supportLibVersion = "26.1.0"
+    supportLibVersion = "25.4.0"
 }

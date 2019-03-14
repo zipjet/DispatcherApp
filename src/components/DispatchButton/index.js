@@ -23,6 +23,7 @@ export default class DispatchButton extends Component {
   }
 
   goToDispatchFinish = () => {
+      this.props.onClick();
       this.props.navigation.push("DispatchFinish");
   }
 

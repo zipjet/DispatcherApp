@@ -8,12 +8,11 @@ import { SUBMIT, NO_INTERNET_BAR, NO_INTERNET_MESSAGE, HEADER, hr } from "./../.
 import { translate } from '../../locale';
 import Button from "./../../components/Button";
 import Menu from "./../../components/Menu";
-import moment       from "moment";
+import { ScannerHolder } from "./../../components/ScannerHolder";
 import * as types   from '../../actions/types';
 import store from '../../store';
 import { fontSize } from '../../constants/util';
 import timer from 'react-native-timer';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import OrderCard from "./../../components/OrderCard";
 import * as storage from '../../storage';
 import { SearchBar } from 'react-native-elements'
@@ -163,7 +162,7 @@ class Search extends React.Component {
                         />
 
                         <View style={SUBMIT}>
-                            <Button text={translate("Scan.Start")} onSubmit={() => { this.props.navigation.navigate('Scan') }} height={fontSize(45)} fontSize={fontSize(15)}/>
+                            <Button text={translate("Scan.Start")} onSubmit={() => { ScannerHolder.showScanner() }} height={fontSize(45)} fontSize={fontSize(15)}/>
                         </View>
                     </View>
 

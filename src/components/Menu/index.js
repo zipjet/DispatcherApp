@@ -3,9 +3,12 @@ import { Text, TextInput, View, Image, Alert, TouchableHighlight } from "react-n
 import { colors, LOGO, LOGO_WRAPPER, ContentCentered, ContentRow } from "./../../constants/base-style.js";
 import { fontSize } from '../../constants/util';
 import { Select, Option } from "../Select";
+import { Scan } from "../../screens/Scan";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import packageJson from '../../../package.json';
 import { StackActions, NavigationActions } from 'react-navigation';
+import { ScannerHolder } from './../../components/ScannerHolder';
+import navigator from '../../navigator';
 
 class Menu extends React.Component {
 
@@ -15,34 +18,44 @@ class Menu extends React.Component {
         this.state = {modalVisible: null}
     }
 
+    changePage(url) {
+        ScannerHolder.hideScanner();
+
+        if (this.props.navigation) {
+            this.props.navigation.navigate(url);
+        } else {
+            navigator.navigate(url);
+        }
+    }
+
     goToListing = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.navigate("DashboardOrders");
+        this.changePage("DashboardOrders");
     }
 
     goToStockListing = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.navigate("Stock");
+        this.changePage("Stock");
     }
 
     goToDispatchFinish = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.push("DispatchFinish");
+        this.changePage("DispatchFinish");
     }
 
     goToScan = () => {
+        ScannerHolder.showScanner();
         this.setState({modalVisible: false});
-        this.props.navigation.push("Scan");
     }
 
     goToSearch = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.push("Search");
+        this.changePage("Search");
     }
 
     goToDriversList = () => {
         this.setState({modalVisible: false});
-        this.props.navigation.push("DriversList");
+        this.changePage("DriversList");
     }
 
     logout = () => {
@@ -60,7 +73,7 @@ class Menu extends React.Component {
             ]
         })
 
-        this.props.navigation.dispatch(resetAction)
+        navigator.dispatch(resetAction)
     }
 
     render() {
