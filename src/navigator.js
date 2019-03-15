@@ -1,4 +1,4 @@
-import { NavigationActions } from 'react-navigation';
+import { StackActions, NavigationActions } from 'react-navigation';
 import type { NavigationParams, NavigationRoute } from 'react-navigation';
 import moment from 'moment';
 
@@ -42,6 +42,21 @@ function push(routeName: string, params?: NavigationParams) {
     );
 }
 
+function forcePush(routeName: string, params?: NavigationParams) {
+    _container.dispatch(
+        StackActions.reset({
+            index: 0,
+            actions: [
+                NavigationActions.navigate({
+                    routeName,
+                    params,
+                    key: moment().format()
+                })
+            ]
+        })
+    );
+}
+
 function dispatch(routeName: string, params?: NavigationParams) {
     _container.dispatch(
         NavigationActions.navigate({
@@ -78,6 +93,7 @@ export default {
     setContainer,
     navigateDeep,
     push,
+    forcePush,
     navigate,
     dispatch,
     reset,

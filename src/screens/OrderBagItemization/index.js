@@ -30,7 +30,9 @@ class OrderBagItemization extends React.Component {
             comment: "",
             itemizationData: [],
         };
+    }
 
+    componentDidMount() {
         Promise
             .all([storage.loadFulfillment(), storage.loadBarcode()])
             .then(values => {

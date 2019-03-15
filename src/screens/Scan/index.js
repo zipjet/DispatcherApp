@@ -113,11 +113,9 @@ class Scan extends React.Component {
                         for (let i = 0; i < task.meta.scannedAtHub.length; i++) {
                             if (task.meta.scannedAtHub[i].code === barcode) {
                                 if (task.meta.scannedAtHub[i].type === WASH_FOLD) {
-                                    // Alert.alert("Scan", "Dispatch WF");
-
                                     this.pauseScanning();
 
-                                    navigator.push("Dispatch");
+                                    navigator.forcePush("Dispatch");
 
                                     return;
                                 }
@@ -126,19 +124,15 @@ class Scan extends React.Component {
 
                         // no need to itemize the stock orders
                         if (isReadyToStock(task, this.state.shift)) {
-                            // Alert.alert("Scan", "Dispatch Stock");
-
                             this.pauseScanning();
 
-                            navigator.push("Dispatch");
+                            navigator.forcePush("Dispatch");
 
                             return;
                         }
 
-                        // Alert.alert("Scan", "Dispatch Bag Itemization");
-
                         this.pauseScanning();
-                        navigator.push("OrderBagItemization");
+                        navigator.forcePush("OrderBagItemization");
                     } else {
                         if (response && response.hasOwnProperty('errors') && response.errors.length > 0) {
                             DropDownHolder.alert('error', response.errors[0].userTitle, response.errors[0].userMessage);
