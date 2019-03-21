@@ -66,14 +66,7 @@ class Menu extends React.Component {
         this.props.storage.saveDispatcher("");
 
         // log out
-        const resetAction = StackActions.reset({
-            index: 0,
-            actions: [
-                NavigationActions.navigate({ routeName: "SignIn"})
-            ]
-        })
-
-        navigator.dispatch(resetAction)
+        navigator.forcePush("SignIn");
     }
 
     render() {
